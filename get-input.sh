@@ -6,7 +6,7 @@ COOKIE="$(cat ~/src/mattb/dotfiles/aoc)"
 
 YEAR="$(date +'%Y')"
 DAY="$(date +'%_d' | tr -d ' ')"
-if [ "$" != "" ]; then
+if [ "$1" != "" ]; then
   YEAR="$1"
   DAY="$2"
 fi
