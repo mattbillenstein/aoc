@@ -3,7 +3,6 @@
 set -eo pipefail
 
 COOKIE="$(cat ~/src/mattb/dotfiles/aoc)"
-echo $COOKIE
 
 YEAR="$(date +'%Y')"
 DAY="$(date +'%_d' | tr -d ' ')"
