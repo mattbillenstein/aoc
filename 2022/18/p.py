@@ -81,11 +81,44 @@ def part2(cubes):
 
     print(surface_area)
 
+def bfs(frontier, cubes, mmin, mmax):
+    surface_area = 0
+    visited = set()
+    while frontier:
+        next_frontier = set()
+        for cube in frontier:
+            visited.add(cube)
+            for n in neighbors(cube):
+                if n in cubes:
+                    surface_area += 1
+                elif n not in visited and all(mmin <= _ <= mmax for _ in n):
+                    next_frontier.add(n)
+
+        frontier = next_frontier
+
+    return surface_area
+
+def part2_bfs(cubes):
+    mmin = min(min(_) for _ in cubes) - 1
+    mmax = max(max(_) for _ in cubes) + 1
+
+    surface_area = bfs({(mmin, mmin, mmin)}, cubes, mmin, mmax)
+    print(surface_area)
+
 def main(argv):
     data = parse_input()
 
+    start = time.time()
     part1(data)
+    print(time.time()-start)
+
+    start = time.time()
     part2(data)
+    print(time.time()-start)
+
+    start = time.time()
+    part2_bfs(data)
+    print(time.time()-start)
 
 if __name__ == '__main__':
     main(sys.argv)

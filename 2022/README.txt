@@ -15,4 +15,4 @@
 15: Sensor/Beacon grid covering problem with manhattan distance - sparse matrix
 16: Graph search valve opening problem - first 1 player, then 2 - bfs, dfs
 17: Tetris like block stacking in 2d grid, compute height of recurring sequence at 1T blocks
-18: 3d shape made of cubes, find its surface area
+18: 3d shape made of cubes, find its surface area - simple sets and bfs
