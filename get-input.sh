@@ -4,8 +4,8 @@ set -eo pipefail
 
 COOKIE="$(cat ~/src/mattb/dotfiles/aoc)"
 
-YEAR="$(date +'%Y')"
-DAY="$(date +'%_d' | tr -d ' ')"
+YEAR="$(date --utc +'%Y')"
+DAY="$(date --utc +'%_d' | tr -d ' ')"
 if [ "$1" != "" ]; then
   YEAR="$1"
   DAY="$2"
