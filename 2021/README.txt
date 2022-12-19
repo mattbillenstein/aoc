@@ -2,3 +2,4 @@
 02: Submarine position simulation
 03: Compute simple numbers from list of bit strings
 04: Bingo simulator
+05: Drawing lines in 2d grid and counting overlapping points
