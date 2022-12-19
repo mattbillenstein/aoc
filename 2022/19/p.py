@@ -1,10 +1,13 @@
 #!/usr/bin/env pypy3
 
+import json
 import re
 import sys
 import time
 from collections import defaultdict
+from multiprocessing import Pool
 from pprint import pprint
+
 
 def parse_input():
     lines = [_.strip('\r\n') for _ in sys.stdin]
@@ -23,119 +26,148 @@ def parse_input():
         blueprints.append(blueprint)
     return blueprints
 
-last = time.time()
-def simulate(minutes_left, robots, resources, blueprint):
-    global last
+def can_make_robot(type, resources, blueprint):
+    return all(resources[k] >= v for k, v in blueprint[type].items())
 
-    if minutes_left <= 1:
-        if time.time() - last > 10:
-            print(' ' * (24-minutes_left), 'sim', minutes_left, 
+def make_robot(type, robots, resources, blueprint):
+    robots[type] += 1
+    for k, v in blueprint[type].items():
+        resources[k] -= v
+
+def simulate(minutes, robots, resources, blueprint):
+    # dfs
+    robots = dict(robots)
+    resources = dict(resources)
+
+    print(json.dumps(blueprint, indent=4))
+
+    best = 0
+    limit = {'ore': 10, 'clay': 10, 'obsidian': 10, 'geode': 10}
+
+    stack = []
+    stack.append((1, dict(robots), dict(resources), []))
+
+    debug = 0
+
+    while stack:
+        minute, robots, resources, made = stack.pop()
+
+        # sloppy
+        if minute >= 15 and robots['obsidian'] == 0:
+            continue
+
+        # quickly prune if we can't possibly beat best so far...
+        if minute >= 20:
+            possible = resources['geode']
+            n = robots['geode']
+            for i in range(minute, minutes+1):
+                possible += n
+                n += 1
+
+            if possible < best:
+                if debug:
+                    print(minute, possible, best)
+                    print(robots)
+                    print(resources)
+                    print()
+                continue
+
+        if debug:
+            print()
+            print(
+                minute,
                 ','.join(':'.join((k, str(v))) for k, v in robots.items()),
                 ','.join(':'.join((k, str(v))) for k, v in resources.items()),
             )
-            last = time.time()
-        return resources['geode']
 
-    # build new robots
-    can_build = {}
-    for k, d in blueprint.items():
-        if k == 'id':
+        if minute < 24:
+            # can only make one robot per round - we have one machine...
+            for type, number in robots.items():
+                if number < limit[type]:
+                    if can_make_robot(type, resources, blueprint):
+                        # push making this robot
+                        new_robots = dict(robots)
+
+                        new_resources = dict(resources)
+                        for resource, amt in robots.items():
+                            new_resources[resource] += amt
+
+                        make_robot(type, new_robots, new_resources, blueprint)
+
+                        new_made = list(made)
+                        new_made.append((minute, type))
+
+                        stack.append((minute+1, new_robots, new_resources, new_made))
+
+                        if debug:
+                            print(f'Make {type} at {minute} {blueprint[type]}')
+                        if debug:
+                            print(f'Push {stack[-1]}')
+
+            assert all(resources[_] >= 0 for _ in resources)
+
+
+        # now actually collect resources
+        for resource, amt in robots.items():
+            resources[resource] += amt
+
+        # check best
+        if minute >= 24:
+            if resources['geode'] > best:
+                best = resources['geode']
+                print(
+                    f'Best:{best}',
+                    f'Minute:{minute}',
+                    f'Blueprint:{blueprint["id"]}',
+                )
+                print('Robots:', ' '.join(':'.join((k, str(v))) for k, v in robots.items()))
+                print('Resources:', ' '.join(':'.join((k, str(v))) for k, v in resources.items()))
+                print('Made:', ' '.join(':'.join((str(a), b)) for a, b in made))
+                print()
             continue
-        
-        num = min(resources[resource] // amt for resource, amt in d.items())
-        can_build[k] = num
 
-#    pprint(blueprint)
-#    print(can_build)
+        # we didn't make anything, just collected
+        stack.append((minute+1, dict(robots), dict(resources), made))
+        if debug:
+            print(f'Push {stack[-1]}')
 
-    # collect resources
-    for resource, amt in robots.items():
-        resources[resource] += amt
-
-    # need to maintain within the loop, this can be deleted...
-    robots = robots
-    resources = resources
-
-    best = resources['geode']
-    for ore in range(0, can_build['ore']+1):
-
-        robots['ore'] += ore
-        resources['ore'] -= blueprint['ore']['ore'] * ore
-
-        for clay in range(0, can_build['clay']+1):
-            if resources['ore'] < blueprint['clay']['ore'] * clay:
-                continue
-
-            robots['clay'] += clay
-            resources['ore'] -= blueprint['clay']['ore'] * clay
-
-            for obsidian in range(0, can_build['obsidian']+1):
-                if resources['ore'] < blueprint['obsidian']['ore'] * obsidian:
-                    continue
-                if resources['clay'] < blueprint['obsidian']['clay'] * obsidian:
-                    continue
-
-                robots['obsidian'] += obsidian
-                resources['ore'] -= blueprint['obsidian']['ore'] * obsidian
-                resources['clay'] -= blueprint['obsidian']['clay'] * obsidian
-
-                for geode in range(0, can_build['geode']+1):
-                    if resources['ore'] < blueprint['geode']['ore'] * geode:
-                        continue
-                    if resources['obsidian'] < blueprint['geode']['obsidian'] * geode:
-                        continue
-
-                    robots['geode'] += geode
-                    resources['ore'] -= blueprint['geode']['ore'] * geode
-                    resources['obsidian'] -= blueprint['geode']['obsidian'] * geode
-
-#                    print('ore', ore)
-#                    print('clay', clay)
-#                    print('obsidian', obsidian)
-#                    print('geode', geode)
-#                    print('sim', minutes_left-1, robots, resources)
-#                    print()
-                    # take a copy here, we mutate inside this function of course...
-                    sim_geode = simulate(minutes_left-1, dict(robots), dict(resources), blueprint)
-                    if sim_geode > best:
-                        best = sim_geode
-
-                    robots['geode'] -= geode
-                    resources['ore'] += blueprint['geode']['ore'] * geode
-                    resources['obsidian'] += blueprint['geode']['obsidian'] * geode
-                robots['obsidian'] -= obsidian
-                resources['ore'] += blueprint['obsidian']['ore'] * obsidian
-                resources['clay'] += blueprint['obsidian']['clay'] * obsidian
-            robots['clay'] -= clay
-            resources['ore'] += blueprint['clay']['ore'] * clay
-        robots['ore'] -= ore
-        resources['ore'] += blueprint['ore']['ore'] * ore
-
-    return best
-
+    return (blueprint['id'], best)
 
 def part1(blueprints):
-#    pprint(blueprints)
-
     minutes = 24
+
     robots = {'ore': 1, 'clay': 0, 'obsidian': 0, 'geode': 0}
     resources = {'ore': 0, 'clay': 0, 'obsidian': 0, 'geode': 0}
 
-#    resources = {'ore': 4, 'clay': 0, 'obsidian': 0, 'geode': 0}
-    x = simulate(minutes, robots, resources, blueprints[0])
-    print(x)
-    duh
+    # debug
+#    blueprints = blueprints[:1]
 
+    start = time.time()
+    sum_quality = 0
 
-    geodes = {}
-    for b in blueprints:
-        geodes[b['id']] = simulate(minutes, robots, resources, b)
+    if 1:
+        results = []
+        with Pool(processes=6) as pool:
+            for b in blueprints:
+                res = pool.apply_async(simulate, (minutes, robots, resources, b))
+                results.append(res)
 
-    print(geodes)
+            for res in results:
+                bid, geodes = res.get()
+                quality = bid * geodes
+                print('RESULT', bid, geodes, quality, time.time() - start)
+                sum_quality += quality
+    else:
+        for b in blueprints:
+            bid, geodes = simulate(minutes, robots, resources, b)
+            quality = bid * geodes
+            print('RESULT', bid, geodes, quality, time.time() - start)
+            sum_quality += quality
+
+    print(sum_quality)
 
 def main(argv):
     data = parse_input()
-    pprint(data)
 
     part1(data)
 
