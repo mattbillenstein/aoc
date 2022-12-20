@@ -33,7 +33,8 @@ def should_make_robot(type, minutes, minute, robots, resources, blueprint):
     # resource R to build, and X * T+Y >= T * Z, then you never need to build
     # another robot mining R anymore.
 
-    if type != 'geode':
+    # helps a bit, but skipping not building is the big thing...
+    if 1 and type != 'geode':
         X = robots[type]
         Y = resources[type]
         T = minutes - minute + 1  # haven't collected?
@@ -59,15 +60,6 @@ def simulate(minutes, robots, resources, blueprint):
 
     # since we can only produce one robot per turn, we can limit the number of
     # robots of each type based on the maximum required in a single turn...
-
-    # For any resource R that's not geode: if you already have X robots
-    # creating resource R, and no robot requires more than X of resource R to
-    # build, then you never need to build another robot mining R anymore. This
-    # rule is correct since you can only build one robot every minute. This
-    # rule prevents a lot of useless branching: it especially prevents you from
-    # building ore robots when the time is almost up (which is a pretty useless
-    # thing to do).
-
     limit = {
         'ore': max(blueprint[_].get('ore', 0) for _ in robots if _ != 'ore'),
         'clay': max(blueprint[_].get('clay', 0) for _ in robots),
@@ -85,23 +77,19 @@ def simulate(minutes, robots, resources, blueprint):
     while stack:
         minute, robots, resources, made = stack.pop()
 
-#        # sloppy
-#        if minute >= 18 and robots['obsidian'] == 0:
-#            continue
-
         # abort if we can't make more geode than current best
-        if 1:
-            # off by one here? we acutally haven't done anything in this
-            # minute... +1 works...
-            T = minutes - minute + 1
-            possible = resources['geode'] + robots['geode'] * T + T*(T+1)//2
-            if possible < best:
-                if debug:
-                    print(minute, possible, best)
-                    print(robots)
-                    print(resources)
-                    print()
-                continue
+        #
+        # off by one here? we acutally haven't done anything in this
+        # minute... +1 works...
+        T = minutes - minute + 1
+        possible = resources['geode'] + robots['geode'] * T + T*(T+1)//2
+        if possible < best:
+            if debug:
+                print(minute, possible, best)
+                print(robots)
+                print(resources)
+                print()
+            continue
 
         if debug:
             print()
@@ -116,6 +104,12 @@ def simulate(minutes, robots, resources, blueprint):
             for type in ('geode', 'obsidian', 'clay', 'ore'):
                 number = robots[type]
                 if number < limit[type]:
+                    # if we could have made it last minute, don't make it this
+                    # minute...  This is the thing that really speeds this up...
+                    if (not made or made and made[-1][0] < (minute-1)) \
+                        and all((resources[_] - robots[_] - blueprint[type][_]) >= 0 for _ in blueprint[type]):
+                        continue
+
                     if should_make_robot(type, minutes, minute, robots, resources, blueprint):
                         # push making this robot
                         new_robots = dict(robots)
@@ -137,7 +131,6 @@ def simulate(minutes, robots, resources, blueprint):
                             print(f'Push {stack[-1]}')
 
             assert all(resources[_] >= 0 for _ in resources)
-
 
         # now actually collect resources
         for resource, amt in robots.items():
