@@ -16,3 +16,5 @@
 16: Graph search valve opening problem - first 1 player, then 2 - bfs, dfs
 17: Tetris like block stacking in 2d grid, compute height of recurring sequence at 1T blocks
 18: 3d shape made of cubes, find its surface area - simple sets and bfs
+19: Time-bound resource optimization - dfs, pruning, multiprocessing
+20: Number shuffling in doubly-linked list

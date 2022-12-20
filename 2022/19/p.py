@@ -54,7 +54,7 @@ def simulate(minutes, robots, resources, blueprint):
     robots = dict(robots)
     resources = dict(resources)
 
-    print(json.dumps(blueprint, indent=4))
+#    print(json.dumps(blueprint, indent=4))
 
     best = 0
 
@@ -67,7 +67,7 @@ def simulate(minutes, robots, resources, blueprint):
         'geode': 999,
     }
 
-    print('Limit:', limit)
+#    print('Limit:', limit)
 
     stack = []
     stack.append((1, dict(robots), dict(resources), []))
@@ -140,15 +140,16 @@ def simulate(minutes, robots, resources, blueprint):
         if minute >= minutes:
             if resources['geode'] > best:
                 best = resources['geode']
-                print(
-                    f'Best:{best}',
-                    f'Minute:{minute}',
-                    f'Blueprint:{blueprint["id"]}',
-                )
-                print('Robots:', ' '.join(':'.join((k, str(v))) for k, v in robots.items()))
-                print('Resources:', ' '.join(':'.join((k, str(v))) for k, v in resources.items()))
-                print('Made:', ' '.join(':'.join((str(a), b)) for a, b in made))
-                print()
+                if debug:
+                    print(
+                        f'Best:{best}',
+                        f'Minute:{minute}',
+                        f'Blueprint:{blueprint["id"]}',
+                    )
+                    print('Robots:', ' '.join(':'.join((k, str(v))) for k, v in robots.items()))
+                    print('Resources:', ' '.join(':'.join((k, str(v))) for k, v in resources.items()))
+                    print('Made:', ' '.join(':'.join((str(a), b)) for a, b in made))
+                    print()
             continue
 
         # we didn't make anything, just collected
@@ -187,7 +188,7 @@ def part1(blueprints):
 
     sum_quality = 0
     for bid, geodes in results:
-        print(bid, geodes)
+#        print(bid, geodes)
         sum_quality += bid * geodes
 
     print(sum_quality)
@@ -199,7 +200,7 @@ def part2(blueprints):
 
     product = 1
     for bid, geodes in results:
-        print(bid, geodes)
+#        print(bid, geodes)
         product *= geodes
 
     print(product)
@@ -211,7 +212,6 @@ def main(argv):
         part1(data)
 
     if '2' in argv:
-        print()
         part2(data)
 
 if __name__ == '__main__':
