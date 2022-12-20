@@ -42,7 +42,17 @@ def simulate(minutes, robots, resources, blueprint):
     print(json.dumps(blueprint, indent=4))
 
     best = 0
-    limit = {'ore': 10, 'clay': 10, 'obsidian': 10, 'geode': 10}
+
+    # since we can only produce one robot per turn, we can limit the number of
+    # robots of each type based on the maximum required in a single turn...
+    limit = {
+        'ore': max(blueprint[_].get('ore', 0) for _ in robots),
+        'clay': max(blueprint[_].get('clay', 0) for _ in robots),
+        'obsidian': max(blueprint[_].get('obsidian', 0) for _ in robots),
+        'geode': 999,
+    }
+
+    print('Limit:', limit)
 
     stack = []
     stack.append((1, dict(robots), dict(resources), []))
@@ -52,25 +62,20 @@ def simulate(minutes, robots, resources, blueprint):
     while stack:
         minute, robots, resources, made = stack.pop()
 
-        # sloppy
-        if minute >= 15 and robots['obsidian'] == 0:
+#        # sloppy
+#        if minute >= 18 and robots['obsidian'] == 0:
+#            continue
+
+        # abort if we can't make more geode than current best
+        T = minutes - minute
+        possible = resources['geode'] + robots['geode'] * T + T*(T+1)//2
+        if possible < best:
+            if debug:
+                print(minute, possible, best)
+                print(robots)
+                print(resources)
+                print()
             continue
-
-        # quickly prune if we can't possibly beat best so far...
-        if minute >= 20:
-            possible = resources['geode']
-            n = robots['geode']
-            for i in range(minute, minutes+1):
-                possible += n
-                n += 1
-
-            if possible < best:
-                if debug:
-                    print(minute, possible, best)
-                    print(robots)
-                    print(resources)
-                    print()
-                continue
 
         if debug:
             print()
@@ -80,9 +85,10 @@ def simulate(minutes, robots, resources, blueprint):
                 ','.join(':'.join((k, str(v))) for k, v in resources.items()),
             )
 
-        if minute < 24:
+        if minute < minutes:
             # can only make one robot per round - we have one machine...
-            for type, number in robots.items():
+            for type in ('geode', 'obsidian', 'clay', 'ore'):
+                number = robots[type]
                 if number < limit[type]:
                     if can_make_robot(type, resources, blueprint):
                         # push making this robot
@@ -112,7 +118,7 @@ def simulate(minutes, robots, resources, blueprint):
             resources[resource] += amt
 
         # check best
-        if minute >= 24:
+        if minute >= minutes:
             if resources['geode'] > best:
                 best = resources['geode']
                 print(
@@ -145,15 +151,18 @@ def part1(blueprints):
     start = time.time()
     sum_quality = 0
 
-    if 1:
+    if '-m' in sys.argv:
         results = []
-        with Pool(processes=6) as pool:
+        with Pool(processes=8) as pool:
             for b in blueprints:
                 res = pool.apply_async(simulate, (minutes, robots, resources, b))
                 results.append(res)
 
+            L = []
             for res in results:
-                bid, geodes = res.get()
+                L.append(res.get())
+
+            for bid, geodes in L:
                 quality = bid * geodes
                 print('RESULT', bid, geodes, quality, time.time() - start)
                 sum_quality += quality
