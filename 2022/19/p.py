@@ -26,7 +26,21 @@ def parse_input():
         blueprints.append(blueprint)
     return blueprints
 
-def can_make_robot(type, resources, blueprint):
+def should_make_robot(type, minutes, minute, robots, resources, blueprint):
+    # Note that we can do a bit better: For any resource R that's not geode: if
+    # you already have X robots creating resource R, a current stock of Y for
+    # that resource, T minutes left, and no robot requires more than Z of
+    # resource R to build, and X * T+Y >= T * Z, then you never need to build
+    # another robot mining R anymore.
+
+    if type != 'geode':
+        X = robots[type]
+        Y = resources[type]
+        T = minutes - minute + 1  # haven't collected?
+        Z = max(blueprint[_].get(type, 0) for _ in resources)
+        if (Y + (X * T)) >= (T * Z):
+            return False
+
     return all(resources[k] >= v for k, v in blueprint[type].items())
 
 def make_robot(type, robots, resources, blueprint):
@@ -45,8 +59,17 @@ def simulate(minutes, robots, resources, blueprint):
 
     # since we can only produce one robot per turn, we can limit the number of
     # robots of each type based on the maximum required in a single turn...
+
+    # For any resource R that's not geode: if you already have X robots
+    # creating resource R, and no robot requires more than X of resource R to
+    # build, then you never need to build another robot mining R anymore. This
+    # rule is correct since you can only build one robot every minute. This
+    # rule prevents a lot of useless branching: it especially prevents you from
+    # building ore robots when the time is almost up (which is a pretty useless
+    # thing to do).
+
     limit = {
-        'ore': max(blueprint[_].get('ore', 0) for _ in robots),
+        'ore': max(blueprint[_].get('ore', 0) for _ in robots if _ != 'ore'),
         'clay': max(blueprint[_].get('clay', 0) for _ in robots),
         'obsidian': max(blueprint[_].get('obsidian', 0) for _ in robots),
         'geode': 999,
@@ -67,15 +90,18 @@ def simulate(minutes, robots, resources, blueprint):
 #            continue
 
         # abort if we can't make more geode than current best
-        T = minutes - minute
-        possible = resources['geode'] + robots['geode'] * T + T*(T+1)//2
-        if possible < best:
-            if debug:
-                print(minute, possible, best)
-                print(robots)
-                print(resources)
-                print()
-            continue
+        if 1:
+            # off by one here? we acutally haven't done anything in this
+            # minute... +1 works...
+            T = minutes - minute + 1
+            possible = resources['geode'] + robots['geode'] * T + T*(T+1)//2
+            if possible < best:
+                if debug:
+                    print(minute, possible, best)
+                    print(robots)
+                    print(resources)
+                    print()
+                continue
 
         if debug:
             print()
@@ -90,7 +116,7 @@ def simulate(minutes, robots, resources, blueprint):
             for type in ('geode', 'obsidian', 'clay', 'ore'):
                 number = robots[type]
                 if number < limit[type]:
-                    if can_make_robot(type, resources, blueprint):
+                    if should_make_robot(type, minutes, minute, robots, resources, blueprint):
                         # push making this robot
                         new_robots = dict(robots)
 
@@ -139,17 +165,13 @@ def simulate(minutes, robots, resources, blueprint):
 
     return (blueprint['id'], best)
 
-def part1(blueprints):
-    minutes = 24
-
+def run(blueprints, minutes):
     robots = {'ore': 1, 'clay': 0, 'obsidian': 0, 'geode': 0}
     resources = {'ore': 0, 'clay': 0, 'obsidian': 0, 'geode': 0}
 
-    # debug
-#    blueprints = blueprints[:1]
-
     start = time.time()
-    sum_quality = 0
+
+    L = []
 
     if '-m' in sys.argv:
         results = []
@@ -158,27 +180,46 @@ def part1(blueprints):
                 res = pool.apply_async(simulate, (minutes, robots, resources, b))
                 results.append(res)
 
-            L = []
             for res in results:
                 L.append(res.get())
-
-            for bid, geodes in L:
-                quality = bid * geodes
-                print('RESULT', bid, geodes, quality, time.time() - start)
-                sum_quality += quality
     else:
         for b in blueprints:
             bid, geodes = simulate(minutes, robots, resources, b)
-            quality = bid * geodes
-            print('RESULT', bid, geodes, quality, time.time() - start)
-            sum_quality += quality
+            L.append((bid, geodes))
+
+    return L
+
+def part1(blueprints):
+    results = run(blueprints, minutes=24)
+
+    sum_quality = 0
+    for bid, geodes in results:
+        print(bid, geodes)
+        sum_quality += bid * geodes
 
     print(sum_quality)
+
+def part2(blueprints):
+    blueprints = blueprints[:3]
+
+    results = run(blueprints, minutes=32)
+
+    product = 1
+    for bid, geodes in results:
+        print(bid, geodes)
+        product *= geodes
+
+    print(product)
 
 def main(argv):
     data = parse_input()
 
-    part1(data)
+    if '1' in argv:
+        part1(data)
+
+    if '2' in argv:
+        print()
+        part2(data)
 
 if __name__ == '__main__':
     main(sys.argv)
