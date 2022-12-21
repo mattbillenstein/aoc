@@ -7,3 +7,4 @@
 07: Find optimal position for list of items given a cost to align them
 08: Decode scrambled 7-segment displays - random search
 09: Low points in heightmap, then bfs floodfill to find basins
+10: Paren matching using a stack
