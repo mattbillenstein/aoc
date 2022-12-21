@@ -19,7 +19,6 @@ def part2(data):
 
 def main():
     data = parse_input()
-
     if '1' in sys.argv:
         part1(data)
     if '2' in sys.argv:

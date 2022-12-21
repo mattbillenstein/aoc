@@ -18,3 +18,4 @@
 18: 3d shape made of cubes, find its surface area - simple sets and bfs
 19: Time-bound resource optimization - dfs, pruning, multiprocessing
 20: Number shuffling in doubly-linked list
+21: Recursive equation solving
