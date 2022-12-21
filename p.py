@@ -13,10 +13,17 @@ def part1(data):
     for line in data:
         print(line)
 
-def main(argv):
+def part2(data):
+    for line in data:
+        print(line)
+
+def main():
     data = parse_input()
 
-    part1(data)
+    if '1' in sys.argv:
+        part1(data)
+    if '2' in sys.argv:
+        part2(data)
 
 if __name__ == '__main__':
-    main(sys.argv)
+    main()
