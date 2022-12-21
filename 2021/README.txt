@@ -5,3 +5,5 @@
 05: Drawing lines in 2d grid and counting overlapping points
 06: Counting exponential growth of fish - dict of ages over time
 07: Find optimal position for list of items given a cost to align them
+08: Decode scrambled 7-segment displays - random search
+09: Low points in heightmap, then bfs floodfill to find basins

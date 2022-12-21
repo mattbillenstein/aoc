@@ -6,6 +6,12 @@ import time
 from collections import defaultdict
 from pprint import pprint
 
+#  a
+# b c
+#  d
+# e f
+#  g
+
 num_to_segments = {
     0: 'abcefg',
     1: 'cf',
@@ -30,20 +36,6 @@ def parse_input():
     lines = [_.split(' | ') for _ in lines]
     return [(_[0].split(), _[1].split()) for _ in lines]
 
-#  a
-# b c
-#  d
-# e f
-#  g
-
-def part1(data):
-    cnt = 0
-    for inputs, outputs in data:
-        for item in outputs:
-            if len(length_to_nums[len(item)]) == 1:
-                cnt += 1
-    print(cnt)
-
 def decode_items(items, mapping):
     L = []
     for item in items:
@@ -61,6 +53,13 @@ def test_mapping(mapping, items):
             cnt += 1
     return cnt
 
+def part1(data):
+    cnt = 0
+    for inputs, outputs in data:
+        for item in outputs:
+            if len(length_to_nums[len(item)]) == 1:
+                cnt += 1
+    print(cnt)
 
 def part2(data):
     tot = 0
