@@ -12,6 +12,28 @@ WALL = 2
 
 DEBUG = '--debug' in sys.argv
 
+def parse_input():
+    lines = [_.strip('\r\n') for _ in sys.stdin]
+
+    gridx = max(len(_) for _ in lines[:-2])
+    gridy = len(lines)-2
+    grid = [[EMPTY] * gridx for _ in range(gridy)]
+    for y, line in enumerate(lines[:-2]):
+        for x, c in enumerate(line):
+            n = EMPTY
+            if c == '.':
+                n = TILE
+            elif c == '#':
+                n = WALL
+            grid[y][x] = n
+
+    directions = re.findall('\d+|[LR]', lines[-1])
+    directions = [int(_) if not _ in 'LR' else _ for _ in directions]
+
+    assert ''.join(str(_) for _ in directions) == lines[-1]
+
+    return grid, directions
+
 class State:
     def __init__(self, x, y, dir, grid):
         self.x = x
@@ -125,7 +147,7 @@ class State:
         if not full:
             yr = range(max(0, self.y-20), min(self.y+20 + 1, len(self.grid)))
             xr = range(len(self.grid[0]))
-            
+
         for y in yr:
             s = f'{y:3} '
             for x in xr:
@@ -142,28 +164,6 @@ class State:
     def __repr__(self):
         return f'State({self.x}, {self.y}, {self.dir})'
 
-def parse_input():
-    lines = [_.strip('\r\n') for _ in sys.stdin]
-
-    gridx = max(len(_) for _ in lines[:-2])
-    gridy = len(lines)-2
-    grid = [[EMPTY] * gridx for _ in range(gridy)]
-    for y, line in enumerate(lines[:-2]):
-        for x, c in enumerate(line):
-            n = EMPTY
-            if c == '.':
-                n = TILE
-            elif c == '#':
-                n = WALL
-            grid[y][x] = n
-
-    directions = re.findall('\d+|[LR]', lines[-1])
-    directions = [int(_) if not _ in 'LR' else _ for _ in directions]
-
-    assert ''.join(str(_) for _ in directions) == lines[-1]
-    
-    return grid, directions
-
 def part2(grid, directions):
     # sigh, they've unfolded differently than in the test...
 
@@ -179,7 +179,7 @@ def part2(grid, directions):
     # B
 
     # WTF!
-    
+
     # UFD are in the right spots, just shifted, lets just permute the other
     # sides to match the test...
 
@@ -206,17 +206,6 @@ def part2(grid, directions):
                 nx = size-y-1 + size*3
                 assert size <= nx < size*2
                 newgrid[ny][nx] = grid[y][x]
-
-    # test is
-    #   U
-    # BLF
-    #   DR
-
-    # input is
-    #  UR
-    #  F
-    # LD
-    # B
 
         # copy B up rot CW
         for y in range(size*3, size*4):
@@ -263,7 +252,6 @@ def part2(grid, directions):
                     state.print()
                     time.sleep(0.1)
 
-    
 #    state.print(True)
     state.print()
     print(state)
@@ -281,7 +269,7 @@ def test(grid):
     # Up to Left
     assert state.translate(8, 1, '<') == (5, 4, 'v')
     # Left to Up
-    assert state.translate(5, 4, '^') == (8, 1, '>') 
+    assert state.translate(5, 4, '^') == (8, 1, '>')
 
     # Up to Right
     assert state.translate(11, 1, '>') == (15, 10, '<')
@@ -306,13 +294,12 @@ def test(grid):
     # Front to Right
     assert state.translate(11, 5, '>') == (14, 8, 'v')
     # Right to Front
-    assert state.translate(14, 8, '^') == (11, 5, '<') 
+    assert state.translate(14, 8, '^') == (11, 5, '<')
 
     # Left to Down
     assert state.translate(6, 7, 'v') == (8, 9, '>')
     # Down to Left
-    assert state.translate(8, 9, '<') == (6, 7, '^') 
-
+    assert state.translate(8, 9, '<') == (6, 7, '^')
 
 def main():
     grid, directions = parse_input()
