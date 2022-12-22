@@ -8,3 +8,4 @@
 08: Decode scrambled 7-segment displays - random search
 09: Low points in heightmap, then bfs floodfill to find basins
 10: Paren matching using a stack
+11: Flashing octopuses in grid with power levels, diagonal neighbors, bfs
