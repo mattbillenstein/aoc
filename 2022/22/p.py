@@ -119,16 +119,9 @@ def part1(grid, directions):
 #    state.print()
     print(state.password())
 
-def part2(data):
-    pass
-
 def main():
     grid, directions = parse_input()
-    if '1' in sys.argv:
-        part1(grid, directions)
-
-    if '2' in sys.argv:
-        part2(data)
+    part1(grid, directions)
 
 if __name__ == '__main__':
     main()
