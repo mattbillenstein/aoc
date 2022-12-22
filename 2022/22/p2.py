@@ -19,19 +19,6 @@ class State:
         self.dir = dir
         self.grid = grid
 
-    def dx_dy_from_dir(self, dir):
-        dx = dy = 0
-        if dir == '>':
-            dx = 1
-        elif dir == '<':
-            dx = -1
-        elif dir == '^':
-            dy = -1
-        elif dir == 'v':
-            dy = 1
-
-        return dx, dy
-
     def move(self):
         # move forward one space or stop if we hit a wall
         nx, ny, nd = self.translate(self.x, self.y, self.dir)
@@ -42,21 +29,27 @@ class State:
 
         if v == TILE:
             found = False
-            if abs(self.x-nx) + abs(self.y-ny) > 1:
-                print(f'Translate: ({self.x}, {self.y}, {self.dir}) -> ({nx}, {ny}, {nd})')
-                self.print()
-                found = True
             self.x = nx
             self.y = ny
             self.dir = nd
-            if found:
-                self.print()
 
     def turn(self, dir):
         self.dir = {
             'R': {'>': 'v', 'v': '<', '<': '^', '^': '>'},
             'L': {'>': '^', '^': '<', '<': 'v', 'v': '>'},
         }[dir][self.dir]
+
+    def dx_dy_from_dir(self, dir):
+        dx = dy = 0
+        if dir == '>':
+            dx = 1
+        elif dir == '<':
+            dx = -1
+        elif dir == '^':
+            dy = -1
+        elif dir == 'v':
+            dy = 1
+        return dx, dy
 
     def translate(self, x, y, dir):
         # translate a given x, y, dir into a new x, y, dir in the flat grid,
@@ -245,6 +238,8 @@ def part2(grid, directions):
 
         grid = newgrid
 
+        # FIXME, these translations need to be reversed on the way back!
+
     # move to start
     x = grid[0].index(TILE)
     state = State(x, 0, '>', grid)
@@ -258,7 +253,7 @@ def part2(grid, directions):
                 print()
                 print(cmd)
                 state.print()
-                time.sleep(0.1)
+                time.sleep(1)
         else:
             for i in range(cmd):
                 state.move()
@@ -266,12 +261,17 @@ def part2(grid, directions):
                     print()
                     print(f'{i+1} / {cmd}')
                     state.print()
-                    time.sleep(0.001)
+                    time.sleep(0.1)
 
     
-    state.print(True)
+#    state.print(True)
+    state.print()
     print(state)
-#    state.print()
+    print(state.password())
+
+    # translate back to original coordinates
+    state.x -= 50
+    print(state)
     print(state.password())
 
 def test(grid):
