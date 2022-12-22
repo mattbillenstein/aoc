@@ -41,9 +41,22 @@ class State:
         v = self.grid[ny][nx]
 
         if v == TILE:
+            found = False
+            if abs(self.x-nx) + abs(self.y-ny) > 1:
+                print(f'Translate: ({self.x}, {self.y}, {self.dir}) -> ({nx}, {ny}, {nd})')
+                self.print()
+                found = True
             self.x = nx
             self.y = ny
             self.dir = nd
+            if found:
+                self.print()
+
+    def turn(self, dir):
+        self.dir = {
+            'R': {'>': 'v', 'v': '<', '<': '^', '^': '>'},
+            'L': {'>': '^', '^': '<', '<': 'v', 'v': '>'},
+        }[dir][self.dir]
 
     def translate(self, x, y, dir):
         # translate a given x, y, dir into a new x, y, dir in the flat grid,
@@ -109,12 +122,6 @@ class State:
         # no translation
         dx, dy = self.dx_dy_from_dir(dir)
         return x+dx, y+dy, dir
-
-    def turn(self, dir):
-        self.dir = {
-            'R': {'>': 'v', 'v': '<', '<': '^', '^': '>'},
-            'L': {'>': '^', '^': '<', '<': 'v', 'v': '>'},
-        }[dir][self.dir]
 
     def password(self):
         return ((self.y+1) * 1000) + ((self.x+1) * 4) + '>v<^'.index(self.dir)
@@ -192,23 +199,49 @@ def part2(grid, directions):
         for stride in (0, 1, 2):
             for y in range(size*stride, size*(stride+1)):
                 for x in range(size, size*2):
-                    # translate x+size
-                    newgrid[y][x+size] = grid[y][x]
+                    ny = y
+                    assert size*stride <= ny < size*(stride+1), ny
+                    nx = x+size
+                    assert size*2 <= nx < size*3
+                    newgrid[ny][nx] = grid[y][x]
 
         # copy L up rot CW
         for y in range(size*2, size*3):
             for x in range(0, size):
-                newgrid[x+size][size-(y+size)-1] = grid[y][x]
+                ny = x+size
+                assert size <= ny < size*2, ny
+                nx = size-y-1 + size*3
+                assert size <= nx < size*2
+                newgrid[ny][nx] = grid[y][x]
+
+    # test is
+    #   U
+    # BLF
+    #   DR
+
+    # input is
+    #  UR
+    #  F
+    # LD
+    # B
 
         # copy B up rot CW
         for y in range(size*3, size*4):
             for x in range(0, size):
-                newgrid[x+size][size-(y+size)-1] = grid[y][x]
+                ny = x+size
+                assert size <= ny < size*2, ny
+                nx = size-y-1 + size*3
+                assert 0 <= nx < size
+                newgrid[ny][nx] = grid[y][x]
 
-        # copy R down, flipX
+        # copy R down, flipY - duh!
         for y in range(0, size):
             for x in range(size*2, size*3):
-                newgrid[size*3-1-y][x+size] = grid[y][x]
+                ny = size*3-y-1
+                assert size*2 <= ny < size*3
+                nx = size*6-x-1
+                assert size*3 <= nx < size*4
+                newgrid[ny][nx] = grid[y][x]
 
         grid = newgrid
 
@@ -233,7 +266,7 @@ def part2(grid, directions):
                     print()
                     print(f'{i+1} / {cmd}')
                     state.print()
-                    time.sleep(0.01)
+                    time.sleep(0.001)
 
     
     state.print(True)
