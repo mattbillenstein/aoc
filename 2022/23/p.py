@@ -5,6 +5,8 @@ import time
 from collections import defaultdict
 from pprint import pprint
 
+from grid import SparseGrid
+
 def parse_input():
     lines = [_.strip('\r\n') for _ in sys.stdin]
 
@@ -16,48 +18,9 @@ def parse_input():
 
     return elves
 
-def neighbors(x, y, dir=None):
-    if dir == 'N':
-        return [(_, y-1) for _ in range(x-1, x+1+1)]
-    elif dir == 'S':
-        return [(_, y+1) for _ in range(x-1, x+1+1)]
-    elif dir == 'W':
-        return [(x-1, _) for _ in range(y-1, y+1+1)]
-    elif dir == 'E':
-        return [(x+1, _) for _ in range(y-1, y+1+1)]
-    return [(nx, ny) for ny in range(y-1, y+1+1) for nx in range(x-1, x+1+1) if (nx, ny) != (x, y)]
-
-def new_position(x, y, dir):
-    nx, ny = x, y
-    if dir == 'N':
-        ny -= 1
-    elif dir == 'S':
-        ny += 1
-    if dir == 'W':
-        nx -= 1
-    elif dir == 'E':
-        nx += 1
-    return nx, ny
-
-def box(elves):
-    minx = min(_[0] for _ in elves)
-    maxx = max(_[0] for _ in elves)
-    miny = min(_[1] for _ in elves)
-    maxy = max(_[1] for _ in elves)
-
-    return (minx, maxx), (miny, maxy)
-
-def print_elves(elves):
-    xs, ys = box(elves)
-
-    for y in range(ys[0], ys[1]+1):
-        s = ''
-        for x in range(xs[0], xs[1]+1):
-            s += '#' if (x, y) in elves else '.'
-        print(s)
-
 def part(elves, part_num):
-#    print_elves(elves)
+    grid = SparseGrid(elves)
+#    grid.print()
 
     dirs = ['N', 'S', 'W', 'E']
 
@@ -71,25 +34,24 @@ def part(elves, part_num):
         # positions elves propose to move to
         propose = defaultdict(list)
 
-        for x, y in elves:
+        for pt in grid:
             # if elf has no neighbors, don't move
-            if all(n not in elves for n in neighbors(x, y)):
+            if all(n not in grid for n in grid.neighbors(pt)):
                 continue
         
             # look through dirs, propose move to adjacent N/W/S/E position if
             # neighbors to that side are empty...
             for dir in dirs:
-                if all(n not in elves for n in neighbors(x, y, dir)):
-                    nx, ny = new_position(x, y, dir)
-                    propose[(nx, ny)].append((x, y))
+                if all(n not in grid for n in grid.neighbors(pt, dir)):
+                    nx, ny = grid.step(pt, dir)
+                    propose[(nx, ny)].append(pt)
                     break
 
         # now, move elves that were the only one to propose a position
         for new, L in propose.items():
             if len(L) == 1:
                 old = L[0]
-                elves.remove(old)
-                elves.add(new)
+                grid.move(old, new)
                 moved += 1
 
         # rotate dirs
@@ -97,15 +59,15 @@ def part(elves, part_num):
 
         if part_num == '1':
             if rnd >= 10:
-                xs, ys = box(elves)
-                print((xs[1] - xs[0] + 1) * (ys[1] - ys[0] + 1) - len(elves))
+                size = grid.size
+                print(size[0] * size[1] - len(grid))
                 break
         if part_num == '2':
             if moved == 0:
                 print(rnd)
                 break
 
-#    print_elves(elves)
+#    grid.print()
 
 def part2(elves):
     print(elves)
