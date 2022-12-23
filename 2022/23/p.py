@@ -56,15 +56,16 @@ def print_elves(elves):
             s += '#' if (x, y) in elves else '.'
         print(s)
 
-def part1(elves):
-    print_elves(elves)
-    print()
+def part(elves, part_num):
+#    print_elves(elves)
 
     dirs = ['N', 'S', 'W', 'E']
 
     rnd = 0
     while 1:
         rnd += 1
+
+        moved = 0
 
         propose = defaultdict(list)
         for x, y in elves:
@@ -84,19 +85,21 @@ def part1(elves):
                 old = L[0]
                 elves.remove(old)
                 elves.add(new)
+                moved += 1
 
         dirs = dirs[1:] + [dirs[0]]
 
-        if rnd >= 10:
-            break
+        if part_num == '1':
+            if rnd >= 10:
+                break
+        if part_num == '2':
+            if moved == 0:
+                print(f'None moved in round {rnd}')
+                break
 
-    print_elves(elves)
-    print()
-    print(len(elves))
+#    print_elves(elves)
 
     xs, ys = box(elves)
-    print(xs, ys)
-
     print((xs[1] - xs[0] + 1) * (ys[1] - ys[0] + 1) - len(elves))
 
 def part2(elves):
@@ -104,10 +107,8 @@ def part2(elves):
 
 def main():
     elves = parse_input()
-    if '1' in sys.argv:
-        part1(elves)
-    if '2' in sys.argv:
-        part2(data)
+    part(set(elves), '1')
+    part(set(elves), '2')
 
 if __name__ == '__main__':
     main()
