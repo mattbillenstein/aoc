@@ -49,8 +49,16 @@ def step(pt, dir):
     return nx, ny
 
 class Grid:
-    def __init__(self, arr):
-        self.g = [list(_) for _ in arr]
+    def __init__(self, arr, convert=lambda x: '.#'.index(x)):
+        if isinstance(arr, list) and isinstance(arr[0], str):
+            self.g = [[0] * len(arr[0]) for _ in arr]
+            for y in range(len(arr)):
+                for x in range(len(arr[y])):
+                    v = convert(arr[y][x])
+                    if v:
+                        self.g[y][x] = v
+        else:
+            self.g = [list(_) for _ in arr]
 
     @property
     def box(self):
@@ -116,14 +124,32 @@ class Grid:
         size = self.size
         return size[0] * size[1]
 
+    def remove(self, pt):
+        self.g[pt[1]][pt[0]] = 0
+
+    def add(self, pt):
+        self.g[pt[1]][pt[0]] = 1
+
+    def move(self, pt, newpt):
+        self.g[newpt[1]][newpt[0]] = self.g[pt[1]][pt[0]]
+        self.g[pt[1]][pt[0]] = 0
+
+    def copy(self):
+        return Grid([list(_) for _ in self.g])
+
 class SparseGrid(Grid):
-    def __init__(self, items):
-        if isinstance(items, (list, set)):
+    def __init__(self, items, convert=lambda x: '.#'.index(x)):
+        if isinstance(items, set):
             self.g = {_: 1 for _ in items}
+        elif isinstance(items, list) and isinstance(items[0], str):
+            self.g = {}
+            for y in range(len(items)):
+                for x in range(len(items[y])):
+                    v = convert(items[y][x])
+                    if v:
+                        self.g[(x, y)] = v
         else:
             self.g = dict(items)
-        self.sizex = 0
-        self.sizey = 0
 
     @property
     def box(self):
@@ -181,14 +207,17 @@ class SparseGrid(Grid):
     def __len__(self):
         return len(self.g)
 
-    def remove(self, k):
-        del self.g[k]
+    def remove(self, pt):
+        del self.g[pt]
 
-    def add(self, k):
-        self.g[k] = 1
+    def add(self, pt):
+        self.g[pt] = 1
 
     def move(self, pt, newpt):
         self.g[newpt] = self.g.pop(pt)
+
+    def copy(self):
+        return SparseGrid(dict(self.g))
 
 if __name__ == '__main__':
     g1 = Grid([[0, 1, 2], [3, 4, 5], [6, 7, 8]])

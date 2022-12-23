@@ -7,17 +7,9 @@ from grid import SparseGrid
 
 def parse_input():
     lines = [_.strip('\r\n') for _ in sys.stdin]
+    return SparseGrid(lines)
 
-    elves = set()
-    for y in range(len(lines)):
-        for x in range(len(lines[y])):
-            if lines[y][x] == '#':
-                elves.add((x, y))
-
-    return elves
-
-def part(elves, part_num):
-    grid = SparseGrid(elves)
+def part(grid, part_num):
 #    grid.print()
 
     dirs = ['N', 'S', 'W', 'E']
@@ -67,13 +59,10 @@ def part(elves, part_num):
 
 #    grid.print()
 
-def part2(elves):
-    print(elves)
-
 def main():
-    elves = parse_input()
-    part(set(elves), '1')
-    part(set(elves), '2')
+    grid = parse_input()
+    part(grid.copy(), '1')
+    part(grid.copy(), '2')
 
 if __name__ == '__main__':
     main()
