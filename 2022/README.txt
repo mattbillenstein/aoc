@@ -19,4 +19,5 @@
 19: Time-bound resource optimization - dfs, pruning, multiprocessing
 20: Number shuffling in doubly-linked list
 21: Recursive equation solving
-22: 
+22: Walking the surface of a cube flattened to 2-d grid - cube folding
+23: Simple x/y sparse matrix automata type problem
