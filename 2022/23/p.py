@@ -65,21 +65,26 @@ def part(elves, part_num):
     while 1:
         rnd += 1
 
+        # how many elves moved this round
         moved = 0
 
+        # positions elves propose to move to
         propose = defaultdict(list)
+
         for x, y in elves:
+            # if elf has no neighbors, don't move
             if all(n not in elves for n in neighbors(x, y)):
                 continue
         
+            # look through dirs, propose move to adjacent N/W/S/E position if
+            # neighbors to that side are empty...
             for dir in dirs:
                 if all(n not in elves for n in neighbors(x, y, dir)):
                     nx, ny = new_position(x, y, dir)
                     propose[(nx, ny)].append((x, y))
                     break
 
-        # now, move elves that were the only one to propose
-
+        # now, move elves that were the only one to propose a position
         for new, L in propose.items():
             if len(L) == 1:
                 old = L[0]
@@ -87,20 +92,20 @@ def part(elves, part_num):
                 elves.add(new)
                 moved += 1
 
+        # rotate dirs
         dirs = dirs[1:] + [dirs[0]]
 
         if part_num == '1':
             if rnd >= 10:
+                xs, ys = box(elves)
+                print((xs[1] - xs[0] + 1) * (ys[1] - ys[0] + 1) - len(elves))
                 break
         if part_num == '2':
             if moved == 0:
-                print(f'None moved in round {rnd}')
+                print(rnd)
                 break
 
 #    print_elves(elves)
-
-    xs, ys = box(elves)
-    print((xs[1] - xs[0] + 1) * (ys[1] - ys[0] + 1) - len(elves))
 
 def part2(elves):
     print(elves)
