@@ -10,3 +10,4 @@
 10: Paren matching using a stack
 11: Flashing octopuses in grid with power levels, diagonal neighbors, bfs
 12: DFS pathfinding - allow passing through some nodes many times, others 1 or 2
+13: Folding a grid of points like paper, sparse grid, gridlib!
