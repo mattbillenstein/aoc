@@ -39,10 +39,11 @@ def parse_input():
 def generate_grids(grid, steps):
     size = grid.size
 
-    grids = [grid.copy()]
+    grids = []
 
+    ngrid = grid
     for step in range(1, steps):
-        grid = grids[-1]
+        grid = ngrid
 
         ngrid = grid.copy()
         for k, v in grid.g.items():
@@ -81,15 +82,15 @@ def bfs(grids, v1=START, v2=END):
         elif v == v2:
             end = pt
 
-    seen = set([(start, 1)])
-    queue = deque([(start, 1)])
+    seen = set([(start, 0)])
+    queue = deque([(start, 0)])
     while queue:
         vertex, step = queue.popleft()
 
         grid = grids[step]
 
         if vertex == end:
-            return step - 1  # don't count the first step...
+            return step
 
         size = grid.size
 
