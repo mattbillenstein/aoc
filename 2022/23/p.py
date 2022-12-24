@@ -40,8 +40,7 @@ def part(grid, part_num):
         # now, move elves that were the only one to propose a position
         for new, L in propose.items():
             if len(L) == 1:
-                old = L[0]
-                grid.move(old, new)
+                grid.move(L[0], new)
                 moved += 1
 
         # rotate dirs
@@ -52,6 +51,7 @@ def part(grid, part_num):
                 size = grid.size
                 print(size[0] * size[1] - len(grid))
                 break
+
         if part_num == '2':
             if moved == 0:
                 print(rnd)
