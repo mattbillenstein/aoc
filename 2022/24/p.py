@@ -81,8 +81,9 @@ def generate_grids(grid, steps):
     return grids
 
 last = time.time()
-def dfs(grids, max_steps):
+def dfs(grids):
     global last
+    start_time = time.time()
 
     for pt in grids[0]:
         v = grids[0].get(pt)
@@ -93,19 +94,34 @@ def dfs(grids, max_steps):
 
 #    print(start, end)
 
-    best = (10000, None)
-#    stack = [(1, [start])]
-    stack = deque([(1, [start])])
+    max_steps = len(grids)
+    best = (10000, [])
+    stack = []
+    stack.append((1, [start]))
 
+    i = 0
     while stack:
-#        step, path = stack.pop()
-        step, path = stack.popleft()
+        i += 1
+        step, path = stack.pop()
 
         pt = path[-1]
 
         dist = abs(pt[0] - start[0]) + abs(pt[1] - start[1])
-        if len(path) > 15 and dist*2 < len(path):
-            # if steps are more than 2x the manhattan distance, abort this path
+#        if len(path) > 15 and dist*4 < len(path):
+#            # if steps are more than 2x the manhattan distance, abort this path
+#            print('hi')
+#            continue
+
+        passes = defaultdict(int)
+        for p in path:
+            passes[p] += 1
+        max_pass = max(passes.values())
+        sum_pass = sum(_ for _ in passes.values() if _ != 1)
+        if sum_pass > 50:
+            continue
+        if sum_pass//2 > len(passes):
+            continue
+        if max_pass > 5:
             continue
 
         if step >= max_steps:
@@ -119,22 +135,21 @@ def dfs(grids, max_steps):
 
         if 0 or time.time() - last > 10:
             print()
-            g = grids[step-1]
-            v = g.get(pt)
-            g.set(pt, END)
-            d = defaultdict(int)
-            for p in path:
-                d[p] += 1
-            print(step-1, path)
-            print(len(path), dist, len(d), max(d.values()))
 
-            g.print()
-#            print()
-#            grid.print()
-            if v in (EMPTY, None):
-                g.remove(pt)
-            else:
-                g.set(pt, v)
+            # print the grid at the end of the last step, before considring the
+            # next grid...
+            g = grids[step-1]
+            v = g.get(pt, EMPTY)
+            assert v == EMPTY
+
+            G = g.copy()
+            G.set(pt, END)
+
+            print(f'Step:{step-1} Point:{pt}') # Path:{path}')
+            print(f'Best:{best[0]} Depth:{len(path)} Distance:{dist} Unique:{len(passes)} Max-passthroughs:{max_pass} Sum-passthroughs:{sum_pass} Paths:{i} Paths/s:{(i/(time.time() - start_time)):2f}')
+
+            G.print()
+
             last = time.time()
 
         size = grid.size
@@ -145,39 +160,55 @@ def dfs(grids, max_steps):
             
             v = grid.get(npt, EMPTY)
 
-            if v == END:
-                if len(path)+1 < best[0]:
-                    best = (len(path)+1, path + [npt])
-                    print(best)
-                continue
-
             if v == EMPTY:
                 found = True
                 stack.append((step+1, path + [npt]))
+            elif v == END:
+                if len(path)+1 < best[0]:
+                    best = (len(path)+1, path + [npt])
+                    print(f'Best: {best}')
 
         if not found:
-            # wait
-            stack.append((step+1, path + [path[-1]]))
+            # wait if we can - we need to check we're not currently sitting on
+            # an occupied spot...
+            if grid.get(pt, EMPTY) == EMPTY:
+                stack.append((step+1, path + [pt]))
 
     return best[1]
 
 def part1(grid):
     size = grid.size
-    depth = size[0] * size[1] * 2
+    depth = 2000 #(size[0] + size[1]) * 20
+    print(depth)
     grids = generate_grids(grid, depth)
 
-    path = dfs(grids, depth)
+    if 0:
+        for i, g in enumerate(grids):
+            cnt = 0
+            d = defaultdict(int)
+            for pt in g:
+                v = g.get(pt)
+                for dir in (UP, DOWN, LEFT, RIGHT):
+                    if v & dir:
+                        d[dir] += 1
+                        cnt += 1
+            print(i, cnt, d)
+            g.print()
+
+    path = dfs(grids)
     print(path)
     print(len(path) - 1)  # exclude start as a step
 
-    i = 0
-    for pt, g in zip(path, grids):
-#        print()
-#        print(i, pt)
-        assert g.get(pt, EMPTY) in (START, EMPTY, END), g.get(pt)
-#        g.set(pt, END)
-#        g.print()
-        i += 1
+    if 0:
+        i = 0
+        for pt, g in zip(path, grids):
+            print()
+            print(i, pt)
+            g.print()
+            assert g.get(pt, EMPTY) in (START, EMPTY, END), g.get(pt)
+    #        g.set(pt, END)
+            g.print()
+            i += 1
 
 
 def main():
