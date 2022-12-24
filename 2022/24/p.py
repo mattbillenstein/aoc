@@ -36,47 +36,47 @@ def parse_input():
 
     return grid
 
-def generate_grids(grid, steps):
+def next_grid(grid):
+    ngrid = grid.copy()
+    for k, v in grid.g.items():
+        if v not in (WALL, START, END):
+            del ngrid.g[k]
+
     size = grid.size
+    for pt, v in grid.g.items():
+        if v not in (WALL, EMPTY):
+            for dir in (UP, DOWN, LEFT, RIGHT):
+                if v & dir:
+                    ndir = grid.values[v & dir]
+                    npt = grid.step(pt, ndir)
+                    if grid.get(npt) == WALL:
+                        # wrap
+                        x, y = npt
+                        if ndir == '^':
+                            npt = (x, size[1]-1-1)
+                        elif ndir == 'v':
+                            npt = (x, 1)
+                        elif ndir == '<':
+                            npt = (size[0]-1-1, y)
+                        elif ndir == '>':
+                            npt = (1, y)
 
-    grids = []
+                    ngrid.g.setdefault(npt, 0)
+                    ngrid.g[npt] |= v & dir
 
-    ngrid = grid
-    for step in range(1, steps):
-        grid = ngrid
+    return ngrid
 
-        ngrid = grid.copy()
-        for k, v in grid.g.items():
-            if v not in (WALL, START, END):
-                del ngrid.g[k]
-        grids.append(ngrid)
-
-        for pt, v in grid.g.items():
-            if v not in (WALL, EMPTY):
-                for dir in (UP, DOWN, LEFT, RIGHT):
-                    if v & dir:
-                        ndir = grid.values[v & dir]
-                        npt = grid.step(pt, ndir)
-                        if grid.get(npt) == WALL:
-                            # wrap
-                            x, y = npt
-                            if ndir == '^':
-                                npt = (x, size[1]-1-1)
-                            elif ndir == 'v':
-                                npt = (x, 1)
-                            elif ndir == '<':
-                                npt = (size[0]-1-1, y)
-                            elif ndir == '>':
-                                npt = (1, y)
-
-                        ngrid.g.setdefault(npt, 0)
-                        ngrid.g[npt] |= v & dir
-
-    return grids
+def get_grid(grids, i):
+    j = len(grids) - 1
+    while j < i:
+        grids.append(next_grid(grids[j]))
+        j += 1
+    return grids[i]
 
 def bfs(grids, v1=START, v2=END):
-    for pt in grids[0]:
-        v = grids[0].get(pt)
+    grid = grids[0]
+    for pt in grid:
+        v = grid.get(pt)
         if v == v1:
             start = pt
         elif v == v2:
@@ -87,7 +87,7 @@ def bfs(grids, v1=START, v2=END):
     while queue:
         vertex, step = queue.popleft()
 
-        grid = grids[step]
+        grid = get_grid(grids, step)
 
         if vertex == end:
             return step
@@ -113,23 +113,13 @@ def bfs(grids, v1=START, v2=END):
             seen.add((vertex, step+1))
             queue.append((vertex, step+1))
 
-def part1(grid):
-    size = grid.size
-    depth = (size[0] + size[1]) * 3   # ?
-    grids = generate_grids(grid, depth)
+def run(grid):
+    grids = [next_grid(grid)]
     steps = bfs(grids)
-    print(steps)
-
-def part2(grid):
-    size = grid.size
-    depth = (size[0] + size[1]) * 10   # ?
-    grids = generate_grids(grid, depth)
-
-    steps = bfs(grids)
-
     print(steps)
 
     for i in range(steps, steps+10):
+        get_grid(grids, i)
         x = bfs(grids[i:], END, START)
         if x:
             ds = (i-steps) + x
@@ -138,6 +128,7 @@ def part2(grid):
             break
 
     for i in range(steps, steps+10):
+        get_grid(grids, i)
         x = bfs(grids[i:])
         if x:
             ds = (i-steps) + x
@@ -147,10 +138,7 @@ def part2(grid):
 
 def main():
     grid = parse_input()
-    if '1' in sys.argv:
-        part1(grid.copy())
-    if '2' in sys.argv:
-        part2(grid.copy())
+    run(grid.copy())
 
 if __name__ == '__main__':
     main()
