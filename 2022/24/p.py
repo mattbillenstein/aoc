@@ -1,8 +1,7 @@
 #!/usr/bin/env pypy3
 
 import sys
-import time
-from collections import defaultdict, deque
+from collections import defaultdict
 from pprint import pprint
 
 from grid import SparseGrid
@@ -38,8 +37,6 @@ def parse_input():
     return grid
 
 def generate_grids(grid, steps):
-#    grid.print()
-
     size = grid.size
 
     grids = [grid.copy()]
@@ -52,7 +49,7 @@ def generate_grids(grid, steps):
             if v not in (WALL, START, END):
                 del ngrid.g[k]
         grids.append(ngrid)
-            
+
         for pt, v in grid.g.items():
             if v not in (WALL, EMPTY):
                 for dir in (UP, DOWN, LEFT, RIGHT):
@@ -74,17 +71,9 @@ def generate_grids(grid, steps):
                         ngrid.g.setdefault(npt, 0)
                         ngrid.g[npt] |= v & dir
 
-#        print()
-#        print(step)
-#        ngrid.print()
-
     return grids
 
-last = time.time()
-def dfs(grids):
-    global last
-    start_time = time.time()
-
+def bfs(grids):
     for pt in grids[0]:
         v = grids[0].get(pt)
         if v == START:
@@ -92,124 +81,43 @@ def dfs(grids):
         elif v == END:
             end = pt
 
-#    print(start, end)
-
-    max_steps = len(grids)
-    best = (10000, [])
-    stack = []
-    stack.append((1, [start]))
-
-    i = 0
-    while stack:
-        i += 1
-        step, path = stack.pop()
-
-        pt = path[-1]
-
-        dist = abs(pt[0] - start[0]) + abs(pt[1] - start[1])
-#        if len(path) > 15 and dist*4 < len(path):
-#            # if steps are more than 2x the manhattan distance, abort this path
-#            print('hi')
-#            continue
-
-        passes = defaultdict(int)
-        for p in path:
-            passes[p] += 1
-        max_pass = max(passes.values())
-        sum_pass = sum(_ for _ in passes.values() if _ != 1)
-        if sum_pass > 50:
-            continue
-        if sum_pass//2 > len(passes):
-            continue
-        if max_pass > 5:
-            continue
-
-        if step >= max_steps:
-            continue
-
-        if step > len(grids)-1:
-            print('End of grids')
-            continue
+    seen = set([(start, 1)])
+    queue = deque([(start, 1)])
+    while queue:
+        vertex, step = queue.popleft()
 
         grid = grids[step]
 
-        if 0 or time.time() - last > 10:
-            print()
-
-            # print the grid at the end of the last step, before considring the
-            # next grid...
-            g = grids[step-1]
-            v = g.get(pt, EMPTY)
-            assert v == EMPTY
-
-            G = g.copy()
-            G.set(pt, END)
-
-            print(f'Step:{step-1} Point:{pt}') # Path:{path}')
-            print(f'Best:{best[0]} Depth:{len(path)} Distance:{dist} Unique:{len(passes)} Max-passthroughs:{max_pass} Sum-passthroughs:{sum_pass} Paths:{i} Paths/s:{(i/(time.time() - start_time)):2f}')
-
-            G.print()
-
-            last = time.time()
+        if vertex == end:
+            return step - 1  # don't count the first step...
 
         size = grid.size
-        found = False
-        for npt in grid.neighbors_manhattan(pt):
+
+        x, y = vertex
+        for npt in [(x+1, y), (x, y+1), (x, y-1), (x-1, y)]:
+            if (npt, step+1) in seen:
+                continue
+
             if not (0 <= npt[0] < size[0] and 0 <= npt[1] < size[1]):
                 continue
-            
+
             v = grid.get(npt, EMPTY)
+            if v in (EMPTY, END):
+                seen.add((npt, step+1))
+                queue.append((npt, step+1))
 
-            if v == EMPTY:
-                found = True
-                stack.append((step+1, path + [npt]))
-            elif v == END:
-                if len(path)+1 < best[0]:
-                    best = (len(path)+1, path + [npt])
-                    print(f'Best: {best}')
-
-        if not found:
-            # wait if we can - we need to check we're not currently sitting on
-            # an occupied spot...
-            if grid.get(pt, EMPTY) == EMPTY:
-                stack.append((step+1, path + [pt]))
-
-    return best[1]
+        # wait if we can - we need to check we're not currently sitting on an
+        # occupied spot...
+        if grid.get(vertex, EMPTY) == EMPTY:
+            seen.add((vertex, step+1))
+            queue.append((vertex, step+1))
 
 def part1(grid):
     size = grid.size
-    depth = 2000 #(size[0] + size[1]) * 20
-    print(depth)
+    depth = (size[0] + size[1]) * 3   # ?
     grids = generate_grids(grid, depth)
-
-    if 0:
-        for i, g in enumerate(grids):
-            cnt = 0
-            d = defaultdict(int)
-            for pt in g:
-                v = g.get(pt)
-                for dir in (UP, DOWN, LEFT, RIGHT):
-                    if v & dir:
-                        d[dir] += 1
-                        cnt += 1
-            print(i, cnt, d)
-            g.print()
-
-    path = dfs(grids)
-    print(path)
-    print(len(path) - 1)  # exclude start as a step
-
-    if 0:
-        i = 0
-        for pt, g in zip(path, grids):
-            print()
-            print(i, pt)
-            g.print()
-            assert g.get(pt, EMPTY) in (START, EMPTY, END), g.get(pt)
-    #        g.set(pt, END)
-            g.print()
-            i += 1
-
+    steps = bfs(grids)
+    print(steps)
 
 def main():
     grid = parse_input()
