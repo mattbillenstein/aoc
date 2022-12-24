@@ -137,6 +137,19 @@ class Grid:
     def copy(self):
         return Grid([list(_) for _ in self.g])
 
+    def flip_x(self):
+        self.g.reverse()
+
+    def flip_y(self):
+        for L in self.g:
+            L.reverse()
+
+    def rotate_cw(self):
+        self.g[:] = [list(_) for _ in zip(*self.g[::-1])]
+
+    def rotate_ccw(self):
+        self.g[:] = [list(_) for _ in zip(*self.g)][::-1]
+
 class SparseGrid(Grid):
     def __init__(self, items, convert=lambda x: '.#'.index(x)):
         if isinstance(items, set):
@@ -219,6 +232,22 @@ class SparseGrid(Grid):
     def copy(self):
         return SparseGrid(dict(self.g))
 
+    def flip_x(self):
+        _, sizey = self.size
+        self.g = {(pt[0], sizey-1-pt[1]): v for pt, v in self.g.items()}
+
+    def flip_y(self):
+        sizex, _ = self.size
+        self.g = {(sizex-1-pt[0], pt[1]): v for pt, v in self.g.items()}
+
+    def rotate_cw(self):
+        _, sizey = self.size
+        self.g = {(sizey-1-pt[1], pt[0]): v for pt, v in self.g.items()}
+
+    def rotate_ccw(self):
+        sizex, _ = self.size
+        self.g = {(pt[1], sizex-1-pt[0]): v for pt, v in self.g.items()}
+
 if __name__ == '__main__':
     g1 = Grid([[0, 1, 2], [3, 4, 5], [6, 7, 8]])
     g2 = SparseGrid({
@@ -227,8 +256,8 @@ if __name__ == '__main__':
         (0, 2): 6, (1, 2): 7, (2, 2): 8,
     })
 
-    g1.print()
-    g2.print()
+#    g1.print()
+#    g2.print()
 
     assert g1.box == g2.box, (g1.box, g2.box)
     assert g1.size == g2.size
