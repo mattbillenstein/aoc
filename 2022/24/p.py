@@ -1,7 +1,7 @@
 #!/usr/bin/env pypy3
 
 import sys
-from collections import defaultdict
+from collections import defaultdict, deque
 from pprint import pprint
 
 from grid import SparseGrid
@@ -73,12 +73,12 @@ def generate_grids(grid, steps):
 
     return grids
 
-def bfs(grids):
+def bfs(grids, v1=START, v2=END):
     for pt in grids[0]:
         v = grids[0].get(pt)
-        if v == START:
+        if v == v1:
             start = pt
-        elif v == END:
+        elif v == v2:
             end = pt
 
     seen = set([(start, 1)])
@@ -102,7 +102,7 @@ def bfs(grids):
                 continue
 
             v = grid.get(npt, EMPTY)
-            if v in (EMPTY, END):
+            if v == EMPTY or npt == end:
                 seen.add((npt, step+1))
                 queue.append((npt, step+1))
 
@@ -118,6 +118,31 @@ def part1(grid):
     grids = generate_grids(grid, depth)
     steps = bfs(grids)
     print(steps)
+
+def part2(grid):
+    size = grid.size
+    depth = (size[0] + size[1]) * 10   # ?
+    grids = generate_grids(grid, depth)
+
+    steps = bfs(grids)
+
+    print(steps)
+
+    for i in range(steps, steps+10):
+        x = bfs(grids[i:], END, START)
+        if x:
+            ds = (i-steps) + x
+            steps += ds
+            print(ds, steps)
+            break
+
+    for i in range(steps, steps+10):
+        x = bfs(grids[i:])
+        if x:
+            ds = (i-steps) + x
+            steps += ds
+            print(ds, steps)
+            break
 
 def main():
     grid = parse_input()
