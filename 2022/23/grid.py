@@ -1,15 +1,15 @@
 #!/usr/bin/env python3
 
-def neighbors(pt, dir=None):
+def neighbors8(pt, dir=None):
     x, y = pt
     if dir:
-        if dir in ('N', 'U'):
+        if dir in ('N', 'U', '^'):
             L = [(_, y-1) for _ in range(x-1, x+1+1)]
-        elif dir in ('S', 'D'):
+        elif dir in ('S', 'D', 'v'):
             L = [(_, y+1) for _ in range(x-1, x+1+1)]
-        elif dir in ('W', 'L'):
+        elif dir in ('W', 'L', '<'):
             L = [(x-1, _) for _ in range(y-1, y+1+1)]
-        elif dir in ('E', 'R'):
+        elif dir in ('E', 'R', '>'):
             L = [(x+1, _) for _ in range(y-1, y+1+1)]
         else:
             assert 0, dir
@@ -18,16 +18,16 @@ def neighbors(pt, dir=None):
 
     return L
 
-def neighbors_manhattan(pt, dir=None):
+def neighbors4(pt, dir=None):
     x, y = pt
     if dir:
-        if dir in ('N', 'U'):
+        if dir in ('N', 'U', '^'):
             L = [(x, y-1)]
-        elif dir in ('S', 'D'):
+        elif dir in ('S', 'D', 'v'):
             L = [(x, y+1)]
-        elif dir in ('W', 'L'):
+        elif dir in ('W', 'L', '<'):
             L = [(x-1, y)]
-        elif dir in ('E', 'R'):
+        elif dir in ('E', 'R', '>'):
             L = [(x+1, y)]
         else:
             assert 0, dir
@@ -36,30 +36,78 @@ def neighbors_manhattan(pt, dir=None):
 
     return L
 
+def neighbors4d(pt, dir=None):
+    # diagonals only
+    x, y = pt
+    if dir:
+        if dir in ('NW', 'UL'):
+            L = [(x-1, y-1)]
+        elif dir in ('NE', 'UR'):
+            L = [(x+1, y-1)]
+        elif dir in ('SW', 'DL'):
+            L = [(x-1, y+1)]
+        elif dir in ('SE', 'DR'):
+            L = [(x+1, y+1)]
+        else:
+            assert 0, dir
+    else:
+        L = [(x-1, y-1), (x+1, y-1), (x-1, y+1), (x+1, y+1)]
+
+    return L
+
 def step(pt, dir):
     nx, ny = pt
-    if dir in ('N', 'U'):
+    if dir in ('N', 'U', '^'):
         ny -= 1
-    elif dir in ('S', 'D'):
+    elif dir in ('S', 'D', 'v'):
         ny += 1
-    if dir in ('W', 'L'):
+    elif dir in ('W', 'L', '<'):
         nx -= 1
-    elif dir in ('E', 'R'):
+    elif dir in ('E', 'R', '>'):
         nx += 1
+    elif dir in ('NW', 'UL'):
+        nx -= 1
+        ny -= 1
+    elif dir in ('NE', 'UR'):
+        nx += 1
+        ny -= 1
+    elif dir in ('SW', 'DL'):
+        nx -= 1
+        ny += 1
+    elif dir in ('SE', 'DR'):
+        nx += 1
+        ny += 1
+    else:
+        assert 0, dir
     return nx, ny
 
 class Grid:
-    def __init__(self, arr, convert=lambda x: '.#'.index(x)):
-        if isinstance(arr, list) and isinstance(arr[0], str):
-            self.g = [[0] * len(arr[0]) for _ in arr]
-            for y in range(len(arr)):
-                for x in range(len(arr[y])):
-                    v = convert(arr[y][x])
+    def __init__(self, items, chars={'.': 0, '#': 1}):
+        self.chars = chars
+        self.values = {v: k for k, v in chars.items()}
+
+        if isinstance(items, list) and isinstance(items[0], str):
+            self.g = [[0] * len(items[0]) for _ in items]
+            for y in range(len(items)):
+                for x in range(len(items[y])):
+                    v = ch[items[y][x]]
                     if v:
                         self.g[y][x] = v
         else:
-            self.g = [list(_) for _ in arr]
+            self.g = [list(_) for _ in items]
 
+    def copy(self):
+        return Grid([list(_) for _ in self.g], self.chars)
+
+    def print(self):
+        for y in self.ys:
+            s = ''
+            for x in self.xs:
+                v = self.get((x, y), 0)
+                s += self.values.get(v, '?')
+            print(s)
+
+    # props
     @property
     def box(self):
         if not self.g:
@@ -70,12 +118,6 @@ class Grid:
     def size(self):
         return (len(self.g[0]), len(self.g))
 
-    def get(self, pt):
-        return self.g[pt[1]][pt[0]]
-
-    def set(self, pt, v):
-        self.g[pt[1]][pt[0]] = v
-
     @property
     def xs(self):
         return range(0, len(self.g[0]))
@@ -83,24 +125,37 @@ class Grid:
     @property
     def ys(self):
         return range(0, len(self.g))
-    
-    def print(self, chars='.#'):
-        for y in self.ys:
-            s = ''
-            for x in self.xs:
-                if self.get((x, y)):
-                    s += chars[1]
-                else:
-                    s += chars[0]
-            print(s)
 
-    def neighbors(self, pt, dir=None):
-        L = neighbors(pt, dir)
+    # mutate
+    def get(self, pt):
+        return self.g[pt[1]][pt[0]]
+
+    def set(self, pt, v):
+        self.g[pt[1]][pt[0]] = v
+
+    def remove(self, pt):
+        self.g[pt[1]][pt[0]] = 0
+
+    def add(self, pt):
+        self.g[pt[1]][pt[0]] = 1
+
+    def move(self, pt, newpt):
+        self.g[newpt[1]][newpt[0]] = self.g[pt[1]][pt[0]]
+        self.g[pt[1]][pt[0]] = 0
+
+    # neighbors
+    def neighbors8(self, pt, dir=None):
+        L = neighbors8(pt, dir)
         size = self.size
         return [_ for _ in L if 0 <= _[0] < size[0] and 0 <= _[1] < size[1]]
 
-    def neighbors_manhattan(self, pt, dir=None):
-        L = neighbors_manhattan(pt, dir)
+    def neighbors4(self, pt, dir=None):
+        L = neighbors4(pt, dir)
+        size = self.size
+        return [_ for _ in L if 0 <= _[0] < size[0] and 0 <= _[1] < size[1]]
+
+    def neighbors4d(self, pt, dir=None):
+        L = neighbors4d(pt, dir)
         size = self.size
         return [_ for _ in L if 0 <= _[0] < size[0] and 0 <= _[1] < size[1]]
 
@@ -111,6 +166,7 @@ class Grid:
             return npt
         return None
 
+    # dict/set ish methods
     def __iter__(self):
         for y in self.ys:
             for x in self.xs:
@@ -124,33 +180,41 @@ class Grid:
         size = self.size
         return size[0] * size[1]
 
-    def remove(self, pt):
-        self.g[pt[1]][pt[0]] = 0
+    # transformations
+    def flip_x(self):
+        self.g.reverse()
 
-    def add(self, pt):
-        self.g[pt[1]][pt[0]] = 1
+    def flip_y(self):
+        for L in self.g:
+            L.reverse()
 
-    def move(self, pt, newpt):
-        self.g[newpt[1]][newpt[0]] = self.g[pt[1]][pt[0]]
-        self.g[pt[1]][pt[0]] = 0
+    def rotate_cw(self):
+        self.g[:] = [list(_) for _ in zip(*self.g[::-1])]
 
-    def copy(self):
-        return Grid([list(_) for _ in self.g])
+    def rotate_ccw(self):
+        self.g[:] = [list(_) for _ in zip(*self.g)][::-1]
 
 class SparseGrid(Grid):
-    def __init__(self, items, convert=lambda x: '.#'.index(x)):
+    def __init__(self, items, chars={'.': 0, '#': 1}):
+        self.chars = chars
+        self.values = {v: k for k, v in chars.items()}
+
         if isinstance(items, set):
             self.g = {_: 1 for _ in items}
         elif isinstance(items, list) and isinstance(items[0], str):
             self.g = {}
             for y in range(len(items)):
                 for x in range(len(items[y])):
-                    v = convert(items[y][x])
+                    v = self.chars[items[y][x]]
                     if v:
                         self.g[(x, y)] = v
         else:
             self.g = dict(items)
 
+    def copy(self):
+        return SparseGrid(dict(self.g), self.chars)
+
+    # props
     @property
     def box(self):
         if not self.g:
@@ -168,12 +232,6 @@ class SparseGrid(Grid):
         box = self.box
         return (box[0][1] - box[0][0] + 1, box[1][1] - box[1][0] + 1)
 
-    def get(self, pt):
-        return self.g.get(pt)
-
-    def set(self, pt, v):
-        self.g[pt] = v
-    
     @property
     def xs(self):
         minx = min(_[0] for _ in self.g)
@@ -186,26 +244,12 @@ class SparseGrid(Grid):
         maxx = max(_[1] for _ in self.g)
         return range(minx, maxx+1)
 
-    def neighbors(self, pt, dir=None):
-        # sparsegrid doesn't care about boundaries
-        return neighbors(pt, dir)
+    # mutate
+    def get(self, pt, default=None):
+        return self.g.get(pt, default)
 
-    def neighbors_manhattan(self, pt, dir=None):
-        # sparsegrid doesn't care about boundaries
-        return neighbors_manhattan(pt, dir)
-
-    def step(self, pt, dir):
-        return step(pt, dir)
-
-    # dict/set ish methods
-    def __iter__(self):
-        return iter(self.g)
-
-    def __contains__(self, k):
-        return k in self.g
-
-    def __len__(self):
-        return len(self.g)
+    def set(self, pt, v):
+        self.g[pt] = v
 
     def remove(self, pt):
         del self.g[pt]
@@ -216,8 +260,47 @@ class SparseGrid(Grid):
     def move(self, pt, newpt):
         self.g[newpt] = self.g.pop(pt)
 
-    def copy(self):
-        return SparseGrid(dict(self.g))
+    # neighbors
+    def neighbors8(self, pt, dir=None):
+        # sparsegrid doesn't care about boundaries
+        return neighbors8(pt, dir)
+
+    def neighbors4(self, pt, dir=None):
+        # sparsegrid doesn't care about boundaries
+        return neighbors4(pt, dir)
+
+    def neighbors4d(self, pt, dir=None):
+        return neighbors4d(pt, dir)
+
+    def step(self, pt, dir):
+        return step(pt, dir)
+
+    # dict/set ish methods
+    def __iter__(self):
+        return iter(dict(self.g))
+
+    def __contains__(self, k):
+        return k in self.g
+
+    def __len__(self):
+        return len(self.g)
+
+    # transformations
+    def flip_x(self):
+        _, sizey = self.size
+        self.g = {(pt[0], sizey-1-pt[1]): v for pt, v in self.g.items()}
+
+    def flip_y(self):
+        sizex, _ = self.size
+        self.g = {(sizex-1-pt[0], pt[1]): v for pt, v in self.g.items()}
+
+    def rotate_cw(self):
+        _, sizey = self.size
+        self.g = {(sizey-1-pt[1], pt[0]): v for pt, v in self.g.items()}
+
+    def rotate_ccw(self):
+        sizex, _ = self.size
+        self.g = {(pt[1], sizex-1-pt[0]): v for pt, v in self.g.items()}
 
 if __name__ == '__main__':
     g1 = Grid([[0, 1, 2], [3, 4, 5], [6, 7, 8]])
@@ -227,8 +310,8 @@ if __name__ == '__main__':
         (0, 2): 6, (1, 2): 7, (2, 2): 8,
     })
 
-    g1.print()
-    g2.print()
+#    g1.print()
+#    g2.print()
 
     assert g1.box == g2.box, (g1.box, g2.box)
     assert g1.size == g2.size
@@ -236,26 +319,26 @@ if __name__ == '__main__':
     assert g1.ys == g2.ys
 
     # neighbors including diagonals
-    assert g1.neighbors((0, 0)) == [(0, 1), (1, 0), (1, 1)], g1.neighbors((0, 0))
-    assert g1.neighbors((1, 0)) == [(0, 0), (0, 1), (1, 1), (2, 0), (2, 1)], g1.neighbors((1, 0))
-    assert g1.neighbors((1, 1)) == [(0, 0), (0, 1), (0, 2), (1, 0), (1, 2), (2, 0), (2, 1), (2, 2)], g1.neighbors((1, 1))
-    assert g1.neighbors((1, 0), 'N') == [], g1.neighbors((1, 1))
-    assert g1.neighbors((1, 0), 'S') == [(0, 1), (1, 1), (2, 1)], g1.neighbors((1, 0), 'S')
+    assert g1.neighbors8((0, 0)) == [(0, 1), (1, 0), (1, 1)], g1.neighbors8((0, 0))
+    assert g1.neighbors8((1, 0)) == [(0, 0), (0, 1), (1, 1), (2, 0), (2, 1)], g1.neighbors8((1, 0))
+    assert g1.neighbors8((1, 1)) == [(0, 0), (0, 1), (0, 2), (1, 0), (1, 2), (2, 0), (2, 1), (2, 2)], g1.neighbors8((1, 1))
+    assert g1.neighbors8((1, 0), 'N') == [], g1.neighbors8((1, 1))
+    assert g1.neighbors8((1, 0), 'S') == [(0, 1), (1, 1), (2, 1)], g1.neighbors8((1, 0), 'S')
 
-    assert g1.neighbors_manhattan((0, 0)) == [(1, 0), (0, 1)], g1.neighbors_manhattan((0, 0))
-    assert g1.neighbors_manhattan((1, 0)) == [(0, 0), (2, 0), (1, 1)], g1.neighbors_manhattan((1, 0))
-    assert g1.neighbors_manhattan((1, 1)) == [(0, 1), (2, 1), (1, 0), (1, 2)], g1.neighbors_manhattan((1, 1))
+    assert g1.neighbors4((0, 0)) == [(1, 0), (0, 1)], g1.neighbors4((0, 0))
+    assert g1.neighbors4((1, 0)) == [(0, 0), (2, 0), (1, 1)], g1.neighbors4((1, 0))
+    assert g1.neighbors4((1, 1)) == [(0, 1), (2, 1), (1, 0), (1, 2)], g1.neighbors4((1, 1))
 
     # sparsegrid has no borders...
-    assert g2.neighbors((0, 0)) == [(-1, -1), (-1, 0), (-1, 1), (0, -1), (0, 1), (1, -1), (1, 0), (1, 1)], g2.neighbors((0, 0))
-    assert g2.neighbors((1, 0), 'N') == [(0, -1), (1, -1), (2, -1)], g2.neighbors((1, 0), 'N')
-    assert g2.neighbors((1, 0), 'S') == [(0, 1), (1, 1), (2, 1)], g2.neighbors((1, 0), 'S')
+    assert g2.neighbors8((0, 0)) == [(-1, -1), (-1, 0), (-1, 1), (0, -1), (0, 1), (1, -1), (1, 0), (1, 1)], g2.neighbors8((0, 0))
+    assert g2.neighbors8((1, 0), 'N') == [(0, -1), (1, -1), (2, -1)], g2.neighbors8((1, 0), 'N')
+    assert g2.neighbors8((1, 0), 'S') == [(0, 1), (1, 1), (2, 1)], g2.neighbors8((1, 0), 'S')
 
-    assert g2.neighbors_manhattan((0, 0)) == [(-1, 0), (1, 0), (0, -1), (0, 1)], g2.neighbors_manhattan((0, 0))
-    assert g2.neighbors_manhattan((1, 0)) == [(0, 0), (2, 0), (1, -1), (1, 1)], g2.neighbors_manhattan((1, 0))
-    assert g2.neighbors_manhattan((1, 0), 'N') == [(1, -1)], g2.neighbors_manhattan((1, 0), 'N')
-    assert g2.neighbors_manhattan((1, 0), 'S') == [(1, 1)], g2.neighbors_manhattan((1, 0), 'S')
-    assert g2.neighbors_manhattan((1, 1)) == [(0, 1), (2, 1), (1, 0), (1, 2)], g2.neighbors_manhattan((1, 1))
+    assert g2.neighbors4((0, 0)) == [(-1, 0), (1, 0), (0, -1), (0, 1)], g2.neighbors4((0, 0))
+    assert g2.neighbors4((1, 0)) == [(0, 0), (2, 0), (1, -1), (1, 1)], g2.neighbors4((1, 0))
+    assert g2.neighbors4((1, 0), 'N') == [(1, -1)], g2.neighbors4((1, 0), 'N')
+    assert g2.neighbors4((1, 0), 'S') == [(1, 1)], g2.neighbors4((1, 0), 'S')
+    assert g2.neighbors4((1, 1)) == [(0, 1), (2, 1), (1, 0), (1, 2)], g2.neighbors4((1, 1))
 
     assert list(g1) == list(g2)
     assert (1, 1) in g1

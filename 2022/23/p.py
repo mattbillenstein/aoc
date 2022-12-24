@@ -26,13 +26,13 @@ def part(grid, part_num):
 
         for pt in grid:
             # if elf has no neighbors, don't move
-            if all(n not in grid for n in grid.neighbors(pt)):
+            if all(n not in grid for n in grid.neighbors8(pt)):
                 continue
         
             # look through dirs, propose move to adjacent N/W/S/E position if
             # neighbors to that side are empty...
             for dir in dirs:
-                if all(n not in grid for n in grid.neighbors(pt, dir)):
+                if all(n not in grid for n in grid.neighbors8(pt, dir)):
                     nx, ny = grid.step(pt, dir)
                     propose[(nx, ny)].append(pt)
                     break

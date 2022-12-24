@@ -94,8 +94,7 @@ def bfs(grids, v1=START, v2=END):
 
         size = grid.size
 
-        x, y = vertex
-        for npt in [(x+1, y), (x, y+1), (x, y-1), (x-1, y)]:
+        for npt in grid.neighbors4(vertex):
             if (npt, step+1) in seen:
                 continue
 
