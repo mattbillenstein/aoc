@@ -17,9 +17,12 @@ def decode(snafu):
     return x
 
 def encode(num):
+    if num == 0:
+        return '0'
+
     L = []
     while num:
-        num, rem = divmod(num+2, BASE)
+        num, rem = divmod(num-OFFSET, BASE)
         L.append(ALPHABET[rem])
     return ''.join(reversed(L))
 

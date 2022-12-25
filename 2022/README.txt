@@ -21,3 +21,5 @@
 21: Recursive equation solving
 22: Walking the surface of a cube flattened to 2-d grid - cube folding
 23: Simple x/y sparse matrix automata type problem
+24: Pathfinding in a grid that changes over time - bfs
+25: Encode/Decode numbers of base5 with an offset
