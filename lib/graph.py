@@ -51,6 +51,8 @@ def dijkstra(graph, start, end=None):
 
     while pq:
         u = pq.pop_task()
+        if u == end:
+            break
         for v, w in graph[u]:
             if v in pq:
                 alt = dist[u] + w
