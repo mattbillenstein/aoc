@@ -12,3 +12,4 @@
 12: DFS pathfinding - allow passing through some nodes many times, others 1 or 2
 13: Folding a grid of points like paper, sparse grid, gridlib!
 14: Count characters in exponentially growing string using the rules for that growth
+15: Min cost pathfinding - implemented dijkstra in graph.py

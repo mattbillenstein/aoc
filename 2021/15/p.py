@@ -29,9 +29,30 @@ def part1(data):
     for pt, cost in path:
         printer.set(pt, 1)
 
-    printer.print()
+#    printer.print()
 
-    print('Cost:', path[-1][1])
+    print(path[-1][1])
+
+def part2(data):
+    # grid multiplied to 5x5
+    sizey = len(data)
+    sizex = len(data[0])
+
+    L = [[0] * sizex * 5 for _ in range(sizey*5)]
+
+    for j in range(5):
+        for i in range(5):
+            offset = i + j
+            for y in range(len(data)):
+                for x in range(len(data[y])):
+                    nx = x + i*sizex
+                    ny = y + j*sizey
+                    v = data[y][x] + offset
+                    if v > 9:
+                        v -= 9
+                    L[ny][nx] = v
+
+    part1(L)
 
 def main():
     data = parse_input()
