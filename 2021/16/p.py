@@ -3,16 +3,8 @@
 import math
 import sys
 
-SUM = 0
-PRODUCT = 1
-MIN = 2
-MAX = 3
-LITERAL = 4
-GT = 5
-LT = 6
-EQ = 7
-
-MIN_PACKET = 11 # version (3), type (3), loop (1), 4-bit literal?
+SUM, PRODUCT, MIN, MAX, LITERAL, GT, LT, EQ = range(8)
+MIN_PACKET_LENGTH = 11 # version (3), type (3), loop (1), 4-bit literal?
 
 def parse_input():
     lines = [_.strip('\r\n') for _ in sys.stdin]
@@ -38,6 +30,7 @@ class Packet:
             return self.value
 
         values = [_.calc() for _ in self.packets]
+
         if self.type == SUM:
             return sum(values)
         elif self.type == PRODUCT:
@@ -60,12 +53,7 @@ class Packet:
         return f'Packet({self.version}, {self.type}, {v})'
 
 def hex_to_bin(s):
-    out = ''
-    for i in range(0, len(s), 16):
-        x = s[i:i+16]
-        y = bin(int(x, 16))[2:].zfill(len(x)*4)
-        out += y
-    return out
+    return bin(int(s, 16))[2:].zfill(len(s)*4)
 
 def consume(bits, idx, cnt):
     v = int(bits[idx:idx+cnt], 2)
@@ -76,8 +64,7 @@ def decode_literal(bits, idx):
     while 1:
         loop, idx = consume(bits, idx, 1)
         x, idx = consume(bits, idx, 4)
-        v <<= 4
-        v |= x
+        v = (v << 4) | x
         if not loop:
             break
 
@@ -117,7 +104,6 @@ def decode_packet(bits, idx):
     if type == LITERAL:
         pkt.value, idx = decode_literal(bits, idx)
     else:
-        # operator
         pkt.packets, idx = decode_operator(bits, idx)
 
     return pkt, idx
@@ -128,7 +114,7 @@ def run(data):
         print(line, bits)
 
         idx = 0
-        while len(bits) - idx >= MIN_PACKET:
+        while len(bits) - idx >= MIN_PACKET_LENGTH:
             pkt, idx = decode_packet(bits, idx)
             print(pkt, idx)
             print('Sum versions:', pkt.versions_sum())
