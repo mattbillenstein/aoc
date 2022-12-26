@@ -103,7 +103,7 @@ class Grid:
         for y in self.ys:
             s = ''
             for x in self.xs:
-                v = self.get((x, y), 0)
+                v = self.g[y][x]
                 s += self.values.get(v, '?')
             print(s)
 
@@ -126,10 +126,10 @@ class Grid:
     def ys(self):
         return range(0, len(self.g))
 
-    # mutate
     def get(self, pt):
         return self.g[pt[1]][pt[0]]
 
+    # mutate
     def set(self, pt, v):
         self.g[pt[1]][pt[0]] = v
 
@@ -244,10 +244,10 @@ class SparseGrid(Grid):
         maxx = max(_[1] for _ in self.g)
         return range(minx, maxx+1)
 
-    # mutate
     def get(self, pt, default=None):
         return self.g.get(pt, default)
 
+    # mutate
     def set(self, pt, v):
         self.g[pt] = v
 
