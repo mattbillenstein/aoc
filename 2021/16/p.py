@@ -12,6 +12,8 @@ GT = 5
 LT = 6
 EQ = 7
 
+MIN_PACKET = 11 # version (3), type (3), loop (1), 4-bit literal?
+
 def parse_input():
     lines = [_.strip('\r\n') for _ in sys.stdin]
     return lines
@@ -69,12 +71,6 @@ def consume(bits, idx, cnt):
     v = int(bits[idx:idx+cnt], 2)
     return v, idx+cnt
 
-def decode_version(bits, idx):
-    return consume(bits, idx, 3)
-
-def decode_type(bits, idx):
-    return consume(bits, idx, 3)
-
 def decode_literal(bits, idx):
     v = 0
     while 1:
@@ -107,6 +103,12 @@ def decode_operator(bits, idx):
 
     return packets, idx
 
+def decode_version(bits, idx):
+    return consume(bits, idx, 3)
+
+def decode_type(bits, idx):
+    return consume(bits, idx, 3)
+
 def decode_packet(bits, idx):
     version, idx = decode_version(bits, idx)
     type, idx = decode_type(bits, idx)
@@ -126,14 +128,11 @@ def run(data):
         print(line, bits)
 
         idx = 0
-        while idx < len(bits):
-            try:
-                pkt, idx = decode_packet(bits, idx)
-                print(pkt)
-                print('Sum versions:', pkt.versions_sum())
-                print('Calc:', pkt.calc())
-            except (ValueError, IndexError):
-                break
+        while len(bits) - idx >= MIN_PACKET:
+            pkt, idx = decode_packet(bits, idx)
+            print(pkt, idx)
+            print('Sum versions:', pkt.versions_sum())
+            print('Calc:', pkt.calc())
 
 def main():
     data = parse_input()
