@@ -1,9 +1,7 @@
 #!/usr/bin/env pypy3
 
+import math
 import sys
-import time
-from collections import defaultdict
-from pprint import pprint
 
 SUM = 0
 PRODUCT = 1
@@ -28,37 +26,12 @@ class Packet:
             # operator - subpackets
             self.packets = []
 
+    def versions_sum(self):
+        if self.type == LITERAL:
+            return self.version
+        return self.version + sum(_.versions_sum() for _ in self.packets)
+
     def calc(self):
-        '''
-        Packets with type ID 0 are sum packets - their value is the sum of the
-        values of their sub-packets. If they only have a single sub-packet,
-        their value is the value of the sub-packet.
-
-        Packets with type ID 1 are product packets - their value is the result of
-        multiplying together the values of their sub-packets. If they only have a
-        single sub-packet, their value is the value of the sub-packet.
-
-        Packets with type ID 2 are minimum packets - their value is the minimum of
-        the values of their sub-packets.
-
-        Packets with type ID 3 are maximum packets - their value is the maximum of
-        the values of their sub-packets.
-
-        Packets with type ID 5 are greater than packets - their value is 1 if the
-        value of the first sub-packet is greater than the value of the second
-        sub-packet; otherwise, their value is 0. These packets always have exactly
-        two sub-packets.
-
-        Packets with type ID 6 are less than packets - their value is 1 if the
-        value of the first sub-packet is less than the value of the second
-        sub-packet; otherwise, their value is 0. These packets always have exactly
-        two sub-packets.
-
-        Packets with type ID 7 are equal to packets - their value is 1 if the value
-        of the first sub-packet is equal to the value of the second sub-packet;
-        otherwise, their value is 0. These packets always have exactly two
-        sub-packets.
-        '''
         if self.type == LITERAL:
             return self.value
 
@@ -66,20 +39,17 @@ class Packet:
         if self.type == SUM:
             return sum(values)
         elif self.type == PRODUCT:
-            p = 1
-            for v in values:
-                p *= v
-            return p
+            return math.prod(values)
         elif self.type == MIN:
             return min(values)
         elif self.type == MAX:
             return max(values)
         elif self.type == GT:
-            return int(values[0] > values[1])
+            return 1 if values[0] > values[1] else 0
         elif self.type == LT:
-            return int(values[0] < values[1])
+            return 1 if values[0] < values[1] else 0
         elif self.type == EQ:
-            return int(values[0] == values[1])
+            return 1 if values[0] == values[1] else 0
         else:
             assert 0
 
@@ -95,53 +65,49 @@ def hex_to_bin(s):
         out += y
     return out
 
+def consume(bits, idx, cnt):
+    v = int(bits[idx:idx+cnt], 2)
+    return v, idx+cnt
+
+def decode_version(bits, idx):
+    return consume(bits, idx, 3)
+
+def decode_type(bits, idx):
+    return consume(bits, idx, 3)
+
 def decode_literal(bits, idx):
     v = 0
     while 1:
-        s = bits[idx:idx+5]
-        idx += 5
+        loop, idx = consume(bits, idx, 1)
+        x, idx = consume(bits, idx, 4)
         v <<= 4
-        v |= int(s[1:], 2)
-        if s[0] == '0':
+        v |= x
+        if not loop:
             break
 
     return v, idx
 
-def decode_version(bits, idx):
-    version = int(bits[idx:idx+3], 2)
-    return version, idx+3
-
-def decode_type(bits, idx):
-    type = int(bits[idx:idx+3], 2)
-    return type, idx+3
-
 def decode_operator(bits, idx):
-#    print('decode_operator', idx)
-    end_idx = 1000000
-    num_pkts = 1000000
+    end_idx = sys.maxsize
+    num_pkts = sys.maxsize
 
-    if bits[idx] == '0':
+    length_type, idx = consume(bits, idx, 1)
+    if length_type == 0:
         # 15 bits - total bits of sub-packets
-        idx += 1
-        num_bits = int(bits[idx:idx+15], 2)
-        idx += 15
+        num_bits, idx = consume(bits, idx, 15)
         end_idx = idx + num_bits
     else:
         # 11 bits - number of sub-packets in this packet
-        idx += 1
-        num_pkts = int(bits[idx:idx+11], 2)
-        idx += 11
+        num_pkts, idx = consume(bits, idx, 11)
 
     packets = []
     while len(packets) < num_pkts and idx < end_idx:
         pkt, idx = decode_packet(bits, idx)
-        assert pkt
         packets.append(pkt)
 
     return packets, idx
 
 def decode_packet(bits, idx):
-#    print('decode_packet', idx)
     version, idx = decode_version(bits, idx)
     type, idx = decode_type(bits, idx)
     pkt = Packet(version, type)
@@ -154,12 +120,6 @@ def decode_packet(bits, idx):
 
     return pkt, idx
 
-def version_sum(pkt):
-    tot = pkt.version
-    if pkt.type != LITERAL:
-        tot += sum(version_sum(_) for _ in pkt.packets)
-    return tot
-
 def run(data):
     for line in data:
         bits = hex_to_bin(line)
@@ -170,7 +130,7 @@ def run(data):
             try:
                 pkt, idx = decode_packet(bits, idx)
                 print(pkt)
-                print('Version sum:', version_sum(pkt))
+                print('Sum versions:', pkt.versions_sum())
                 print('Calc:', pkt.calc())
             except (ValueError, IndexError):
                 break
