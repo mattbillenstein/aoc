@@ -5,6 +5,13 @@ import time
 from collections import defaultdict
 from pprint import pprint
 
+def debug(*args):
+    pass
+
+if '--debug' in sys.argv:
+    def debug(*args):
+        print(*args)
+
 def parse_input():
     lines = [_.strip('\r\n') for _ in sys.stdin]
     return lines
@@ -14,8 +21,7 @@ def part1(data):
         print(line)
 
 def part2(data):
-    for line in data:
-        print(line)
+    pass
 
 def main():
     data = parse_input()
