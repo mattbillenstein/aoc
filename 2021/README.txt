@@ -14,3 +14,4 @@
 14: Count characters in exponentially growing string using the rules for that growth
 15: Min cost pathfinding - implemented dijkstra in graph.py
 16: Decoding binary data into nested data structures representing a simple math function
+17: Balistics trajectories in 2d grid
