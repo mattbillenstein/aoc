@@ -8,10 +8,7 @@ from pprint import pprint
 DEBUG = '--debug' in sys.argv
 
 def debug(*args):
-    pass
-
-if DEBUG:
-    def debug(*args):
+    if DEBUG:
         print(*args)
 
 def parse_input():
