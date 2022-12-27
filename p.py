@@ -5,10 +5,12 @@ import time
 from collections import defaultdict
 from pprint import pprint
 
+DEBUG = '--debug' in sys.argv
+
 def debug(*args):
     pass
 
-if '--debug' in sys.argv:
+if DEBUG:
     def debug(*args):
         print(*args)
 
