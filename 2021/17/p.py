@@ -17,7 +17,7 @@ def parse_input():
     target = ((xs[0], ys[0]), (xs[1], ys[1]))
     return target
 
-def part1(target):
+def run(target):
     print(target)
     debug = '--debug' in sys.argv
 
@@ -64,6 +64,7 @@ def part1(target):
                     velocities.append((DX, DY, maxy))
                     if debug:
                         print(DX, DY, maxy, MAX)
+                        e.flip_x()
                         e.print()
                     break
 
@@ -86,10 +87,7 @@ def part1(target):
     
 def main():
     data = parse_input()
-    if '1' in sys.argv:
-        part1(data)
-    if '2' in sys.argv:
-        part2(data)
+    run(data)
 
 if __name__ == '__main__':
     main()
