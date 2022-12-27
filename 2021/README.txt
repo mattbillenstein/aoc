@@ -15,3 +15,4 @@
 15: Min cost pathfinding - implemented dijkstra in graph.py
 16: Decoding binary data into nested data structures representing a simple math function
 17: Balistics trajectories in 2d grid
+18: Binary tree and recursion
