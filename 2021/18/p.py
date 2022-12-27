@@ -45,11 +45,6 @@ class Node:
     def __repr__(self):
         return f'[{self.left}, {self.right}]'
 
-def flatten(num):
-    if isinstance(num, Int):
-        return [num]
-    return flatten(num.left) + flatten(num.right)
-    
 def find_explode(num, depth=0):
     if isinstance(num, Int):
         return None
@@ -96,6 +91,11 @@ def explode(num):
                 n = n.left
             n.value += x.right.value
     else:
+        def flatten(num):
+            if isinstance(num, Int):
+                return [num]
+            return flatten(num.left) + flatten(num.right)
+
         # other option is to recursively flatten, then just look left and
         # right...
         L = flatten(num)
@@ -166,14 +166,14 @@ def reduce(num):
     # looping until neither fire...
     while explode(num) or split(num):
         pass
-    
+
 def add(a, b):
     c = Node(a, b)
     a.parent = c
     b.parent = c
     reduce(c)
     return c
-    
+
 def snail_sum(nums):
     a = nums[0]
     for b in nums[1:]:
