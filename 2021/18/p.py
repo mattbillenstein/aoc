@@ -1,4 +1,4 @@
-#!/usr/bin/env pypy3
+#!/usr/bin/env python3
 
 import json
 import sys
@@ -72,17 +72,43 @@ def explode(num):
     if debug:
         print('explode', num, x)
 
-    L = flatten(num)
+    if 1:
+        # find left - go up until we're on the right, then if we didn't hit the
+        # root, down left one, then down right to Int...
+        n = x
+        while n.parent and n.parent.left == n:
+            n = n.parent
 
-    # find left number
-    idx = L.index(x.left)
-    if idx > 0:
-        L[idx-1].value += x.left.value
+        if n.parent:
+            n = n.parent.left
+            while not isinstance(n, Int):
+                n = n.right
+            n.value += x.left.value
 
-    # find right number
-    idx = L.index(x.right)
-    if idx < len(L)-1:
-        L[idx+1].value += x.right.value
+        # find right - same except opposite pointers down
+        n = x
+        while n.parent and n.parent.right == n:
+            n = n.parent
+
+        if n.parent:
+            n = n.parent.right
+            while not isinstance(n, Int):
+                n = n.left
+            n.value += x.right.value
+    else:
+        # other option is to recursively flatten, then just look left and
+        # right...
+        L = flatten(num)
+
+        # find left number
+        idx = L.index(x.left)
+        if idx > 0:
+            L[idx-1].value += x.left.value
+
+        # find right number
+        idx = L.index(x.right)
+        if idx < len(L)-1:
+            L[idx+1].value += x.right.value
 
     # replace x with 0
     n = Int(0)
