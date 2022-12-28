@@ -4,3 +4,4 @@
 04: Basic data validation
 05: Decode text "seat location" as binary - then simple math
 06: Counting sets
+07: Counting nested dicts of things
