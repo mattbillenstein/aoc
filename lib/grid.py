@@ -90,7 +90,7 @@ class Grid:
             self.g = [[0] * len(items[0]) for _ in items]
             for y in range(len(items)):
                 for x in range(len(items[y])):
-                    v = ch[items[y][x]]
+                    v = chars[items[y][x]]
                     if v:
                         self.g[y][x] = v
         else:
@@ -103,7 +103,7 @@ class Grid:
         for y in self.ys:
             s = ''
             for x in self.xs:
-                v = self.g.get((x, y)) or 0
+                v = self.get((x, y)) or 0
                 s += self.values.get(v, '?')
             print(s)
 
