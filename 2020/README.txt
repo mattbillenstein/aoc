@@ -5,3 +5,4 @@
 05: Decode text "seat location" as binary - then simple math
 06: Counting sets
 07: Counting nested dicts of things
+08: Simulating a simple cpu and finding/breaking infinite loops
