@@ -9,3 +9,4 @@
 09: Find numbers in rolling window list of numbers
 10: Combinatorics problem - number of combinations removing some items
 11: Medium grid problem - people sitting in seats
+12: Coordinate math of moving ship and waypoint
