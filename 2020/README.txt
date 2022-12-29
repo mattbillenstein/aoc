@@ -8,3 +8,4 @@
 08: Simulating a simple cpu and finding/breaking infinite loops
 09: Find numbers in rolling window list of numbers
 10: Combinatorics problem - number of combinations removing some items
+11: Medium grid problem - people sitting in seats
