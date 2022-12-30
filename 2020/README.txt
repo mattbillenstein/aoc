@@ -10,3 +10,4 @@
 10: Combinatorics problem - number of combinations removing some items
 11: Medium grid problem - people sitting in seats
 12: Coordinate math of moving ship and waypoint
+13: Chinese remainder theorem - I don't understand this...
