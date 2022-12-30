@@ -12,3 +12,4 @@
 12: Coordinate math of moving ship and waypoint
 13: Chinese remainder theorem - I don't understand this...
 14: Bit twiddling in the memory of a simple machine
+15: Generating recurring sequence of numbers given rules
