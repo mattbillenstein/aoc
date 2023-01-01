@@ -14,3 +14,4 @@
 14: Bit twiddling in the memory of a simple machine
 15: Generating recurring sequence of numbers given rules
 16: Covering problem - match fields to values given constraints and samples
+17: 3D / 4D grid neighbors problem
