@@ -90,7 +90,7 @@ class Grid:
             self.g = [[0] * len(items[0]) for _ in items]
             for y in range(len(items)):
                 for x in range(len(items[y])):
-                    v = ch[items[y][x]]
+                    v = chars[items[y][x]]
                     if v:
                         self.g[y][x] = v
         else:
@@ -103,7 +103,7 @@ class Grid:
         for y in self.ys:
             s = ''
             for x in self.xs:
-                v = self.get((x, y), 0)
+                v = self.get((x, y)) or 0
                 s += self.values.get(v, '?')
             print(s)
 
@@ -126,10 +126,10 @@ class Grid:
     def ys(self):
         return range(0, len(self.g))
 
-    # mutate
     def get(self, pt):
         return self.g[pt[1]][pt[0]]
 
+    # mutate
     def set(self, pt, v):
         self.g[pt[1]][pt[0]] = v
 
@@ -201,7 +201,7 @@ class SparseGrid(Grid):
 
         if isinstance(items, set):
             self.g = {_: 1 for _ in items}
-        elif isinstance(items, list) and isinstance(items[0], str):
+        elif items and isinstance(items, list) and isinstance(items[0], str):
             self.g = {}
             for y in range(len(items)):
                 for x in range(len(items[y])):
@@ -223,14 +223,17 @@ class SparseGrid(Grid):
         maxx = max(_[0] for _ in self.g)
         miny = min(_[1] for _ in self.g)
         maxy = max(_[1] for _ in self.g)
-        return (minx, maxx), (miny, maxy)
+        return (minx, miny), (maxx, maxy)
 
     @property
     def size(self):
         if not self.g:
             return (0, 0)
         box = self.box
-        return (box[0][1] - box[0][0] + 1, box[1][1] - box[1][0] + 1)
+        return (
+            box[1][0] - box[0][0] + 1,
+            box[1][1] - box[0][1] + 1,
+        )
 
     @property
     def xs(self):
@@ -244,10 +247,10 @@ class SparseGrid(Grid):
         maxx = max(_[1] for _ in self.g)
         return range(minx, maxx+1)
 
-    # mutate
     def get(self, pt, default=None):
         return self.g.get(pt, default)
 
+    # mutate
     def set(self, pt, v):
         self.g[pt] = v
 

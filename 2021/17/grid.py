@@ -90,7 +90,7 @@ class Grid:
             self.g = [[0] * len(items[0]) for _ in items]
             for y in range(len(items)):
                 for x in range(len(items[y])):
-                    v = ch[items[y][x]]
+                    v = chars[items[y][x]]
                     if v:
                         self.g[y][x] = v
         else:
@@ -103,7 +103,7 @@ class Grid:
         for y in self.ys:
             s = ''
             for x in self.xs:
-                v = self.g.get((x, y)) or 0
+                v = self.get((x, y)) or 0
                 s += self.values.get(v, '?')
             print(s)
 
@@ -223,14 +223,17 @@ class SparseGrid(Grid):
         maxx = max(_[0] for _ in self.g)
         miny = min(_[1] for _ in self.g)
         maxy = max(_[1] for _ in self.g)
-        return (minx, maxx), (miny, maxy)
+        return (minx, miny), (maxx, maxy)
 
     @property
     def size(self):
         if not self.g:
             return (0, 0)
         box = self.box
-        return (box[0][1] - box[0][0] + 1, box[1][1] - box[1][0] + 1)
+        return (
+            box[1][0] - box[0][0] + 1,
+            box[1][1] - box[0][1] + 1,
+        )
 
     @property
     def xs(self):
