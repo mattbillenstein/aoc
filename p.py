@@ -27,9 +27,9 @@ def part2(data):
 def main():
     data = parse_input()
     if '1' in sys.argv:
-        part1(*data)
+        part1(data)
     if '2' in sys.argv:
-        part2(*data)
+        part2(data)
 
 if __name__ == '__main__':
     main()
