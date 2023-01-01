@@ -1,10 +1,11 @@
 #!/usr/bin/env pypy3
 
 import math
+import random
 import sys
 import time
 from collections import defaultdict
-from itertools import combinations, permutations
+from itertools import permutations
 from pprint import pprint
 
 DEBUG = '--debug' in sys.argv
@@ -72,7 +73,36 @@ for x in (-1, 1):
         for z in (-1, 1):
             FLIPS.append((x, y, z))
 
-def part1(scanners):
+def translate_reduce(scanners, translate):
+    scanners = {k: set(v) for k, v in scanners.items()}
+
+    # iteratively move beacons from one scanner to the next until just zero is
+    # left...
+    while sum(1 for v in scanners.values() if v) > 1:
+        for num in list(scanners):
+            if num == 0:
+                continue
+
+            translators = [(k, v) for k, v in translate.items() if k[0] == num]
+            func = translate_point
+            if not translators:
+                # reverse into something else...
+                translators = [((k[1], k[0]), v) for k, v in translate.items() if k[1] == num]
+                func = reverse_translate_point
+
+            # randomly pick a translator so we don't have to actually figure
+            # out how to path from N to 0... This will eventually get us there.
+            k, trans = random.choice(translators)
+            nnum = k[1]
+
+            for pt in scanners[num]:
+                pt = func(pt, *trans)
+                scanners[nnum].add(pt)
+            scanners[num].clear()
+
+    return scanners[0]
+
+def run(scanners):
     # not sure what I'm doing, but try to fingerprint the beacons in each group
     # by computing their manhattan distance to their N closest neighbors -
     # perhaps that lets us match up some in some groups, then the distances to
@@ -139,38 +169,37 @@ def part1(scanners):
                             debug(f'Match {num} -> {onum}', swp, flp, offset)
 
 
-    if 1 or DEBUG:
+    if DEBUG:
         print('TRANSLATE')
         pprint(translate)
 
-    beacons = set()
-    for b in scanners[0]:
-        beacons.add(b)
-
-    for src in (1, 2, 4):
-        for b in scanners[src]:
-            b = translate_point(b, *translate[(src, 0)])
-            beacons.add(b)
-
-    for b in scanners[3]:
-        b = translate_point(b, *translate[(3, 1)])
-        b = translate_point(b, *translate[(1, 0)])
-        beacons.add(b)
-
-    for b in sorted(beacons):
-        debug(b)
-
+    beacons = translate_reduce(scanners, translate)
     print(len(beacons))
 
-def part2(data):
-    pass
+    if DEBUG:
+        for b in sorted(beacons):
+            print(b)
+        print()
+
+    scanners = {k: [(0, 0, 0)] for k in scanners}
+    scanners = translate_reduce(scanners, translate)
+
+    # part2 - importantly, manhattan distance between _scanners_ - not
+    # beacons...
+    mdist = 0
+    pts = None
+    for b1, b2 in permutations(scanners, 2):
+        d = sum(adist(b1, b2))
+        if d > mdist:
+            mdist = d
+            pts = (b1, b2)
+
+    debug(pts)
+    print(mdist)
 
 def main():
     data = parse_input()
-    if '1' in sys.argv:
-        part1(data)
-    if '2' in sys.argv:
-        part2(data)
+    run(data)
 
 if __name__ == '__main__':
     main()
