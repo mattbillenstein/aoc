@@ -27,32 +27,26 @@ def solve(expr, add_first=False):
     debug(expr)
 
     # scan for subexpressions first
-    subexpr = []
-    level = 0
-    for i, tok in enumerate(expr):
-        if tok == '(':
-            if level == 0:
-                subexpr.append([i])
-            level += 1
-        elif tok == ')':
-            level -= 1
-            if level == 0:
-                subexpr[-1].append(i)
-
-    # reverse so as we mutate, the indexes used to replace are still valid...
-    for start, end in reversed(subexpr):
-        x = solve(expr[start+1:end], add_first)
-        expr[start:end+1] = [x]
-
-    if add_first and '+' in expr:
-        found = True
-        while found:
-            found = False
-            for i, tok in enumerate(expr):
-                if tok == '+':
-                    expr[i-1:i+2] = [expr[i-1] + expr[i+1]]
-                    found = True
+    while '(' in expr:
+        level = 0
+        for i, tok in enumerate(expr):
+            if tok == '(':
+                if level == 0:
+                    sidx = i
+                level += 1
+            elif tok == ')':
+                level -= 1
+                if level == 0:
+                    eidx = i
                     break
+
+        # found matching parens, recurse and replace
+        expr[sidx:eidx+1] = [solve(expr[sidx+1:eidx], add_first)]
+
+    if add_first:
+        while '+' in expr:
+            idx = expr.index('+')
+            expr[idx-1:idx+2] = [expr[idx-1] + expr[idx+1]]
 
     # evaluate left to right and return result
     while len(expr) > 1:
