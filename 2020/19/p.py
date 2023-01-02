@@ -49,56 +49,45 @@ def expand_tuple(item):
     if isinstance(item, str):
         return item
 
+    if is_list and len(item) == 1:
+        return item[0]
+
     if is_tuple and all(isinstance(_, str) for _ in item):
         return item
 
     if is_tuple and all(isinstance(_, tuple) for _ in item):
         assert len(item) == 2, item
+        assert all(isinstance(_, str) for _ in item[0])
+        assert all(isinstance(_, str) for _ in item[1])
         return tuple(sorted(set(item[0] + item[1])))
-
-    if is_list and len(item) == 1:
-        return item[0]
 
     # reduce lists > length 2
     while len(item) > 2:
         assert is_list
-        item = expand_tuple(item[:2]) + item[2:]
-
-    if is_list:
-        item[0] = expand_tuple(item[0])
-        item[1] = expand_tuple(item[1])
+        item = [expand_tuple(item[:2])] + item[2:]
 
     # now, actually expand against tuple
     res = None
     a, b = item
     if isinstance(a, tuple):
         if isinstance(b, tuple):
-            L2 = []
-            for s1 in a:
-                for s2 in b:
-                    L2.append(s1 + s2)
-            res = tuple(L2)
+            res = tuple(s1 + s2 for s1 in a for s2 in b)
         else:
             assert isinstance(b, str), b
-            L2 = []
-            for s1 in a:
-                L2.append(s1 + b)
-            res = tuple(L2)
+            res = tuple(s + b for s in a)
     else:
         assert isinstance(a, str), a
         if isinstance(b, tuple):
-            L2 = []
-            for s1 in b:
-                L2.append(a + s1)
-            res = tuple(L2)
+            res = tuple(a + s for s in b)
         else:
             assert isinstance(b, str), b
-            # list of string, combine
-            if isinstance(item, list):
-                res = ''.join(item)
+            if is_list:
+                # list of string, combine
+                res = a + b
             else:
+                assert is_tuple
                 # tuple of string, options
-                res = item
+                res = (a, b)
 
     assert res is not None
     return res
@@ -112,31 +101,51 @@ def expand_rule(rule, rules):
 
     if isinstance(rule, tuple):
         # expand |
-        return expand_tuple(tuple([expand_rule(_, rules) for _ in rule]))
+        assert len(rule) == 2
+        rule = (expand_rule(rule[0], rules), expand_rule(rule[1], rules))
+        return expand_tuple(rule)
 
+    assert isinstance(rule, list)
     rule = [expand_rule(rules[_], rules) for _ in rule]
 
     while 1:
         x = expand_tuple(rule)
         if x == rule:
-            rule = x
             break
         rule = x
 
     return rule
 
 def part1(rules, messages):
+    pprint(rules)
+    print()
     valid = expand_rule(rules[0], rules)
+#    print(valid)
+    d = defaultdict(int)
+    for x in valid:
+        d[len(x)] += 1
+
+    pprint(d)
+
+    with open('valid.txt', 'w') as f:
+        for s in valid:
+            f.write(s + '\n')
+
     valid = set(valid)
     debug('valid', len(valid))
 
     cnt = 0
+    d = defaultdict(int)
     for m in messages:
+        d[len(m)] += 1
         if m in valid:
             cnt += 1
         else:
-            print(m)
+#            print(m)
+            pass
     print(cnt)
+
+    pprint(d)
 
 def part2(data):
     pass
