@@ -19,7 +19,7 @@ def parse_input():
     messages = []
     for line in lines:
         if not line:
-            break
+            continue
         if ':' in line:
             num, rest = line.replace('"', '').split(': ')
             num = int(num)
@@ -36,17 +36,17 @@ def parse_input():
                 else:
                     assert len(rest) == 1
                     rules[num] = rest[0]
+        else:
+            messages.append(line)
 
-    idx = lines.index('')
-    messages = lines[idx+1:]
-        
     return rules, messages
 
 def expand_tuple(item):
     is_tuple = isinstance(item, tuple)
     is_list = isinstance(item, list)
+    is_str = isinstance(item, str)
 
-    if isinstance(item, str):
+    if is_str:
         return item
 
     if is_list and len(item) == 1:
@@ -85,9 +85,8 @@ def expand_tuple(item):
                 # list of string, combine
                 res = a + b
             else:
-                assert is_tuple
-                # tuple of string, options
-                res = (a, b)
+                # 2-tuple str handled above
+                assert 0, (a, b)
 
     assert res is not None
     return res
@@ -119,7 +118,14 @@ def expand_rule(rule, rules):
 def part1(rules, messages):
     pprint(rules)
     print()
+
+    eight = expand_rule(rules[8], rules)
+    eleven = expand_rule(rules[11], rules)
+
+    print(len(eight), len(eleven))
+
     valid = expand_rule(rules[0], rules)
+    print(len(valid))
 #    print(valid)
     d = defaultdict(int)
     for x in valid:
