@@ -81,14 +81,13 @@ def part2(tiles):
     size = int(math.sqrt(len(tiles)))
 
     # pick a corner and orient it for top-left
-    T = corners[0]
-    TT = tiles[T]
-    while len(edges[TT.edge_min('T')]) > 1 or len(edges[TT.edge_min('L')]) > 1:
-        TT.rotate_cw()
+    TL = tiles[corners[0]]
+    while len(edges[TL.edge_min('T')]) > 1 or len(edges[TL.edge_min('L')]) > 1:
+        TL.rotate_cw()
 
     # larger grid holding tiles
     G = [[None] * size for _ in range(size)]
-    G[0][0] = TT
+    G[0][0] = TL
 
     # stitch everything to the top-left tile, for the first tile on a row,
     # stitch it to the tile above, then stitch the rest of the row to that
@@ -99,7 +98,7 @@ def part2(tiles):
                 continue
 
             if col == 0:
-                # stitch to top
+                # stitch to bottom of tile above
                 U = G[row-1][col]
 
                 # find the other tile that shares this edge
@@ -119,7 +118,7 @@ def part2(tiles):
 
                 assert len(edges[T.edge_min('L')]) == 1  # faces out
             else:
-                # stitch to left
+                # stitch to right of tile to left
                 L = G[row][col-1]
 
                 tile_id = [_ for _ in edges[L.edge_min('R')] if _ != L.id][0]
