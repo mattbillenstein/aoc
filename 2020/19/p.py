@@ -72,13 +72,16 @@ def _match_message(message, rule, rules):
             if not consumed:
                 continue
 
-            # don't recurse if rule is longer than left, can't possibly
-            # match...
-            if rule and len(rule) <= len(left):
+            # rule longer than left msg, can't match...
+            if len(rule) > len(left):
+                continue
+
+            if rule:
                 for c, lft in _match_message(left, rule, rules):
                     yield consumed + c, lft
             else:
                 yield consumed, left
+
     elif isinstance(rule, tuple):
         # match any of the sub-expressions
         for x in rule:
@@ -87,21 +90,23 @@ def _match_message(message, rule, rules):
 
 def run(rules, messages):
     count = 0
-    for m in messages:
-        if match_message(m, rules[0], rules):
+    i = 0
+    for msg in messages:
+        i += 1
+        if match_message(msg, rules[0], rules):
             count += 1
+            debug(i, msg)
+
     print(count)
 
 def part1(rules, messages):
     run(rules, messages)
 
 def part2(rules, messages):
-    # update so the rules contain loops...
+    # HACK - update so the rules don't contain loops by expanding them to some
+    # arbitrary length...
     # 8: 42 | 42 8
     # 11: 42 31 | 42 11 31
-
-    # hack, just put in a rather long list of repeats instead of implementing
-    # something generic...
 
     # one or more of 42
     #rules[8] = (42, [42, 8])
