@@ -76,7 +76,7 @@ def parse_input():
     return tiles
 
 def run(tiles):
-    # edge to tile id and face + reversed
+    # edge to list of tile id
     edges = defaultdict(list)
     for tile_id, tile in tiles.items():
         edges[tile.edge_Tm].append(tile_id)
@@ -84,6 +84,7 @@ def run(tiles):
         edges[tile.edge_Lm].append(tile_id)
         edges[tile.edge_Rm].append(tile_id)
 
+    # compute corners - having two edges with just that tile sharing that edge
     corners = defaultdict(int)
     for eid, L in edges.items():
         if len(L) == 1:
@@ -95,10 +96,9 @@ def run(tiles):
 
 def part1(tiles):
     edges, corners = run(tiles)
-    print(math.prod(corners))
 
-def other_tile_id(tile_id, edge, edges):
-    return [_ for _ in edges[edge] if _ != tile_id][0]
+    # product of corner ids
+    print(math.prod(corners))
 
 def part2(tiles):
     edges, corners = run(tiles)
@@ -128,7 +128,8 @@ def part2(tiles):
                 U = G[row-1][col]
 
                 # find the other tile that shares this edge
-                T = tiles[other_tile_id(U.id, U.edge_Bm, edges)]
+                tile_id = [_ for _ in edges[U.edge_Bm] if _ != U.id][0]
+                T = tiles[tile_id]
 
                 # put it on the big grid
                 G[row][col] = T
@@ -146,7 +147,8 @@ def part2(tiles):
                 # stitch to left
                 L = G[row][col-1]
 
-                T = tiles[other_tile_id(L.id, L.edge_Rm, edges)]
+                tile_id = [_ for _ in edges[L.edge_Rm] if _ != L.id][0]
+                T = tiles[tile_id]
 
                 G[row][col] = T
 
@@ -178,18 +180,20 @@ def part2(tiles):
                 for tx in range(1, tile.size[0]-1):
                     L[offsety + ty - 1][offsetx + tx - 1] = tile.get((tx, ty))
 
+    # char O for monster
     g = Grid(L, chars={'.': 0, '#': 1, 'O': 2})
-#    g.print()
 
-    monster = dict()
+    # ala sparse grid, just store #
+    monster = set()
     with open('monster.txt') as f:
         for y, line in enumerate(f):
             line = line.rstrip()
             for x, c in enumerate(line):
                 if c == '#':
-                    monster[(x, y)] = 1
+                    monster.add((x, y))
 
-    # paint the monters
+    # find monsters and paint, if we don't find a monster in an iteration,
+    # rotate, after 4 rotations, flip_y and then keep rotating...
     monsters = 0
     i = 0
     while 1:
@@ -202,10 +206,12 @@ def part2(tiles):
 
                         for mx, my in monster:
                             g.set((x + mx, y + my), 2)
-
                 except IndexError:
-                    continue
+                    # off the grid, just break
+                    break
 
+        # we found monsters, assuming we can only find them in one orientation,
+        # we're done here...
         if monsters:
             break
 
@@ -215,13 +221,13 @@ def part2(tiles):
 
     if DEBUG:
         g.print()
+        print(monsters)
 
+    # count points that are set, but not monster
     cnt = 0
     for pt in g:
         if g.get(pt) == 1:
             cnt += 1
-
-    debug(monsters)
 
     print(cnt)
 
