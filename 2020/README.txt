@@ -17,3 +17,4 @@
 17: 3D / 4D grid neighbors problem
 18: Solve math expressions with unusual precedence rules
 19: Regex matcher - recursion
+20: Grid splicing matching edges problem
