@@ -42,42 +42,84 @@ def parse_input():
     return rules, messages
 
 def match_message(message, rule, rules):
+    for consumed, left in _match_message(message, rule, rules):
+        if left == '':
+            return True
+    return False
+
+def _match_message(message, rule, rules):
     if isinstance(rule, str):
         # consume a char
-        if rule == message[0]:
-            return rule, message[1:]
-        return '', message
+        if message and rule == message[0]:
+            yield rule, message[1:]
+        else:
+            yield '', message
     elif isinstance(rule, int):
-        return match_message(message, rules[rule], rules)
+        for tup in _match_message(message, rules[rule], rules):
+            yield tup
     elif isinstance(rule, list):
-        # match each part
-        left = message
-        consumed = ''
-        for x in rule:
-            c, left = match_message(left, x, rules)
-            consumed += c
-        return consumed, left
-    elif isinstance(rule, tuple):
-        # match either side and return best match
-        c1, left1 = match_message(message, rule[0], rules)
-        c2, left2 = match_message(message, rule[1], rules)
-        if len(c1) > len(c2):
-            return c1, left1
-        return c2, left2
-    else:
-        assert 0, rule
+        # match each part, peel off the first item, match, then recurse on the
+        # rest...
+        rule = list(rule)  # don't mutate the global rules
+        x = rule.pop(0)
+        for tup in _match_message(message, x, rules):
+            if tup is None:
+                break
 
-def part1(rules, messages):
+            consumed, left = tup
+
+            # we didn't match on the first rule, skip the rest
+            if not consumed:
+                continue
+
+            # don't recurse if rule is longer than left, can't possibly
+            # match...
+            if rule and len(rule) <= len(left):
+                for c, lft in _match_message(left, rule, rules):
+                    yield consumed + c, lft
+            else:
+                yield consumed, left
+    elif isinstance(rule, tuple):
+        # match any of the sub-expressions
+        for x in rule:
+            for tup in _match_message(message, x, rules):
+                yield tup
+
+def run(rules, messages):
     count = 0
     for m in messages:
-        consumed, left = match_message(m, rules[0], rules)
-        if not left:
+        if match_message(m, rules[0], rules):
             count += 1
-
     print(count)
 
-def part2(data):
-    pass
+def part1(rules, messages):
+    run(rules, messages)
+
+def part2(rules, messages):
+    # update so the rules contain loops...
+    # 8: 42 | 42 8
+    # 11: 42 31 | 42 11 31
+
+    # hack, just put in a rather long list of repeats instead of implementing
+    # something generic...
+
+    # one or more of 42
+    #rules[8] = (42, [42, 8])
+
+    L = []
+    for i in range(1, 50):
+        L.append([42] * i)
+    rules[8] = tuple(L)
+
+    # 42 zero or more 11
+    #rules[11] = ([42, 31], [42, 11, 31])
+
+    L = []
+    for i in range(1, 25):
+        L.append([42] * i + [31] * i)
+    rules[11] = tuple(L)
+
+    run(rules, messages)
 
 def main():
     data = parse_input()
