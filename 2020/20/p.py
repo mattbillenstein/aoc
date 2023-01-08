@@ -127,12 +127,17 @@ def part2(tiles):
                 # stitch to top
                 U = G[row-1][col]
 
+                # find the other tile that shares this edge
                 T = tiles[other_tile_id(U.id, U.edge_Bm, edges)]
+
+                # put it on the big grid
                 G[row][col] = T
 
+                # rotate until matching
                 while T.edge_Tm != U.edge_Bm:
                     T.rotate_cw()
 
+                # flip if not equal
                 if T.edge_T != U.edge_B:
                     T.flip_y()
 
@@ -142,6 +147,7 @@ def part2(tiles):
                 L = G[row][col-1]
 
                 T = tiles[other_tile_id(L.id, L.edge_Rm, edges)]
+
                 G[row][col] = T
 
                 while T.edge_Lm != L.edge_Rm:
@@ -172,8 +178,52 @@ def part2(tiles):
                 for tx in range(1, tile.size[0]-1):
                     L[offsety + ty - 1][offsetx + tx - 1] = tile.get((tx, ty))
 
-    g = Grid(L)
-    g.print()
+    g = Grid(L, chars={'.': 0, '#': 1, 'O': 2})
+#    g.print()
+
+    monster = dict()
+    with open('monster.txt') as f:
+        for y, line in enumerate(f):
+            line = line.rstrip()
+            for x, c in enumerate(line):
+                if c == '#':
+                    monster[(x, y)] = 1
+
+    # paint the monters
+    monsters = 0
+    i = 0
+    while 1:
+        i += 1
+        for y in g.ys:
+            for x in g.xs:
+                try:
+                    if all(g.get((x + mx, y + my)) for mx, my in monster):
+                        monsters += 1
+
+                        for mx, my in monster:
+                            g.set((x + mx, y + my), 2)
+
+                except IndexError:
+                    continue
+
+        if monsters:
+            break
+
+        g.rotate_cw()
+        if i == 4:
+            g.flip_y()
+
+    if DEBUG:
+        g.print()
+
+    cnt = 0
+    for pt in g:
+        if g.get(pt) == 1:
+            cnt += 1
+
+    debug(monsters)
+
+    print(cnt)
 
 def main():
     data = parse_input()
