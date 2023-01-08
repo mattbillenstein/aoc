@@ -15,46 +15,23 @@ class Tile(Grid):
         self.id = id
         super().__init__(items)
 
-    @property
-    def edge_T(self):
-        return ''.join(str(self.get((_, 0))) for _ in self.xs)
+    def edge(self, side):
+        if side == 'T':
+            s = ''.join(str(self.get((_, 0))) for _ in self.xs)
+        elif side == 'B':
+            s = ''.join(str(self.get((_, self.box[1][1]))) for _ in self.xs)
+        elif side == 'L':
+            s = ''.join(str(self.get((0, _))) for _ in self.ys)
+        elif side == 'R':
+            s = ''.join(str(self.get((self.box[0][1], _))) for _ in self.ys)
+        else:
+            assert 0, side
+        return s
 
-    @property
-    def edge_Tm(self):
+    def edge_min(self, side):
         # the min of current orientation and reversed...
-        e = self.edge_T
-        er = ''.join(reversed(e))
-        return min(e, er)
-
-    @property
-    def edge_B(self):
-        return ''.join(str(self.get((_, self.box[1][1]))) for _ in self.xs)
-
-    @property
-    def edge_Bm(self):
-        e = self.edge_B
-        er = ''.join(reversed(e))
-        return min(e, er)
-
-    @property
-    def edge_L(self):
-        return ''.join(str(self.get((0, _))) for _ in self.ys)
-
-    @property
-    def edge_Lm(self):
-        e = self.edge_L
-        er = ''.join(reversed(e))
-        return min(e, er)
-
-    @property
-    def edge_R(self):
-        return ''.join(str(self.get((self.box[0][1], _))) for _ in self.ys)
-
-    @property
-    def edge_Rm(self):
-        e = self.edge_R
-        er = ''.join(reversed(e))
-        return min(e, er)
+        e = self.edge(side)
+        return min(e, ''.join(reversed(e)))
 
 def debug(*args):
     if DEBUG:
@@ -79,10 +56,8 @@ def run(tiles):
     # edge to list of tile id
     edges = defaultdict(list)
     for tile_id, tile in tiles.items():
-        edges[tile.edge_Tm].append(tile_id)
-        edges[tile.edge_Bm].append(tile_id)
-        edges[tile.edge_Lm].append(tile_id)
-        edges[tile.edge_Rm].append(tile_id)
+        for side in 'TBLR':
+            edges[tile.edge_min(side)].append(tile_id)
 
     # compute corners - having two edges with just that tile sharing that edge
     corners = defaultdict(int)
@@ -108,7 +83,7 @@ def part2(tiles):
     # pick a corner and orient it for top-left
     T = corners[0]
     TT = tiles[T]
-    while len(edges[TT.edge_Tm]) > 1 or len(edges[TT.edge_Lm]) > 1:
+    while len(edges[TT.edge_min('T')]) > 1 or len(edges[TT.edge_min('L')]) > 1:
         TT.rotate_cw()
 
     # larger grid holding tiles
@@ -128,50 +103,50 @@ def part2(tiles):
                 U = G[row-1][col]
 
                 # find the other tile that shares this edge
-                tile_id = [_ for _ in edges[U.edge_Bm] if _ != U.id][0]
+                tile_id = [_ for _ in edges[U.edge_min('B')] if _ != U.id][0]
                 T = tiles[tile_id]
 
                 # put it on the big grid
                 G[row][col] = T
 
                 # rotate until matching
-                while T.edge_Tm != U.edge_Bm:
+                while T.edge_min('T') != U.edge_min('B'):
                     T.rotate_cw()
 
                 # flip if not equal
-                if T.edge_T != U.edge_B:
+                if T.edge('T') != U.edge('B'):
                     T.flip_y()
 
-                assert len(edges[T.edge_Lm]) == 1  # faces out
+                assert len(edges[T.edge_min('L')]) == 1  # faces out
             else:
                 # stitch to left
                 L = G[row][col-1]
 
-                tile_id = [_ for _ in edges[L.edge_Rm] if _ != L.id][0]
+                tile_id = [_ for _ in edges[L.edge_min('R')] if _ != L.id][0]
                 T = tiles[tile_id]
 
                 G[row][col] = T
 
-                while T.edge_Lm != L.edge_Rm:
+                while T.edge_min('L') != L.edge_min('R'):
                     T.rotate_cw()
 
-                if T.edge_L != L.edge_R:
+                if T.edge('L') != L.edge('R'):
                     T.flip_x()
 
-                assert T.edge_L == L.edge_R
+                assert T.edge('L') == L.edge('R')
 
             if row > 0:
                 # check top edge to bottom of tile above...
-                assert T.edge_T == G[row-1][col].edge_B
+                assert T.edge('T') == G[row-1][col].edge('B')
 
-    # compute size of new grid
+    # compute size of new grid removing edges
     tile_size = G[0][0].size
     sizex = (tile_size[0]-2) * len(G[0])
     sizey = (tile_size[1]-2) * len(G)
 
     L = [[0] * sizex for _ in range(sizey)]
 
-    # paste tiles on new grid
+    # paste tiles on new grid without edges
     for y, row in enumerate(G):
         offsety = (tile_size[1]-2) * y
         for x, tile in enumerate(G[y]):
