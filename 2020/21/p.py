@@ -10,82 +10,6 @@ from pprint import pprint
 
 DEBUG = '--debug' in sys.argv
 
-class Conflict(Exception):
-    pass
-
-class Food:
-    def __init__(self, ingredients, allergens):
-        self.allergens = set(allergens)
-        self.ingredients = {}
-        for i in ingredients:
-            self.ingredients[i] = set(self.allergens | set([None]))
-
-    def __repr__(self):
-        return f'Food({self.ingredients}, {self.allergens})'
-
-    def set_allergen(self, ingredient, allergen):
-        L = []
-
-        for i, s in self.ingredients.items():
-            # if allergen set on another ingredient, conflict
-            if i != ingredient and allergen in s and len(s) == 1:
-                raise Conflict()
-
-        # if we don't have the ingredient, nothing else to do...
-        allergens = self.ingredients.get(ingredient)
-        if not allergens:
-            return L
-
-        if allergen not in allergens:
-            # if ingredient isn't marked none or allergen isn't marked in any
-            # other ingredient...
-            if None not in allergens:
-                raise Conflict()
-
-            # we can set to None if allergen isn't marked...
-            allergens.intersection_update([None])
-        else:
-            # set the allergen here
-            allergen = set([allergen])
-            allergens.intersection_update(allergen)
-
-            # we can remove the allergen from other ingredients, it's present
-            # in exactly on ingredient globally...
-            for i, s in self.ingredients.items():
-                if i != ingredient:
-                    s.difference_update(allergen)
-                    assert len(s), s
-
-            # check if we implictely set any other allergens and back-propagate
-            # this set to the other fooods through the return value
-            d = defaultdict(int)
-            for i, s in self.ingredients.items():
-                if None in s and len(s) == 2:
-                    a = [_ for _ in s if _][0]
-                    d[a] += 1
-
-            for a, cnt in d.items():
-                if cnt == 1:
-                    for i, s in self.ingredients.items():
-                        if a in s:
-                            s.difference_update(set([None]))
-                            L.append((i, a))
-                            break
-
-        # check all allergens are still covered...
-        existing = set()
-        for s in self.ingredients.values():
-            existing.update(s)
-
-        existing.discard(None)
-        if existing != self.allergens:
-            raise Conflict()
-
-        return L
-
-    def copy(self):
-        return Food({k: set(v) for k, v in self.ingredients.items()}, list(self.allergens))
-
 def debug(*args):
     if DEBUG:
         print(*args)
@@ -99,75 +23,92 @@ def parse_input():
         ingredients, allergens = line.split(' contains ')
         ingredients = ingredients.split()
         allergens = allergens.split()
-        foods.append(Food(ingredients, allergens))
+        foods.append((ingredients, allergens))
 
     return foods
 
-def part1(foods):
-    # guess and check
-    done = False
-    while not done:
-        L = [_.copy() for _ in foods]
+class Ingredient:
+    def __init__(self, name):
+        self.name = name
+        self.allergen = None
 
-        while 1:
-            done = True
-            for f in L:
-                debug(f)
-                if not all(len(_) == 1 for _ in f.ingredients.values()):
-                    done = False
+    def __repr__(self):
+        return f'I({self.name}, {self.allergen})'
 
-            if done:
-                break
+class Food:
+    def __init__(self, ingredients, allergens):
+        self.ingredients = ingredients
+        self.allergens = set(allergens)
 
-            q = []
-            while 1:
-                f = random.choice(L)
-                i = random.choice(list(f.ingredients))
-                s = f.ingredients[i]
-                if len(s) > 1:
-                    a = [_ for _ in s if _][0]
-                    q.append((i, a))
-                    debug(f'Select {i} {a} {f}')
-                    break
+    def check(self):
+        # return missing allergens to guide the guess-and-check
+        u = set()
+        for i in self.ingredients:
+            if i.allergen:
+                u.add(i.allergen)
+        return self.allergens.difference(u)
 
-            try:
-                while q:
-                    i, a = q.pop()
-                    for f in L:
-                        q.extend(f.set_allergen(i, a))
-                        debug(f'Set {i} {a} {f}')
-            except Conflict:
-                debug(f'Conflict {i} {a}')
-                break
+    def __repr__(self):
+        return f'Food({self.ingredients}, {self.allergens})'
 
-    ingredients = defaultdict(set)
-    for f in L:
-        for i, s in f.ingredients.items():
-            ingredients[i].update(s)
+def run(foods):
+    ingredients = dict()
+    allergens = set()
+    for f in foods:
+        for i in f[0]:
+            ingredients[i] = Ingredient(i)
+        for a in f[1]:
+            allergens.add(a)
 
-    pprint(ingredients)
+    Foods = []
+    for f in foods:
+        Foods.append(Food([ingredients[_] for _ in f[0]], f[1]))
+
+    ingredients = list(ingredients.values())
+
+    # assign initial allergens
+    allergens = sorted(allergens)
+    for i, a in zip(ingredients, allergens):
+        i.allergen = a
+
+    # until each food has ingredients with a valid set of allergens, swap a
+    # missing allergen to any of the other ingredients of that food
+    while any(_.check() for _ in Foods):
+        f = random.choice(Foods)
+        missing = f.check()
+        if missing:
+            for m in missing:
+                other = random.choice(f.ingredients)
+                while other.allergen == m:
+                    other = random.choice(f.ingredients)
+
+                for old in ingredients:
+                    if old.allergen == m:
+                        old.allergen = None
+                        break
+
+                other.allergen = m
 
     non_allergens = set()
-    for i, s in ingredients.items():
-        if s == {None}:
-            non_allergens.add(i)
+    for i in ingredients:
+        debug(i.name, i.allergen)
+        if i.allergen is None:
+            non_allergens.add(i.name)
 
     cnt = 0
-    for f in foods:
+    for f in Foods:
+        debug(f)
         for i in f.ingredients:
-            if i in non_allergens:
+            if i.name in non_allergens:
                 cnt += 1
+
     print(cnt)
 
-def part2(data):
-    pass
+    print(','.join(_.name for _ in sorted([_ for _ in ingredients if _.allergen], key=lambda x: x.allergen)))
 
 def main():
     data = parse_input()
-    if '1' in sys.argv:
-        part1(data)
-    if '2' in sys.argv:
-        part2(data)
+    run(data)
 
 if __name__ == '__main__':
     main()
