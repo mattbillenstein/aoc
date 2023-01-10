@@ -22,3 +22,4 @@
 22: Recursive deck of cards game problem
 23: Algo moving items around in linked-list large-N times
 24: Automata in a hexagonal grid - hexgrid.py
+25: Simple brute-force encryption breaking problem
