@@ -21,3 +21,4 @@
 21: sets optimization problem - assign a set of allergens to a set of ingredients such that a set of food requirements is satisfied
 22: Recursive deck of cards game problem
 23: Algo moving items around in linked-list large-N times
+24: Automata in a hexagonal grid - hexgrid.py
