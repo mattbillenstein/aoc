@@ -18,3 +18,4 @@
 18: Solve math expressions with unusual precedence rules
 19: Regex matcher - recursion
 20: Grid splicing matching edges problem
+21: sets optimization problem - assign a set of allergens to a set of ingredients such that a set of food requirements is satisfied
