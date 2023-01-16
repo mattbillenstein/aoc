@@ -6,6 +6,7 @@ import time
 from collections import defaultdict
 from pprint import pprint
 
+from cube import Cube
 from grid3d import SparseGrid3D
 
 DEBUG = '--debug' in sys.argv
@@ -28,9 +29,9 @@ def parse_input():
 
     return cubes
 
-def part1(cubes):
+def part1(data):
     grid = SparseGrid3D(set())
-    for tup in cubes:
+    for tup in data:
         if not all(abs(_) <= 50 for _ in tup):
             debug('Skip', tup)
             continue
@@ -49,7 +50,29 @@ def part1(cubes):
     print(cnt)
 
 def part2(data):
-    pass
+    cubes = []
+    for tup in data:
+        if not all(abs(_) <= 50 for _ in tup):
+            debug('Skip', tup)
+            continue
+        v, x1, x2, y1, y2, z1, z2 = tup
+        cubes.append(Cube((x1, y1, z1), (x2, y2, z2), v))
+
+#    print(cubes)
+
+    c1 = Cube((0,0,0), (20,20,20), 1)
+    c2 = Cube((1,1,1), (3,3,3), 1)
+    c3 = Cube((10,10,10), (30,30,30), 1)
+
+    print(c1.contains((1,1,1)))
+    print(c1.contains((2,2,2)))
+    print(c1.contains((30,30,30)))
+
+    print(c1.intersection(c2))
+    print(c2.intersection(c1))
+
+    print(c1.intersection(c3))
+    print(c3.intersection(c1))
 
 def main():
     data = parse_input()
