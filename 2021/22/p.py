@@ -52,27 +52,30 @@ def part1(data):
 def part2(data):
     cubes = []
     for tup in data:
-        if not all(abs(_) <= 50 for _ in tup):
+        if 0 and not all(abs(_) <= 50 for _ in tup):
             debug('Skip', tup)
             continue
         v, x1, x2, y1, y2, z1, z2 = tup
-        cubes.append(Cube((x1, y1, z1), (x2, y2, z2), v))
+        cube = Cube((x1, y1, z1), (x2, y2, z2), v)
 
-#    print(cubes)
+        for c in cubes:
+            if cube.contains_cube(c):
+                print('Contains:', cube, c)
 
-    c1 = Cube((0,0,0), (20,20,20), 1)
-    c2 = Cube((1,1,1), (3,3,3), 1)
-    c3 = Cube((10,10,10), (30,30,30), 1)
+        cubes.append(cube)
 
-    print(c1.contains((1,1,1)))
-    print(c1.contains((2,2,2)))
-    print(c1.contains((30,30,30)))
+    with open('cubes.txt', 'w') as f:
+        f.write('x0 x1 y0 y1 z0 z1\n')
+        for c in cubes:
+            if not c.value:
+                f.write(f'{c.xs[0]} {c.xs[1]} {c.ys[0]} {c.ys[1]} {c.zs[0]} {c.zs[1]}\n')
 
-    print(c1.intersection(c2))
-    print(c2.intersection(c1))
+    cubes_on = defaultdict(int)
+    for cube in cubes:
+        if cube.value:
+            cubes_on[cube] += cube.volume
 
-    print(c1.intersection(c3))
-    print(c3.intersection(c1))
+    print(sum(cubes_on.values()))
 
 def main():
     data = parse_input()

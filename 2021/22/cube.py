@@ -19,6 +19,13 @@ class Cube:
         self.ys = (min(self.pt1[1], self.pt2[1]), max(self.pt1[1], self.pt2[1]))
         self.zs = (min(self.pt1[2], self.pt2[2]), max(self.pt1[2], self.pt2[2]))
 
+    @property
+    def volume(self):
+        return abs(self.xs[0] - self.xs[1]) * abs(self.ys[0] - self.ys[1]) * abs(self.zs[0] - self.zs[1])
+
+    def contains_cube(self, other):
+        return self.contains(other.pt1) and self.contains(other.pt2)
+
     def contains(self, pt):
         return (
             self.xs[0] <= pt[0] <= self.xs[1] and
@@ -53,7 +60,7 @@ class Cube:
             return None
 
         # swap and deal with just one intersection
-        if other_contains and not self_contains:
+        if len(other_contains) > len(self_contains):
             self, other = other, self
             self_contains, other_contains = other_contains, self_contains
 
@@ -62,13 +69,10 @@ class Cube:
             return Cube(other.pt1, other.pt2)
             
         if len(self_contains) == 1:
-            assert len(other_contains) == 1
             pts = [self_contains[0], other_contains[0]]
             return Cube(self_contains[0], other_contains[0])
 
         if len(self_contains) == 2:
-            # two points, two axis will be the same, project
-            assert len(other_contains) == 0
             a, b = self_contains
             if a[0] == b[0]:
                 if a[1] == b[1]:
@@ -103,7 +107,6 @@ class Cube:
                 return Cube((a[0], a[1], a[2]), (b[0], pt[1], pt[2]))
 
         if len(self_contains) == 4:
-            assert len(other_contains) == 0
             # just need to truncate on one axis given a point outside the box
             # a is inside, b is outside
             a, b = other.pt1, other.pt2
@@ -132,6 +135,9 @@ class Cube:
 
     def __eq__(self, other):
         return self.pt1 == other.pt1 and self.pt2 == other.pt2
+
+    def __hash__(self):
+        return hash((self.pt1, self.pt2, self.value))
 
     def __repr__(self):
         return f'Cube({self.pt1}, {self.pt2})'
