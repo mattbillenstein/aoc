@@ -21,7 +21,10 @@ class Cube:
 
     @property
     def volume(self):
-        return abs(self.xs[0] - self.xs[1]) * abs(self.ys[0] - self.ys[1]) * abs(self.zs[0] - self.zs[1])
+        # volume including boundaries - so a point-cube has a volume of 1
+        return (abs(self.xs[0] - self.xs[1]) + 1) \
+            * (abs(self.ys[0] - self.ys[1]) + 1) \
+            * (abs(self.zs[0] - self.zs[1]) + 1)
 
     def contains_cube(self, other):
         return self.contains(other.pt1) and self.contains(other.pt2)
@@ -195,3 +198,11 @@ if __name__ == '__main__':
     # four corners - truncate z
     c3 = Cube((6, 8, 17), (16, 16, -27))
     assert c1.intersection(c3) == c3.intersection(c1) == Cube((6, 8, 17), (16, 16, 0))
+
+    # point cube
+    c4 = Cube((10, 10, 10), (10, 10, 10))
+    assert c1.intersection(c4) == c4.intersection(c1) == c4
+
+    # plane cube
+    c5 = Cube((10, 10, 10), (30, 30, 10))
+    assert c1.intersection(c5) == c5.intersection(c1) == Cube((10, 10, 10), (20, 20, 10))

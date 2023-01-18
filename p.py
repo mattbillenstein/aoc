@@ -1,5 +1,6 @@
 #!/usr/bin/env pypy3
 
+import itertools
 import math
 import sys
 import time

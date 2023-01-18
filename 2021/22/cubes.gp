@@ -5,9 +5,9 @@ reset session
 set xyplane relative 0
 set view equal xyz
 set view 60,30,1.0
-set xtics 10
-set ytics 10
-set ztics 10
+set xtics auto
+set ytics auto
+set ztics auto
 set key noautotitle
 
 splot for [i=0:3] ARG1 u 1:i/2+3:i%2+5:($2-$1):(0):(0):0 w vec lc var nohead, \
