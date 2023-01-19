@@ -50,67 +50,41 @@ def part1(data):
 
     print(cnt)
 
-def compute_volume(cubes):
-    '''
-    Generalizing the results of these examples gives the principle of
-    inclusion–exclusion. To find the cardinality of the union of n sets:
-
-    Include the cardinalities of the sets.
-    Exclude the cardinalities of the pairwise intersections.
-    Include the cardinalities of the triple-wise intersections.
-    Exclude the cardinalities of the quadruple-wise intersections.
-    Include the cardinalities of the quintuple-wise intersections.
-    Continue, until the cardinality of the n-tuple-wise intersection is included (if n is odd) or excluded (n even).
-    '''
-    tot = 0
-    for i in range(1, len(cubes)+1):
-        for L in itertools.combinations(cubes, i):
-            c = L[0]
-            for x in L[1:]:
-                c = c.intersection(x)
-                if c is None:
-                    break
-
-            if c:
-                if i % 2:
-                    tot += c.volume
-                else:
-                    tot -= c.volume
-    return tot
-
-def split_intersection(cubes, cube):
-    # split intersecting cubes with the given cube so we exclude the
-    # intersection...
-    L = []
-    for c in cubes:
-        it = c.intersection(cube)
-        if it:
-            print('Intersection', c, cube, it)
-        else:
-            L.append(c)
-
 def part2(data):
     tot = 0
     cubes = []
     for tup in data:
-        if not all(abs(_) <= 50 for _ in tup):
+        if 0 and not all(abs(_) <= 50 for _ in tup):
             debug('Skip', tup)
             continue
         v, x1, x2, y1, y2, z1, z2 = tup
-        cube = Cube((x1, y1, z1), (x2, y2, z2), v)
+        cube = Cube((x1, y1, z1), (x2, y2, z2), 1 if v else -1)
 
-        if cube.value:
-            cubes.append(cube)
-        else:
-            split_intersection(cubes, cube)
+        to_add = []
 
-    tot = compute_volume(cubes)
+        # add if an 'on' cube
+        if cube.value == 1:
+            to_add.append(cube)
 
-    with open('cubes.txt', 'w') as f:
-        f.write('x0 x1 y0 y1 z0 z1\n')
+        # for each existing cube, compute intersection and mark it
+        # as 'on' (1) or 'off' (-1)
         for c in cubes:
-            if not c.value:
-                f.write(f'{c.xs[0]} {c.xs[1]} {c.ys[0]} {c.ys[1]} {c.zs[0]} {c.zs[1]}\n')
+            it = cube.intersection(c)
+            if it:
+                it.value = -c.value
+                to_add.append(it)
+
+        cubes += to_add
+
+    for cube in cubes:
+        tot += cube.value * cube.volume
+
+    if DEBUG:
+        with open('cubes.txt', 'w') as f:
+            f.write('x0 x1 y0 y1 z0 z1\n')
+            for c in cubes:
+                if c.value == 1:
+                    f.write(f'{c.pt1[0]} {c.pt2[0]} {c.pt1[1]} {c.pt2[1]} {c.pt1[2]} {c.pt2[2]}\n')
 
     print(tot)
 

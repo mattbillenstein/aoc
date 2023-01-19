@@ -5,3 +5,6 @@ Common / generic data-structures and algorithms are in lib/
 
 Sorted containers might be useful in the future:
 https://grantjenks.com/docs/sortedcontainers/
+
+Some interesting algorithms here:
+https://github.com/dps/aoc/blob/main/utils.py

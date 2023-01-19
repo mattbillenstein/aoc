@@ -3,138 +3,35 @@
 class Cube:
     def __init__(self, pt1, pt2, value=None):
         self.value = value
-
-        self.corners = []
-        for x in (pt1[0], pt2[0]):
-            for y in (pt1[1], pt2[1]):
-                for z in (pt1[2], pt2[2]):
-                    self.corners.append((x, y, z))
-
-        self.corners.sort()
-
-        self.pt1 = self.corners[0]
-        self.pt2 = self.corners[-1]
-
-        self.xs = (min(self.pt1[0], self.pt2[0]), max(self.pt1[0], self.pt2[0]))
-        self.ys = (min(self.pt1[1], self.pt2[1]), max(self.pt1[1], self.pt2[1]))
-        self.zs = (min(self.pt1[2], self.pt2[2]), max(self.pt1[2], self.pt2[2]))
+        self.pt1 = (
+            min(pt1[0], pt2[0]),
+            min(pt1[1], pt2[1]),
+            min(pt1[2], pt2[2]),
+        )
+        self.pt2 = (
+            max(pt1[0], pt2[0]),
+            max(pt1[1], pt2[1]),
+            max(pt1[2], pt2[2]),
+        )
 
     @property
     def volume(self):
         # volume including boundaries - so a point-cube has a volume of 1
-        return (abs(self.xs[0] - self.xs[1]) + 1) \
-            * (abs(self.ys[0] - self.ys[1]) + 1) \
-            * (abs(self.zs[0] - self.zs[1]) + 1)
-
-    def contains_cube(self, other):
-        return self.contains(other.pt1) and self.contains(other.pt2)
-
-    def contains(self, pt):
-        return (
-            self.xs[0] <= pt[0] <= self.xs[1] and
-            self.ys[0] <= pt[1] <= self.ys[1] and
-            self.zs[0] <= pt[2] <= self.zs[1]
-        )
-
-    def contains_xy(self, pt):
-        return (
-            self.xs[0] <= pt[0] <= self.xs[1] and
-            self.ys[0] <= pt[1] <= self.ys[1]
-        )
-
-    def contains_xz(self, pt):
-        return (
-            self.xs[0] <= pt[0] <= self.xs[1] and
-            self.zs[0] <= pt[2] <= self.zs[1]
-        )
-
-    def contains_yz(self, pt):
-        return (
-            self.ys[0] <= pt[1] <= self.ys[1] and
-            self.zs[0] <= pt[2] <= self.zs[1]
-        )
+        return (self.pt2[0] - self.pt1[0] + 1) \
+             * (self.pt2[1] - self.pt1[1] + 1) \
+             * (self.pt2[2] - self.pt1[2] + 1)
 
     def intersection(self, other):
-        other_contains = [_ for _ in self.corners if other.contains(_)]
-        self_contains  = [_ for _ in other.corners if self.contains(_)]
+        xmin = max(self.pt1[0], other.pt1[0])
+        xmax = min(self.pt2[0], other.pt2[0])
+        ymin = max(self.pt1[1], other.pt1[1])
+        ymax = min(self.pt2[1], other.pt2[1])
+        zmin = max(self.pt1[2], other.pt1[2])
+        zmax = min(self.pt2[2], other.pt2[2])
 
-        # no overlap
-        if not self_contains and not other_contains:
+        if xmin > xmax or ymin > ymax or zmin > zmax:
             return None
-
-        # swap and deal with just one intersection
-        if len(other_contains) > len(self_contains):
-            self, other = other, self
-            self_contains, other_contains = other_contains, self_contains
-
-        # one completely contains other, return a copy
-        if len(self_contains) == 8:
-            return Cube(other.pt1, other.pt2)
-            
-        if len(self_contains) == 1:
-            pts = [self_contains[0], other_contains[0]]
-            return Cube(self_contains[0], other_contains[0])
-
-        if len(self_contains) == 2:
-            a, b = self_contains
-            if a[0] == b[0]:
-                if a[1] == b[1]:
-                    # x/y same, enclose z
-                    pt = None
-                    for x in self.corners:
-                        if other.contains_xy(x):
-                            pt = x
-                            break
-                    assert pt
-
-                    return Cube((a[0], a[1], a[2]), (pt[0], pt[1], b[2]))
-                else:
-                    # x/z same, enclose y
-                    pt = None
-                    for x in self.corners:
-                        if other.contains_xz(x):
-                            pt = x
-                            break
-                    assert pt
-
-                    return Cube((a[0], a[1], a[2]), (pt[0], b[1], pt[2]))
-            else:
-                # y/z same, enclose x
-                pt = None
-                for x in self.corners:
-                    if other.contains_yz(x):
-                        pt = x
-                        break
-                assert pt
-
-                return Cube((a[0], a[1], a[2]), (b[0], pt[1], pt[2]))
-
-        if len(self_contains) == 4:
-            # just need to truncate on one axis given a point outside the box
-            # a is inside, b is outside
-            a, b = other.pt1, other.pt2
-            if self.contains(b):
-                a, b = b, a
-            
-            if self.contains_xy(b):
-                if b[2] > self.zs[1]:
-                    b = (b[0], b[1], self.zs[1])
-                else:
-                    b = (b[0], b[1], self.zs[0])
-            elif self.contains_xz(b):
-                if b[1] > self.ys[1]:
-                    b = (b[0], self.ys[1], b[2])
-                else:
-                    b = (b[0], self.ys[0], b[2])
-            else:
-                if b[0] > self.xs[1]:
-                    b = (self.xs[1], b[1], b[2])
-                else:
-                    b = (self.xs[0], b[1], b[2])
-
-            return Cube(a, b)
-
-        assert 0
+        return Cube((xmin, ymin, zmin), (xmax, ymax, zmax))
 
     def __eq__(self, other):
         return self.pt1 == other.pt1 and self.pt2 == other.pt2
