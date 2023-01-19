@@ -19,3 +19,4 @@
 19: Hard 3d scanners/beacons problem where we have to match up different coordinate systems.
 20: SparseGrid "image sharpening" - infinite grid neighbors problem
 21: Combinatorics dice rolling simulation
+22: Box intersection volume problem - Inclusion–exclusion principle, cube.py class
