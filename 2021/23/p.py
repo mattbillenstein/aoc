@@ -290,8 +290,17 @@ def part1(rooms, hall):
 
     print('BEST', best.energy)
 
-def part2(data):
-    pass
+def part2(rooms, hall):
+    # splice new data into rooms between first and second row
+
+    #D#C#B#A#
+    #D#B#A#C#
+
+    for r, s in enumerate(['DD', 'CB', 'BA', 'AC']):
+        for c in s:
+            rooms[r].insert(-1, c)
+
+    part1(rooms, hall)
 
 def main():
     data = parse_input()

@@ -20,3 +20,4 @@
 20: SparseGrid "image sharpening" - infinite grid neighbors problem
 21: Combinatorics dice rolling simulation
 22: Box intersection volume problem - Inclusion–exclusion principle, cube.py class
+23: Tower of Hanoi type problem - dfs / search
