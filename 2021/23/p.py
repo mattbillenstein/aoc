@@ -76,15 +76,15 @@ for k, v in list(dists.items()):
     dists[(h, (r, p))] = v
     dists[(h, (r, p+1))] = v-1
 
-# from each room, hall slots to try in order, break if occupied...
-neighbors = {
+# from each room, hall slots to try in order, break if blocked
+room_to_hall = {
     0: ([1, 0], [3, 5, 7, 9, 10]),
     1: ([3, 1, 0], [5, 7, 9, 10]),
     2: ([5, 3, 1, 0], [7, 9, 10]),
     3: ([7, 5, 3, 1, 0], [9, 10]),
 }
 
-clear = {
+hall_to_room = {
     # (hall, room): [hall spots to check]
     (0, 0): [1],
     (1, 0): [],
@@ -120,13 +120,9 @@ clear = {
 }
 
 # pod -> destination room
-dest = {
-    'A': 0,
-    'B': 1,
-    'C': 2,
-    'D': 3,
-}
-dest.update({v: k for k, v in dest.items()})
+pod_rooms = [('A', 0), ('B', 1), ('C', 2), ('D', 3)]
+dest = dict(pod_rooms)
+dest.update({r: p for p, r in pod_rooms})
 
 class State:
     def __init__(self, rooms, hall, energy=0):
@@ -134,12 +130,6 @@ class State:
         self.hall = list(hall)
         self.energy = energy
         self.last = None
-
-    def finished(self):
-        for pod, r in [('A', 0), ('B', 1), ('C', 2), ('D', 3)]:
-            if self.rooms[r] != [pod, pod]:
-                return False
-        return True
 
     def get(self, pos):
         if isinstance(pos, tuple):
@@ -157,6 +147,7 @@ class State:
         pod = self.get(start)
         self.energy += dists[(start, end)] * power[pod]
         tmp = self.get(end)
+        assert tmp == '.'
         self.set(end, self.get(start))
         self.set(start, tmp)
 
@@ -172,87 +163,125 @@ class State:
         print('  #' + '#'.join(_[0] for _ in self.rooms) + '#  ')
         print('  #########  ')
 
-def dfs(state):
-    stack = [state]
-    best = None
-    while stack:
-        state = stack.pop()
+    def finished(self):
+        for pod, r in pod_rooms:
+            if self.rooms[r] != [pod, pod]:
+                return False
+        return True
 
-        if DEBUG:
-            state.print()
-            print()
-            time.sleep(3)
+    def could_solve(self):
+        for pod, r in pod_rooms:
+            room = self.rooms[r]
+            if not all(_ in ('.', pod) for _ in room):
+                return False
+        return True
 
-        if state.finished():
-            if not best or state.energy < best.energy:
-                best = state
-                best.print()
-            continue
+    def best_score(self):
+        # best we could score if we could place everything
+        score = self.energy
+        for h, c in enumerate(self.hall):
+            if c not in ('.', ' '):
+                end = (dest[c], 1)
+                score += dists[(h, end)] * power[c]
+        return score
 
-        if best and state.energy > best.energy:
-            continue
+_last = time.time()
 
-        # can we put a pod into a room? Push state for every pod we could place
-        # in a room...
-        for h, c in enumerate(state.hall):
-            if c in dest:
-                r = dest[c]
+def dfs(state, best):
+    global _last
+    if DEBUG and time.time() - _last > 5:
+        _last = time.time()
+        print(best[0] and best[0].energy)
+        state.print()
+        print()
+#        time.sleep(3)
 
-                # path clear to room
-                if not all(_ == '.' for _ in clear[(h, r)]):
-                    continue
+    # costly
+    if 'D' in state.hall[:2]:
+        return
 
-                room = state.rooms[r]
-                if all(_ in ('.', c) for _ in room):
+    # impossible to solve
+    for d, a in [(3, 5), (5, 7), (3, 7)]:
+        if state.hall[d] == 'D' and state.hall[a] == 'A':
+            return
+    for d, b in [(5, 7)]:
+        if state.hall[d] == 'D' and state.hall[b] == 'B':
+            return
+    for c, a in [(3, 5)]:
+        if state.hall[c] == 'C' and state.hall[a] == 'A':
+            return
+
+    if best[0]:
+        # if used energy > best
+        if state.energy > best[0].energy:
+            return
+
+        # if rooms are clear of other pods and best we could do > best found
+        if state.could_solve() and state.best_score() > best[0].energy:
+            return
+
+    if state.finished():
+        if not best[0] or state.energy < best[0].energy:
+            best[0] = state
+#            best[0].print()
+#            print()
+        return
+
+    # can we put a pod into a room? Push state for every pod we could place
+    # in a room...
+    for h, c in enumerate(state.hall):
+        if c in dest:
+            r = dest[c]
+
+            # path clear to room
+            if any(state.hall[_] != '.' for _ in hall_to_room[(h, r)]):
+                continue
+
+            room = state.rooms[r]
+            if all(_ in ('.', c) for _ in room):
+                p = 0 if room[0] == '.' else 1
+                s = state.copy()
+                s.move(h, (r, p))
+                dfs(s, best)
+
+    # take a pod out into any one of the free spots in the hall if possible
+    for r, room in enumerate(state.rooms):
+        pod = dest[r]
+        if any(_ in 'ABCD' and _ != pod for _ in room):
+            p = 1 if room[1] != '.' else 0
+            for dir in (0, 1):
+                for h in room_to_hall[r][dir]:
+                    if state.hall[h] != '.':
+                        break
+
                     s = state.copy()
-                    if DEBUG:
-                        s.print()
-                    p = 0 if room[0] == '.' else 1
-                    s.move(h, (r, p))
-                    stack.append(s)
-                    if DEBUG:
-                        s.print()
-                        print()
+                    s.move((r, p), h)
+                    dfs(s, best)
 
-        # otherwise take a pod out into any one of the free spots in the hall
-        # if any
-        for r, room in enumerate(state.rooms):
-            pod = dest[r]
-            if any(_ in 'ABCD' and _ != pod for _ in room):
-                p = 1 if room[1] != '.' else 0
-                for dir in (0, 1):
-                    for h in neighbors[r][dir]:
-                        if state.hall[h] != '.':
-                            break
-                        s = state.copy()
-                        if DEBUG:
-                            s.print()
-                            print()
-                        s.move((r, p), h)
-                        stack.append(s)
-                        if DEBUG:
-                            s.print()
-                            print()
-
-    return best
 
 def part1(rooms, hall):
     state = State(rooms, hall)
-    state.print()
-    print()
-    best = dfs(state)
-    print(best.energy)
 
-    s = best
-    L = []
-    while s:
-        L.append(s)
-        s = s.last
+#    best = [state.copy()]
+#    best[0].energy = 20000 
 
-    L.reverse()
-    for s in L:
-        s.print()
-        print()
+    best = [None]
+    dfs(state, best)
+    best = best[0]
+
+    if DEBUG:
+        s = best
+        L = []
+        while s:
+            L.append(s)
+            s = s.last
+
+        L.reverse()
+        for s in L:
+            s.print()
+            print()
+
+    print('BEST', best.energy)
 
 def part2(data):
     pass
