@@ -60,38 +60,60 @@ def part1(prog):
     N = len(prog) // 14
     assert len(prog) % N == 0
 
-    inputs = defaultdict(dict)
-    inputs[14] = {0: None}
+    outputs = defaultdict(set)
 
-    # project backwards from valid outputs, valid inputs of w, z for a
-    # sufficiently large range of input z
-    for pc in range(13, -1, -1):
+    zs = set([0])
+    for pc in range(0, 14):
+        print(pc, zs)
         start = pc * N
         sprog = prog[start:start + N]
-        print('PC', pc, start, inputs[pc+1])
-        print(sprog)
         for w in range(1, 10):
-            for z in range(0, 10000):
+            for z in zs:
                 regs = {_: 0 for _ in 'wxyz'}
                 regs['z'] = z
                 run(sprog, str(w), regs)
-                if regs['z'] in inputs[pc+1]:
-                    print('IN', pc, z, w)
-                    print(regs)
-                    inputs[pc][z] = w
+                if abs(regs['z']) < 200000:
+                    outputs[pc].add(regs['z'])
 
-#    print(inputs)
-    print(inputs[0])
+        zs = outputs[pc]
 
-    # now remove inputs that aren't outputs of the previous stage
-    for pc in range(0, 13):
-        d1 = inputs[pc]
-        d2 = inputs[pc+1]
+    assert 0 in outputs[13]
 
-        print(pc)
-        print(d1)
-        print(d2)
-        duh
+    newoutputs = defaultdict(set)
+    newoutputs[14] = set([0])
+
+    # now go backwards constraining inputs on outputs
+    for pc in range(13, -1, -1):
+        inputs = outputs[pc-1]
+        start = pc * N
+        sprog = prog[start:start + N]
+        for w in range(1, 10):
+            for z in inputs:
+                regs = {_: 0 for _ in 'wxyz'}
+                regs['z'] = z
+                run(sprog, str(w), regs)
+                if regs['z'] in newoutputs[pc+1]:
+                    newoutputs[pc].add(z)
+
+    ws = defaultdict(set)
+
+    # now forwards, every step that generates a valid z at that step is a valid
+    # digit...
+    zs = set([0])
+    for pc in range(0, 14):
+        start = pc * N
+        sprog = prog[start:start + N]
+        for w in range(1, 10):
+            for z in zs:
+                regs = {_: 0 for _ in 'wxyz'}
+                regs['z'] = z
+                run(sprog, str(w), regs)
+                if regs['z'] in newoutputs[pc]:
+                    ws[pc].add(w)
+
+        zs = newoutputs[pc]
+
+    print(ws)
 
 def part2(data):
     pass
