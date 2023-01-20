@@ -18,8 +18,8 @@ def parse_input():
     hall = list('.. . . . ..')
     rooms = [[] for _ in range(4)]
     for r, c in [(0, 3), (1, 5), (2, 7), (3, 9)]:
-        rooms[r].append(lines[3][c])
         rooms[r].append(lines[2][c])
+        rooms[r].append(lines[3][c])
     return rooms, hall
 
 # power per step
@@ -33,51 +33,55 @@ power = {
 # room and position to hall position distances
 dists = {
     # ((room, position), hall spot): distance
-    ((0, 0), 0): 4,
-    ((0, 0), 1): 3,
-    ((0, 0), 3): 3,
-    ((0, 0), 5): 5,
-    ((0, 0), 7): 7,
-    ((0, 0), 9): 9,
-    ((0, 0), 10): 10,
+    ((0, 0), 0): 3,
+    ((0, 0), 1): 2,
+    ((0, 0), 3): 2,
+    ((0, 0), 5): 4,
+    ((0, 0), 7): 6,
+    ((0, 0), 9): 8,
+    ((0, 0), 10): 9,
 
-    ((1, 0), 0): 6,
-    ((1, 0), 1): 5,
-    ((1, 0), 3): 3,
-    ((1, 0), 5): 3,
-    ((1, 0), 7): 5,
-    ((1, 0), 9): 7,
-    ((1, 0), 10): 8,
+    ((1, 0), 0): 5,
+    ((1, 0), 1): 4,
+    ((1, 0), 3): 2,
+    ((1, 0), 5): 2,
+    ((1, 0), 7): 4,
+    ((1, 0), 9): 6,
+    ((1, 0), 10): 7,
 
-    ((2, 0), 0): 8,
-    ((2, 0), 1): 7,
-    ((2, 0), 3): 5,
-    ((2, 0), 5): 3,
-    ((2, 0), 7): 3,
-    ((2, 0), 9): 5,
-    ((2, 0), 10): 6,
+    ((2, 0), 0): 7,
+    ((2, 0), 1): 6,
+    ((2, 0), 3): 4,
+    ((2, 0), 5): 2,
+    ((2, 0), 7): 2,
+    ((2, 0), 9): 4,
+    ((2, 0), 10): 5,
 
-    ((3, 0), 0): 10,
-    ((3, 0), 1): 9,
-    ((3, 0), 3): 7,
-    ((3, 0), 5): 5,
-    ((3, 0), 7): 3,
-    ((3, 0), 9): 3,
-    ((3, 0), 10): 4,
+    ((3, 0), 0): 9,
+    ((3, 0), 1): 8,
+    ((3, 0), 3): 6,
+    ((3, 0), 5): 4,
+    ((3, 0), 7): 2,
+    ((3, 0), 9): 2,
+    ((3, 0), 10): 3,
 }
 
-# the top room position is just one less step to any hall position
+# reverse mapping and add additional positions to the rooms
 for k, v in list(dists.items()):
     x, h = k
     r, p = x
-    dists[((r, p+1), h)] = v-1
+    dists[((r, p+1), h)] = v+1
+    dists[((r, p+2), h)] = v+2
+    dists[((r, p+3), h)] = v+3
 
     # also reverse mapping
     dists[(h, (r, p))] = v
-    dists[(h, (r, p+1))] = v-1
+    dists[(h, (r, p+1))] = v+1
+    dists[(h, (r, p+2))] = v+2
+    dists[(h, (r, p+3))] = v+3
 
-# from each room, hall slots to try in order, break if blocked
 room_to_hall = {
+    # room: hall left and right in order, break if occupied...
     0: ([1, 0], [3, 5, 7, 9, 10]),
     1: ([3, 1, 0], [5, 7, 9, 10]),
     2: ([5, 3, 1, 0], [7, 9, 10]),
@@ -159,20 +163,19 @@ class State:
     def print(self):
         print('#' * (len(self.hall)+2), self.energy)
         print('#' + ''.join(self.hall) + '#')
-        print('###' + '#'.join(_[1] for _ in self.rooms) + '###')
-        print('  #' + '#'.join(_[0] for _ in self.rooms) + '#  ')
-        print('  #########  ')
+        for i in range(len(self.rooms[0])):
+            print('###' + '#'.join(_[i] for _ in self.rooms) + '###')
+        print('#############')
 
     def finished(self):
         for pod, r in pod_rooms:
-            if self.rooms[r] != [pod, pod]:
+            if any(_ != pod for _ in self.rooms[r]):
                 return False
         return True
 
     def could_solve(self):
         for pod, r in pod_rooms:
-            room = self.rooms[r]
-            if not all(_ in ('.', pod) for _ in room):
+            if any(_ not in ('.', pod) for _ in self.rooms[r]):
                 return False
         return True
 
@@ -181,7 +184,7 @@ class State:
         score = self.energy
         for h, c in enumerate(self.hall):
             if c not in ('.', ' '):
-                end = (dest[c], 1)
+                end = (dest[c], 0)
                 score += dists[(h, end)] * power[c]
         return score
 
@@ -229,17 +232,20 @@ def dfs(state, best):
 
     # can we put a pod into a room? Push state for every pod we could place
     # in a room...
-    for h, c in enumerate(state.hall):
-        if c in dest:
-            r = dest[c]
+    for h, pod in enumerate(state.hall):
+        if pod in dest:
+            r = dest[pod]
 
             # path clear to room
             if any(state.hall[_] != '.' for _ in hall_to_room[(h, r)]):
                 continue
 
             room = state.rooms[r]
-            if all(_ in ('.', c) for _ in room):
-                p = 0 if room[0] == '.' else 1
+            if all(_ in ('.', pod) for _ in room):
+                p = len(room) - 1
+                while room[p] == pod:
+                    p -= 1
+
                 s = state.copy()
                 s.move(h, (r, p))
                 dfs(s, best)
@@ -248,7 +254,10 @@ def dfs(state, best):
     for r, room in enumerate(state.rooms):
         pod = dest[r]
         if any(_ in 'ABCD' and _ != pod for _ in room):
-            p = 1 if room[1] != '.' else 0
+            p = 0
+            while room[p] == '.':
+                p += 1
+
             for dir in (0, 1):
                 for h in room_to_hall[r][dir]:
                     if state.hall[h] != '.':
@@ -261,9 +270,7 @@ def dfs(state, best):
 
 def part1(rooms, hall):
     state = State(rooms, hall)
-
-#    best = [state.copy()]
-#    best[0].energy = 20000 
+    state.print()
 
     best = [None]
     dfs(state, best)
