@@ -7,3 +7,4 @@
 07: Parallel IntCode programs using generator coroutines and .send()
 08: Simple pixel to image array problem
 09: Relative mode IntCode operations
+10: Grid problem sweeping points by slope and angle
