@@ -18,7 +18,7 @@ def parse_input():
     mem = [int(_) for _ in lines[0].split(',')]
     return mem
 
-def run(mem):
+def intcode(mem):
     mem = list(mem) + [0] * 1_000_000
 
     rbase = 0
@@ -95,21 +95,32 @@ def run(mem):
         else:
             assert 0, ('Invalid instruction', op)
 
-def part1(mem):
-    g = run(mem)
+def run(mem, input=None):
+    input = input or []
+    output = []
+    g = intcode(mem)
+
+    # run up to first yield
     next(g)
-    v = g.send(1)
-    print(v)
+
+    # feed input and collect output
+    for x in input:
+        v = g.send(x)
+        if v is not None:
+            yield v
+
+    # finish consuming any other output
     for v in g:
-        print(v)
+        if v is not None:
+            yield v
+
+def part1(mem):
+    for x in run(mem, [1]):
+        print(x)
 
 def part2(mem):
-    g = run(mem)
-    next(g)
-    v = g.send(2)
-    print(v)
-    for v in g:
-        print(v)
+    for x in run(mem, [2]):
+        print(x)
 
 def test(mem):
     for v in run(mem):
