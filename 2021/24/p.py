@@ -67,7 +67,7 @@ def recurse(num, prog, z):
             yield num + sw
         # hard-code number here - if it's too small, we won't find z=0 at the
         # end...
-        elif digit < 13: # and regs['z'] < 500_000:
+        elif digit < 13 and regs['z'] < 500_000:
             for x in recurse(num + sw, prog, regs['z']):
                 yield x
 
