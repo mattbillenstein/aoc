@@ -22,3 +22,4 @@
 22: Box intersection volume problem - Inclusion–exclusion principle, cube.py class
 23: Optimization problem, minimizing steps moving items between rooms - dfs / search
 24: asm problem - reverse engineering some code to be fast enough to search a large solution space - recursion
+25: Grid moving things until they stop problem
