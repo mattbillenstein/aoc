@@ -55,70 +55,53 @@ def run(prog, inp, regs=None):
 
     return regs
 
-def part1(prog):
-    # bisect 14-digit inputs made of digits 1-9
-    N = len(prog) // 14
+def recurse(num, prog, z):
+    # eh, this is slow, we could pick apart the asm and optimize, but yolo
+    digit = len(num)
+    for w in range(1, 10):
+        sw = str(w)
+        regs = {_: 0 for _ in 'wxy'}
+        regs['z'] = z
+        run(prog[digit], sw, regs)
+        if digit == 13 and regs['z'] == 0:
+            yield num + sw
+        # hard-code number here - if it's too small, we won't find z=0 at the
+        # end...
+        elif digit < 13 and regs['z'] < 500_000:
+            for x in recurse(num + sw, prog, regs['z']):
+                yield x
+
+def part(prog):
+    DIGITS = 14
+    N = len(prog) // DIGITS
     assert len(prog) % N == 0
 
-    outputs = defaultdict(set)
+    prog = [prog[_*N:_*N+N] for _ in range(DIGITS)]
 
-    zs = set([0])
-    for pc in range(0, 14):
-        print(pc, zs)
-        start = pc * N
-        sprog = prog[start:start + N]
-        for w in range(1, 10):
-            for z in zs:
-                regs = {_: 0 for _ in 'wxyz'}
-                regs['z'] = z
-                run(sprog, str(w), regs)
-                if abs(regs['z']) < 200000:
-                    outputs[pc].add(regs['z'])
+    mn = '9' * DIGITS
+    mx = '1' * DIGITS
+    cnt = 0
+    for x in recurse('', prog, 0):
+        cnt += 1
+        print(x)
+        if x < mn:
+            mn = x
+        elif x > mx:
+            mx = x
 
-        zs = outputs[pc]
+    print(mn, mx, cnt)
 
-    assert 0 in outputs[13]
+def do_bin(prog):
+    for i in range(10):
+        regs = run(prog, str(i))
+        print(i, regs)
 
-    newoutputs = defaultdict(set)
-    newoutputs[14] = set([0])
+def test_monad(prog):
+    x = sys.argv[2]
+    regs = run(prog, x)
+    print(regs)
 
-    # now go backwards constraining inputs on outputs
-    for pc in range(13, -1, -1):
-        inputs = outputs[pc-1]
-        start = pc * N
-        sprog = prog[start:start + N]
-        for w in range(1, 10):
-            for z in inputs:
-                regs = {_: 0 for _ in 'wxyz'}
-                regs['z'] = z
-                run(sprog, str(w), regs)
-                if regs['z'] in newoutputs[pc+1]:
-                    newoutputs[pc].add(z)
-
-    ws = defaultdict(set)
-
-    # now forwards, every step that generates a valid z at that step is a valid
-    # digit...
-    zs = set([0])
-    for pc in range(0, 14):
-        start = pc * N
-        sprog = prog[start:start + N]
-        for w in range(1, 10):
-            for z in zs:
-                regs = {_: 0 for _ in 'wxyz'}
-                regs['z'] = z
-                run(sprog, str(w), regs)
-                if regs['z'] in newoutputs[pc]:
-                    ws[pc].add(w)
-
-        zs = newoutputs[pc]
-
-    print(ws)
-
-def part2(data):
-    pass
-
-def test():
+def test_alu():
     regs = run([
         ['inp', 'w'],
         ['inp', 'x'],
@@ -168,22 +151,18 @@ def test():
     ], '34')
     assert regs == {'w': 3, 'x': 0, 'y': 0, 'z': 0}, regs
 
-def do_bin(prog):
-    for i in range(10):
-        regs = run(prog, str(i))
-        print(i, regs)
-
 def main():
-#    test()
-
-    data = parse_input()
-    if '1' in sys.argv:
-        part1(data)
-    if '2' in sys.argv:
-        part2(data)
-
     if 'bin' in sys.argv:
+        data = parse_input()
         do_bin(data)
+    elif 'monad' in sys.argv:
+        data = parse_input()
+        monad(data)
+    elif 'test' in sys.argv:
+        test_alu()
+    else:
+        data = parse_input()
+        part(data)
 
 if __name__ == '__main__':
     main()
