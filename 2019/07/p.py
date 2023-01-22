@@ -7,6 +7,8 @@ import time
 from collections import defaultdict
 from pprint import pprint
 
+from intcode import intcode
+
 DEBUG = '--debug' in sys.argv
 
 def debug(*args):
@@ -18,70 +20,11 @@ def parse_input():
     mem = [int(_) for _ in lines[0].split(',')]
     return mem
 
-def run(mem):
-    mem = list(mem)
-
-    pc = 0
-    while mem[pc] != 99:
-        instr = mem[pc]
-        op = instr % 100
-        mode = [instr // 100 % 10, instr // 1000 % 10, instr // 10000 % 10]
-
-        debug(op, mode, mem[pc:pc+4])
-
-        def param(i):
-            v = mem[pc+i+1]
-            if mode[i] == 0:
-                v = mem[v]
-            return v
-
-        if op == 1:
-            # add
-            mem[mem[pc+3]] = param(0) + param(1)
-            pc += 4
-        elif op == 2:
-            # mul
-            mem[mem[pc+3]] = param(0) * param(1)
-            pc += 4
-        elif op == 3:
-            # input
-            mem[mem[pc+1]] = x = yield
-            assert x is not None
-            pc += 2
-        elif op == 4:
-            # output
-            x = param(0)
-            debug('OUT', x)
-            yield x
-            pc += 2
-        elif op == 5:
-            # jump if true
-            if param(0) != 0:
-                pc = param(1)
-            else:
-                pc += 3
-        elif op == 6:
-            # jump if false
-            if param(0) == 0:
-                pc = param(1)
-            else:
-                pc += 3
-        elif op == 7:
-            # <
-            mem[mem[pc+3]] = int(param(0) < param(1))
-            pc += 4
-        elif op == 8:
-            # ==
-            mem[mem[pc+3]] = int(param(0) == param(1))
-            pc += 4
-        else:
-            assert 0, ('Invalid instruction', op)
-
 def run_thrusters(mem, phases, repeat=False):
     v = 0
     gens = []
     for p in phases:
-        g = run(mem)
+        g = intcode(mem)
         gens.append(g)
         next(g)
         g.send(p)
