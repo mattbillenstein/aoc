@@ -7,6 +7,8 @@ import time
 from collections import defaultdict
 from pprint import pprint
 
+from grid import SparseGrid
+
 DEBUG = '--debug' in sys.argv
 
 def debug(*args):
@@ -96,45 +98,54 @@ def intcode(mem):
         else:
             assert 0, ('Invalid instruction', op)
 
-def run(mem, input=None):
-    input = input or []
-    output = []
-    g = intcode(mem)
+def part(mem, start=0):
+    g = SparseGrid([])
+    pt = (0, 0)
+    g.set(pt, start)
 
-    # run up to first yield
-    next(g)
+    dir = '^'
+    dirs = {
+        # 0 is left, 1 right
+        '^': {0: '<', 1: '>'},
+        '<': {0: 'v', 1: '^'},
+        'v': {0: '>', 1: '<'},
+        '>': {0: '^', 1: 'v'},
+    }
 
-    # feed input and collect output
-    for x in input:
-        v = g.send(x)
-        if v is not None:
-            yield v
+    prog = intcode(mem)
 
-    # finish consuming any other output
-    for v in g:
-        if v is not None:
-            yield v
+    painted = set()
 
-def part1(mem):
-    for x in run(mem, [1]):
-        print(x)
+    while 1:
+        try:
+            next(prog) # run up to yield...
 
-def part2(mem):
-    for x in run(mem, [2]):
-        print(x)
+            # feed value of current tile and read color to paint
+            v = g.get(pt, 0)
+            color = prog.send(v)
 
-def test(mem):
-    for v in run(mem):
-        print(v)
+            # paint the grid and record the painted tile
+            g.set(pt, color)
+            painted.add(pt)
+
+            # turn and step
+            turn = next(prog)
+            dir = dirs[dir][turn]
+            pt = g.step(pt, dir)
+        except StopIteration:
+            break
+
+    print()
+    g.print()
+
+    print(len(painted))
 
 def main():
     data = parse_input()
     if '1' in sys.argv:
-        part1(data)
+        part(data)
     if '2' in sys.argv:
-        part2(data)
-    if 'test' in sys.argv:
-        test(data)
+        part(data, 1)
 
 if __name__ == '__main__':
     main()

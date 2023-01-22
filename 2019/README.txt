@@ -8,3 +8,4 @@
 08: Simple pixel to image array problem
 09: Relative mode IntCode operations
 10: Grid problem sweeping points by slope and angle
+11: Hull painting robot using IntCode and SparseGrid - generators
