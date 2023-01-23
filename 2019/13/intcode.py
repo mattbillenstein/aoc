@@ -25,7 +25,7 @@ def run(mem, input=None):
         if v is not None:
             yield v
 
-def intcode(mem, inp, out):
+def intcode(mem):
     mem = list(mem) + [0] * 1_000_000
 
     rbase = 0
@@ -65,7 +65,7 @@ def intcode(mem, inp, out):
             pc += 4
         elif op == 3:
             # input
-            x = inp.get()
+            x = yield
             debug('IN', x)
             store(0, x)
             assert x is not None
@@ -74,7 +74,7 @@ def intcode(mem, inp, out):
             # output
             x = load(0)
             debug('OUT', x)
-            out.put(x)
+            yield x
             pc += 2
         elif op == 5:
             # jump if true
@@ -102,6 +102,3 @@ def intcode(mem, inp, out):
             pc += 2
         else:
             assert 0, ('Invalid instruction', op)
-
-    # put to the output queue to wake up caller in case of race on is_alive()
-    out.put(None)
