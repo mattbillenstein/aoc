@@ -11,3 +11,5 @@
 11: Hull painting robot using IntCode and SparseGrid - generators
 12: Lowest Common Multiple periodic simulation of moon movements - math.lcm
 13: IntCode Breakout type game - threading
+14: Resource production problem - reduce needed resources to amount of native resources
+15: IntCode grid search problem - SparseGrid, bfs, intcode
