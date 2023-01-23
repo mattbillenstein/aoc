@@ -76,9 +76,7 @@ def part2(mem):
             elif tile == 4:
                 ball = (x, y)
 
-                # after the game paints the ball, it reads input for the joystick
-                # position... Simple enough to just follow the ball with the
-                # paddle...
+                # Simple enough to just follow the ball with the paddle...
                 joystick = 0
                 if paddle and paddle[0] > ball[0]:
                     joystick = -1
