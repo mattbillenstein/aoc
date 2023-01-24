@@ -23,10 +23,12 @@ def parse_input():
     return mem
 
 def part(mem):
+    # program outputs chr(c) values, but only store non-empty
     chars = {_: ord(_) for _ in '#<>v^'}
     chars['.'] = 0
     g = SparseGrid([], chars)
 
+    # run program and pull out the grid
     prog = intcode(mem)
     x, y = 0, 0
     for v in prog:
@@ -50,14 +52,17 @@ def part(mem):
             intersections.append(pt)
 
     debug(intersections)
+    # part 1, sum of all x*y intersections
     print(sum(x*y for x, y in intersections))
 
-    # wake up bot
-    mem[0] = 2
+    # part 2
+    #
+    # trace backwards from the bot location until we visit the entire path,
+    # first compute a turn, then step until we hit another corner - it works
+    # out we never have to consider turning at an intersection, we can always
+    # go straight...
 
-    intersections = set(intersections)
-    visited = set()
-
+    # initial conditions
     cnt = 0
     for pt in g:
         v = g.get(pt, 0)
@@ -67,30 +72,25 @@ def part(mem):
         if c == '#':
             cnt += 1
 
-    directions = []
     dir = chr(g.get(pos))
 
     debug(pos, cnt, dir)
 
-    g2 = SparseGrid([], chars)
+    turns = {
+        '^': {'<': 'L', '>': 'R'},
+        '<': {'v': 'L', '^': 'R'},
+        'v': {'>': 'L', '<': 'R'},
+        '>': {'^': 'L', 'v': 'R'},
+    }
 
-    # I think I need to consider turning at intersections here - can't find a
-    # repeating set of sequences that covers the given path...
-
-    # trace backwards from the bot location until we visit the entire path,
-    # first compute a 90-degree turn, then step until we hit another corner -
-    # repeat
+    directions = []
+    visited = set()
     while len(visited) < cnt:
         # compute turn
         for ndir in '<>^v':
             pt = g.step(pos, ndir)
             if not pt in visited and g.get(pt):
-                turn = {
-                    '^': {'<': 'L', '>': 'R'},
-                    '<': {'v': 'L', '^': 'R'},
-                    'v': {'>': 'L', '<': 'R'},
-                    '>': {'^': 'L', 'v': 'R'},
-                }[dir][ndir]
+                turn = turns[dir][ndir]
                 directions.append(turn)
                 dir = ndir
                 break
@@ -102,71 +102,82 @@ def part(mem):
                 break
             pos = npos
             visited.add(pos)
-            g2.set(pos, ord('#'))
             steps += 1
 
         directions.append(steps)
 
-    print(directions)
-    print(len(directions))
+    debug(directions, len(directions))
 
-    if 0:
-        # common steps are 4/8 and 6/12, break apart 8's and 12's
-        ndirs = []
-        for x in directions:
-            if not isinstance(x, int):
-                ndirs.append(x)
-            elif x % 3 == 0:
-                ndirs.extend([3] * (x // 3))
-            elif x % 4 == 0:
-                ndirs.extend([4] * (x // 4))
-            else:
-                assert 0
+    # Try range of lengths for A, B, C consuming the directions...
 
-        directions = ndirs
-        print(directions)
-        print(len(directions))
-
-    matches = defaultdict(set)
-    for i in range(0, len(directions)):
-#        if directions[i] not in ('L', 'R'):
-#            continue
-        for j in range(0, len(directions)):
-            if i == j:
-                continue
-
-            k = 2
-            while directions[i:i+k] == directions[j:j+k] and k < 20:
-                i, j = min(i, j), max(i, j)
-                d = tuple(directions[i:i+k])
-                matches[d].add((i, j))
-
-                k += 1
-
-    for k, v in matches.items():
-        print(k, v)
-    print(len(matches))
-
-    for a, b, c in itertools.combinations(list(matches), 3):
-        # see if we can consume using just these components...
+    def consume(directions, seqs):
         L = []
-        d = tuple(directions)
         found = True
-        while d and found:
+        while directions and found:
             found = False
-            for tup in (a, b, c):
-                if d[:len(tup)] == tup:
+            for name, tup in seqs.items():
+                if directions[:len(tup)] == tup:
                     found = True
-                    d = d[len(tup):]
-                    L.append(tup)
+                    directions = directions[len(tup):]
+                    L.append(name)
                     break
+        return L, directions
 
-        if not d:
-            print('matched', a, b, c, L)
-    
-    if DEBUG:
-        print()
-        g2.print()
+    lengths = range(4, 14, 2)
+    matched = None
+    for alen in lengths:
+        for blen in lengths:
+            for clen in lengths:
+                MAIN = []
+                d = tuple(directions)
+                seqs = {}
+
+                assert len(d) >= alen
+                seqs['A'] = d[:alen]
+                L, d = consume(d, seqs)
+                MAIN.extend(L)
+
+                assert len(d) >= blen
+                seqs['B'] = d[:blen]
+                L, d = consume(d, seqs)
+                MAIN.extend(L)
+
+                assert len(d) >= clen
+                C = d[:clen]
+                seqs['C'] = d[:clen]
+                L, d = consume(d, seqs)
+                MAIN.extend(L)
+
+                if not d:
+                    matched = (MAIN, dict(seqs))
+
+    assert matched
+
+    MAIN, seqs = matched
+
+    debug(MAIN)
+    debug(seqs)
+
+    # wake up bot and feed directions
+    mem[0] = 2
+
+    prog = intcode(mem)
+    for L in (MAIN, seqs['A'], seqs['B'], seqs['C'], 'n'):
+        s = ','.join(str(_) for _ in L) + '\n'
+        if DEBUG:
+            print(repr(s), [ord(_) for _ in s], len(s))
+
+        x = next(prog)
+        while x != 'INPUT':
+            x = next(prog)
+
+        for c in s:
+            prog.send(ord(c))
+
+    # read dust collected...
+    for v in prog:
+        if v > 128:
+            print(v)
 
 def main():
     data = parse_input()

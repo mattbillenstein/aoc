@@ -65,10 +65,11 @@ def intcode(mem):
             pc += 4
         elif op == 3:
             # input
-            x = yield
-            debug('IN', x)
+            x = None
+            while x is None:
+                x = yield 'INPUT'
+                debug('IN', x)
             store(0, x)
-            assert x is not None
             pc += 2
         elif op == 4:
             # output
