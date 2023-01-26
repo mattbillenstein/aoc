@@ -29,10 +29,8 @@ def parse_input():
     return g
 
 def bfs(frontier, grid, end=None):
-    # neighbors is a function that takes a vertex and yields neighboring
-    # vertices...
-
-    found = {}
+    # Record key/door position and distance reachable from given point...
+    found = []
 
     if not isinstance(frontier, (list, set)):
         frontier = [frontier]
@@ -45,7 +43,7 @@ def bfs(frontier, grid, end=None):
             v = grid.get(x)
             if v > 2:
                 visited.add(x)
-                found[chr(v)] = (x, distance)
+                found.append((x, chr(v), distance))
                 continue
 
             visited.add(x)
@@ -63,18 +61,61 @@ def bfs(frontier, grid, end=None):
 
         distance += 1
 
+    found.sort(key=lambda x: x[2])
     return found
+
+def find_keys(grid, pos, keys, all_keys, dist, bdist):
+    if keys == all_keys:
+        return dist
+
+    if DEBUG:
+        print(pos, keys, dist)
+        grid.print()
+
+    # recurse until we find all keys
+    found = bfs(pos, grid)
+
+    if DEBUG:
+        print(found)
+        print()
+
+    mdist = bdist
+    for pt, c, fdist in found:
+        if dist + fdist > mdist:
+            continue
+
+        if 'a' <= c <= 'z':
+            grid.set(pt, 0)
+            keys.add(c)
+            ndist = find_keys(grid, pt, keys, all_keys, dist + fdist, bdist)
+            if ndist < mdist:
+                mdist = ndist
+            keys.remove(c)
+            grid.set(pt, ord(c))
+        elif 'A' <= c <= 'Z' and c.lower() in keys:
+            grid.set(pt, 0)
+            ndist = find_keys(grid, pt, keys, all_keys, dist + fdist, bdist)
+            if ndist < mdist:
+                mdist = ndist
+            grid.set(pt, ord(c))
+
+    return mdist
 
 def part1(grid):
     grid.print()
 
+    all_keys = set()
     for pt in grid:
-        if grid.get(pt) == 2:
+        v = grid.get(pt)
+        c = chr(v)
+        if v == 2:
             pos = pt
             grid.set(pt, 0)
+        elif 'a' <= c <= 'z':
+            all_keys.add(c)
 
-    found = bfs(pos, grid)
-    print(found)
+    dist = find_keys(grid, pos, set(), all_keys, 0, sys.maxsize)
+    print(dist)
 
 def part2(data):
     pass
