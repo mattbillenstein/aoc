@@ -34,18 +34,20 @@ def bfs(frontier, grid, end=None):
     found = []
 
     if not isinstance(frontier, (list, set)):
-        frontier = [frontier]
+        frontier = [(frontier, '')]
 
     distance = 0
     visited = set()
     while 1:
         next_frontier = set()
-        for x in frontier:
+        for x, doors in frontier:
             v = grid.get(x)
-            if v > 2:
-                visited.add(x)
-                found.append((x, chr(v), distance))
-                continue
+            c = chr(v)
+            if 'a' <= c <= 'z':
+                found.append((c, x, doors, distance))
+            elif 'A' <= c <= 'Z':
+                doors += c
+                doors = ''.join(sorted(doors))
 
             visited.add(x)
             for y in grid.neighbors4(x):
@@ -53,7 +55,7 @@ def bfs(frontier, grid, end=None):
                 if v == 1:
                     continue
                 if y not in visited:
-                    next_frontier.add(y)
+                    next_frontier.add((y, doors))
 
         frontier = next_frontier
 
@@ -62,66 +64,11 @@ def bfs(frontier, grid, end=None):
 
         distance += 1
 
-last = time.time()
-bdist = sys.maxsize
-best = {}
-def find_keys(grid, pos, keys, all_keys, dist):
-    global last, best, bdist
-
-    fs = frozenset(keys)
-    if best.get((pos, fs), sys.maxsize) < dist:
-        return None
-
-    # recurse until we find all keys
-    if keys == all_keys:
-        if dist < bdist:
-            bdist = dist
-        return dist
-
-    doprint = time.time() - last > 10
-    if DEBUG or doprint:
-        last = time.time()
-        grid.print()
-        print(pos, keys, dist, bdist)
-
-    found = bfs(pos, grid)
-    found.sort(key=lambda x: x[2])
-
-    # if dist + the distance to the furthest key/door > bdist continue
-    maxfound = max(_[2] for _ in found)
-    if dist + maxfound > bdist:
-        return dist + maxfound
-
-    if DEBUG or doprint:
-        print(found)
-        print()
-
-    mdist = bdist
-    for pt, c, fdist in found:
-        if dist + fdist > bdist:
-            continue
-
-        if 'a' <= c <= 'z':
-            grid.set(pt, 0)
-            keys.add(c)
-            ndist = find_keys(grid, pt, keys, all_keys, dist + fdist)
-            if ndist is not None and ndist < mdist:
-                mdist = ndist
-            keys.remove(c)
-            grid.set(pt, ord(c))
-        elif 'A' <= c <= 'Z' and c.lower() in keys:
-            grid.set(pt, 0)
-            ndist = find_keys(grid, pt, keys, all_keys, dist + fdist)
-            if ndist < mdist:
-                mdist = ndist
-            grid.set(pt, ord(c))
-
-    return mdist
-
 def part1(grid):
     grid.print()
 
-    all_keys = set()
+    edges = {}
+
     for pt in grid:
         v = grid.get(pt)
         c = chr(v)
@@ -129,14 +76,12 @@ def part1(grid):
             pos = pt
             grid.set(pt, 0)
         elif 'a' <= c <= 'z':
-            all_keys.add(c)
-#            grid.set(pt, 0)
-#            found = bfs(pt, grid)
-#            grid.set(pt, v)
-#            print(c, pt, found)
+            grid.set(pt, 0)
+            found = bfs(pt, grid)
+            edges[(c, pt)] = found
+            grid.set(pt, v)
 
-    dist = find_keys(grid, pos, set(), all_keys, 0)
-    print(dist)
+    pprint(edges)
 
 def part2(data):
     pass
