@@ -20,7 +20,7 @@ def parse_input():
     lines = [_.strip('\r\n') for _ in sys.stdin]
 #    lines = [int(_) for _ in lines]
 
-    chars = {'.': 0, '#': 1, '@': 2}
+    chars = {'.': 0, '#': 1, '@': 64}
     for c in 'abcdefghijklmnopqrstuvwxyz':
         chars[c] = ord(c)
         chars[c.upper()] = ord(c.upper())
@@ -34,7 +34,7 @@ def bfs(frontier, grid, end=None):
     found = []
 
     if not isinstance(frontier, (list, set)):
-        frontier = [(frontier, '')]
+        frontier = [(frontier, frozenset())]
 
     distance = 0
     visited = set()
@@ -44,10 +44,9 @@ def bfs(frontier, grid, end=None):
             v = grid.get(x)
             c = chr(v)
             if 'a' <= c <= 'z':
-                found.append((c, x, doors, distance))
+                found.append((c, distance, doors))
             elif 'A' <= c <= 'Z':
-                doors += c
-                doors = ''.join(sorted(doors))
+                doors = doors.union(c.lower())
 
             visited.add(x)
             for y in grid.neighbors4(x):
@@ -72,13 +71,12 @@ def part1(grid):
     for pt in grid:
         v = grid.get(pt)
         c = chr(v)
-        if v == 2:
-            pos = pt
+        if c == '@':
             grid.set(pt, 0)
+            edges[c] = bfs(pt, grid)
         elif 'a' <= c <= 'z':
             grid.set(pt, 0)
-            found = bfs(pt, grid)
-            edges[(c, pt)] = found
+            edges[c] = bfs(pt, grid)
             grid.set(pt, v)
 
     pprint(edges)
@@ -95,4 +93,3 @@ def main():
 
 if __name__ == '__main__':
     main()
-
