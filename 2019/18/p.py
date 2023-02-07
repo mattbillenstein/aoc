@@ -82,7 +82,7 @@ best_at = {}
 
 _last = time.time()
 def dfs(state, best):
-    global _last
+    global _last, best_at
 
     if state.dist > best[0]:
         return
@@ -118,14 +118,20 @@ def part1(grid):
     edges = {}
     all_keys = set()
 
+    starts = []
     for pt in grid:
         v = grid.get(pt)
         c = chr(v)
         if c == '@':
+            starts.append(pt)
             grid.set(pt, 0)
             edges[c] = bfs(pt, grid)
-        elif 'a' <= c <= 'z':
-            all_keys.add(c)
+            all_keys = set([_[0] for _ in edges[c]])
+
+    for pt in grid:
+        v = grid.get(pt)
+        c = chr(v)
+        if 'a' <= c <= 'z':
             grid.set(pt, 0)
             edges[c] = bfs(pt, grid)
             grid.set(pt, v)
@@ -140,8 +146,54 @@ def part1(grid):
 
     print(best[0])
 
-def part2(data):
-    pass
+def part2(grid):
+    # Min steps with 4 robots - one in each quadrant
+
+    global best_at
+
+    grid.print()
+
+    points = {}
+
+    starts = []
+    for pt in grid:
+        v = grid.get(pt)
+        c = chr(v)
+        if c == '@':
+            starts.append(pt)
+            grid.set(pt, 0)
+        elif 'a' <= c <= 'z':
+            points[c] = pt
+
+    tot = 0
+    for spt in starts:
+        best_at = {}
+        edges = {}
+        found = bfs(spt, grid)
+        all_keys = set([_[0] for _ in found])
+        edges['@'] = [(_[0], _[1], _[2].intersection(all_keys)) for _ in found]
+
+        for c, dist, doors in edges['@']:
+            pt = points[c]
+            grid.set(pt, 0)
+            found = bfs(pt, grid)
+            grid.set(pt, ord(c))
+
+            # just ignore doors not in this quadrant, assume they'll be
+            # unlocked by another robot before we get to them... This doesn't
+            # work on the 72-step example (test-p2.txt) - it calculates 70...
+            edges[c] = [(_[0], _[1], _[2].intersection(all_keys)) for _ in found]
+
+        if DEBUG:
+            pprint(edges)
+
+        state = State('@', 0, set(), all_keys, edges)
+        best = [sys.maxsize]
+        dfs(state, best)
+
+        tot += best[0]
+
+    print(tot)
 
 def main():
     data = parse_input()
