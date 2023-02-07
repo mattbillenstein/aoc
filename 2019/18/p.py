@@ -63,10 +63,60 @@ def bfs(frontier, grid, end=None):
 
         distance += 1
 
+class State:
+    def __init__(self, pos, dist, keys, all_keys, edges):
+        self.pos = pos
+        self.dist = dist
+        self.keys = keys
+        self.all_keys = all_keys
+        self.edges = edges
+
+    def copy(self):
+         return State(self.pos, self.dist, set(self.keys), self.all_keys, self.edges)
+
+    def __repr__(self):
+        keys = ''.join(self.keys)
+        return f'State({self.pos}, {self.dist}, {keys})'
+
+best_at = {}
+
+_last = time.time()
+def dfs(state, best):
+    global _last
+
+    if state.dist > best[0]:
+        return
+
+    if len(state.keys) > 1:
+        at = tuple(state.keys)
+        at = tuple(sorted(at[:-1])) + (at[-1],)
+        bdist = best_at.get(at, sys.maxsize)
+        if state.dist > bdist:
+            return
+        elif state.dist < bdist:
+            best_at[at] = state.dist
+
+    if state.keys == state.all_keys:
+        if state.dist < best[0]:
+            best[0] = state.dist
+
+    if time.time() - _last > 10:
+        _last = time.time()
+        print(best[0], state)
+
+    for v, d, doors in state.edges[state.pos]:
+        if v not in state.keys and state.keys.issuperset(doors):
+            s = state.copy()
+            s.pos = v
+            s.dist += d
+            s.keys.add(v)
+            dfs(s, best)
+
 def part1(grid):
     grid.print()
 
     edges = {}
+    all_keys = set()
 
     for pt in grid:
         v = grid.get(pt)
@@ -75,11 +125,20 @@ def part1(grid):
             grid.set(pt, 0)
             edges[c] = bfs(pt, grid)
         elif 'a' <= c <= 'z':
+            all_keys.add(c)
             grid.set(pt, 0)
             edges[c] = bfs(pt, grid)
             grid.set(pt, v)
 
-    pprint(edges)
+    if DEBUG:
+        pprint(edges)
+
+    state = State('@', 0, set(), all_keys, edges)
+
+    best = [sys.maxsize]
+    dfs(state, best)
+
+    print(best[0])
 
 def part2(data):
     pass
