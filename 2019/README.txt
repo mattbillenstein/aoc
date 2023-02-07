@@ -13,3 +13,6 @@
 13: IntCode Breakout type game - threading
 14: Resource production problem - reduce needed resources to amount of native resources
 15: IntCode grid search problem - SparseGrid, bfs, intcode
+16: Infinite sequence summing
+17: IntCode path tracing
+18: Grid bfs/dfs shortest path collecting keys with doors
