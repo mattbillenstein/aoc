@@ -19,16 +19,13 @@ def debug(*args):
 
 def parse_input():
     lines = [_.strip('\r\n').replace(' ', '#') for _ in sys.stdin]
-#    lines = [int(_) for _ in lines]
     chars = {'.': 0, '#': 1}
     for c in string.ascii_uppercase:
         chars[c] = ord(c)
     grid = Grid(lines, chars)
     return grid
 
-def part1(grid):
-    grid.print()
-
+def find_labels(grid):
     # find labels
     labels = defaultdict(list)
 
@@ -49,7 +46,15 @@ def part1(grid):
 
             if zpt and c2:
                 label = ''.join(sorted(c + c2))
-                labels[label].append(zpt)
+                labels[label].append((zpt, 0))
+
+    return labels
+
+def part1(grid):
+    if DEBUG:
+        grid.print()
+
+    labels = find_labels(grid)
 
     if DEBUG:
         pprint(labels)
@@ -57,21 +62,22 @@ def part1(grid):
     portals = {}
     for k, L in labels.items():
         if len(L) == 2:
-            portals[L[0]] = L[1]
-            portals[L[1]] = L[0]
+            portals[L[0][0]] = L[1][0]
+            portals[L[1][0]] = L[0][0]
                 
     if DEBUG:
         pprint(portals)
 
-    def neighbors(pt):
+    def neighbors(tup):
+        pt, level = tup
         L = []
         for npt in grid.neighbors4(pt):
             v = grid.get(npt)
             if v == 0:
-                L.append(npt)
+                L.append((npt, level))
 
         if pt in portals:
-            L.append(portals[pt])
+            L.append((portals[pt], level))
 
         return L
 
@@ -81,8 +87,73 @@ def part1(grid):
 
     print(dist)
 
-def part2(data):
-    pass
+def part2(grid):
+    # points include the level so we can visit each point in the grid once per
+    # level in bfs
+    #
+    # ((x, y), level)
+
+    if DEBUG:
+        grid.print()
+
+    # find portals out on the outermost edge
+    maxx = maxy = -1
+    minx = miny = sys.maxsize
+    for pt in grid:
+        if not grid.get(pt):
+            if pt[0] < minx:
+                minx = pt[0]
+            if pt[0] > maxx:
+                maxx = pt[0]
+
+            if pt[1] < miny:
+                miny = pt[1]
+            if pt[1] > maxy:
+                maxy = pt[1]
+            
+    def portal_out(pt):
+        return pt[0] in (minx, maxx) or pt[1] in (miny, maxy)
+
+    def portal_in(pt):
+        return not portal_out(pt)
+
+    labels = find_labels(grid)
+
+    if DEBUG:
+        pprint(labels)
+
+    portals = {}
+    for k, L in labels.items():
+        if len(L) == 2:
+            portals[L[0][0]] = L[1][0]
+            portals[L[1][0]] = L[0][0]
+                
+    if DEBUG:
+        pprint(portals)
+
+    def neighbors(tup):
+        pt, level = tup
+        L = []
+        for npt in grid.neighbors4(pt):
+            v = grid.get(npt)
+            if v == 0:
+                L.append((npt, level))
+
+        if pt in portals:
+            if portal_out(pt) and level > 0:
+                # going out, decrement level
+                L.append((portals[pt], level-1))
+            elif portal_in(pt):
+                # going in, increment level
+                L.append((portals[pt], level+1))
+
+        return L
+
+    AA = labels['AA'][0]
+    ZZ = labels['ZZ'][0]
+    dist = bfs(AA, neighbors, ZZ)
+
+    print(dist)
 
 def main():
     data = parse_input()
