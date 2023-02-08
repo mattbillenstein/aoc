@@ -22,3 +22,4 @@
 22: Card shuffle with very large deck and number of shuffles - Linear Algebra?
 23: IntCode with 50 programs passing values around
 24: Recursive grid automata type problem
+25: Random IntCode Dungeons and Dragons style game search
