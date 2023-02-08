@@ -20,3 +20,5 @@
 20: Grid shortest path with portals - bfs, grid
 21: IntCode hole jumping robot programmed using "BoolCode"
 22: Card shuffle with very large deck and number of shuffles - Linear Algebra?
+23: IntCode with 50 programs passing values around
+24: Recursive grid automata type problem
