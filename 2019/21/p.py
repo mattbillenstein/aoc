@@ -69,18 +69,30 @@ def part1(mem):
 
 def part2(mem):
     # we now have registers A-I, 9 steps ahead
+    # mainly just trial and error - landing at the first spot after a hole
+    # generally gives the most options...
+
     prog = intcode(mem)
 
     next_input(prog)
 
     inp = [
-        # Jump if any hole ABC and not hole D
-        'NOT A T',
-        'NOT B J',
-        'OR T J',   # A' or B'
-        'NOT C T',
-        'OR T J',   # A' or B' or C'
+        # hole at C, land at D, H
+        'NOT C J',
         'AND D J',
+        'AND H J',
+
+        # hole at B, land at D, H
+        'NOT B T',
+        'AND D T',
+        'AND H T',
+
+        'OR T J',
+
+        # or, any hole at A...
+        'NOT A T',
+
+        'OR T J',
 
         'RUN\n',
     ]

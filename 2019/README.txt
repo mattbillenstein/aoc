@@ -18,3 +18,4 @@
 18: Grid bfs/dfs shortest path collecting keys with doors
 19: IntCode / grid tractor beam - find nearest coordinates of 100x100 box that fits inside
 20: Grid shortest path with portals - bfs, grid
+21: IntCode hole jumping robot programmed using "BoolCode"
