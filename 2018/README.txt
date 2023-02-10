@@ -5,3 +5,4 @@
 05: String manipulation
 06: Manhattan distance / area between group of points problem
 07: Task scheduling with deps
+08: Recursive data packet parsing
