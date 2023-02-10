@@ -2,3 +2,4 @@
 02: Count differences in strings
 03: Counting overlapping rectangles
 04: sort/agg/search list of time events
+05: String manipulation
