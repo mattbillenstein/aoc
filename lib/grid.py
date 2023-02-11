@@ -129,9 +129,16 @@ class Grid:
     def get(self, pt):
         return self.g[pt[1]][pt[0]]
 
+    def getc(self, pt):
+        return self.values[self.get(pt)]
+
     # mutate
     def set(self, pt, v):
         self.g[pt[1]][pt[0]] = v
+
+    def setc(self, pt, c):
+        v = self.chars[c]
+        self.set(pt, v)
 
     def remove(self, pt):
         self.g[pt[1]][pt[0]] = 0
@@ -254,9 +261,19 @@ class SparseGrid(Grid):
     def get(self, pt, default=None):
         return self.g.get(pt, default)
 
+    def getc(self, pt, default=None):
+        v = self.get(pt)
+        if v is None:
+            return default
+        return self.values[v]
+
     # mutate
     def set(self, pt, v):
         self.g[pt] = v
+
+    def setc(self, pt, c):
+        v = self.chars[c]
+        self.set(pt, v)
 
     def remove(self, pt):
         del self.g[pt]
