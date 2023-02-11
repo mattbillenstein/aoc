@@ -18,33 +18,6 @@ from heapq import heappop, heappush
 def bfs(frontier, neighbors, end=None):
     # neighbors is a function that takes a vertex and yields neighboring
     # vertices...
-
-    if not isinstance(frontier, (list, set)):
-        frontier = [frontier]
-
-    distance = 0
-    visited = set()
-    while 1:
-        next_frontier = set()
-        for x in frontier:
-            if x == end:
-                return distance
-
-            visited.add(x)
-            for y in neighbors(x):
-                if y not in visited:
-                    next_frontier.add(y)
-
-        frontier = next_frontier
-
-        if not frontier:
-            return distance
-
-        distance += 1
-
-def bfs_many(frontier, neighbors, ends):
-    # neighbors is a function that takes a vertex and yields neighboring
-    # vertices...
     found = []
 
     if not isinstance(frontier, (list, set)):
@@ -55,8 +28,10 @@ def bfs_many(frontier, neighbors, ends):
     while 1:
         next_frontier = set()
         for x in frontier:
-            if x in ends:
+            if isinstance(end, set) and x in end:
                 found.append((x, distance))
+            elif x == end:
+                return distance
 
             visited.add(x)
             for y in neighbors(x):
@@ -66,7 +41,9 @@ def bfs_many(frontier, neighbors, ends):
         frontier = next_frontier
 
         if not frontier:
-            return found
+            if isinstance(end, set):
+                return found
+            return distance
 
         distance += 1
 

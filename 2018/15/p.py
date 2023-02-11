@@ -7,7 +7,7 @@ import time
 from collections import defaultdict
 from pprint import pprint
 
-from graph import bfs_many
+from graph import bfs
 from grid import Grid
 
 DEBUG = '--debug' in sys.argv
@@ -47,15 +47,21 @@ class Unit:
         def neighbors(pt):
             return [_ for _ in grid.neighbors4(pt) if grid.get(_) == 0]
 
+        done = True
+
         ends = set()
         for unit in units:
             if unit.hp > 0 and unit.type != self.type:
                 ends.update(neighbors(unit.pt))
+                done = False
+
+        if done:
+            return True
         
         pts = neighbors(self.pt)
         options = []
         for pt in pts:
-            found = bfs_many(pt, neighbors, ends)
+            found = bfs(pt, neighbors, ends)
             if found:
                 options.append((pt, min(_[1] for _ in found)))
 
@@ -64,6 +70,8 @@ class Unit:
             grid.set(self.pt, 0)
             self.pt = options[0][0]
             grid.setc(self.pt, self.type)
+
+        return False
 
     def attack(self, grid, units):
         pts = grid.neighbors4(self.pt)
@@ -88,17 +96,19 @@ class Unit:
     def __repr__(self):
         return f'{self.type}({self.pt}, {self.hp})'
 
-def part1(grid):
+def run(grid, eap=3):
     units = []
     for pt in grid:
         c = grid.getc(pt)
         if c in 'GE':
-            units.append(Unit(c, pt))
+            unit = Unit(c, pt)
+            if c == 'E':
+                unit.ap = eap
+            units.append(unit)
 
     rounds = 0
-    while any(_.hp > 0 for _ in units if _.type == 'E') and \
-          any(_.hp > 0 for _ in units if _.type == 'G'):
-
+    done = False
+    while 1:
         units.sort(key=ro)
 
         if DEBUG:
@@ -115,8 +125,13 @@ def part1(grid):
             if unit.hp <= 0:
                 continue
 
-            unit.move(grid, units)
+            done = unit.move(grid, units)
+            if done:
+                break
             unit.attack(grid, units)
+
+        if done:
+            break
 
         rounds += 1
 
@@ -125,10 +140,27 @@ def part1(grid):
         print(rounds)
         grid.print()
 
-    print(rounds, rounds * sum(_.hp for _ in units if _.hp > 0))
+    points = sum(_.hp for _ in units if _.hp > 0)
 
-def part2(data):
-    pass
+    for unit in units:
+        if unit.hp > 0:
+            winner = unit.type
+            break
+
+    return rounds, points, rounds * points, winner
+
+def part1(grid):
+    print(run(grid))
+
+def part2(grid):
+    eap = 3
+    while 1:
+        tup = run(grid.copy(), eap)
+        print(tup, eap)
+        if tup[-1] == 'E':
+            break
+        eap += 1
+
 
 def main():
     grid = parse_input()
