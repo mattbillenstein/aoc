@@ -119,7 +119,7 @@ def run(grid, eap=3):
             for unit in units:
                 if unit.hp <= 0:
                     continue
-    #            print(unit)
+                print(unit)
 
         for unit in units:
             if unit.hp <= 0:
@@ -140,27 +140,30 @@ def run(grid, eap=3):
         print(rounds)
         grid.print()
 
+        for unit in units:
+            if unit.hp <= 0:
+                continue
+            print(unit)
+
     points = sum(_.hp for _ in units if _.hp > 0)
 
-    for unit in units:
-        if unit.hp > 0:
-            winner = unit.type
-            break
+    elf_losses = sum(1 for _ in units if _.type == 'E' and _.hp <= 0)
 
-    return rounds, points, rounds * points, winner
+    return rounds, points, rounds * points, elf_losses
 
 def part1(grid):
     print(run(grid))
 
 def part2(grid):
-    eap = 3
+    eap = 4
     while 1:
         tup = run(grid.copy(), eap)
-        print(tup, eap)
-        if tup[-1] == 'E':
+        debug(tup, eap)
+        if tup[-1] == 0:
             break
         eap += 1
 
+    print(tup, eap)
 
 def main():
     grid = parse_input()
