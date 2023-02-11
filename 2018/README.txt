@@ -10,3 +10,4 @@
 10: Grid with moving points spelling word problem
 11: Finding max over rolling grid sums
 12: Linear automata problem with large number of generations...
+13: Carts on tracks grid problem
