@@ -63,10 +63,15 @@ class Unit:
         for pt in pts:
             found = bfs(pt, neighbors, ends)
             if found:
-                options.append((pt, min(_[1] for _ in found)))
+                found.sort(key=lambda x: x[1])
+                m = min(_[1] for _ in found)
+                for ept, dist in found:
+                    if dist != m:
+                        break
+                    options.append((pt, ept, dist))
 
         if options:
-            options.sort(key=lambda x: (x[1], x[0][1], x[0][0]))
+            options.sort(key=lambda x: (x[2], x[1][1], x[1][0], x[0][1], x[0][0]))
             grid.set(self.pt, 0)
             self.pt = options[0][0]
             grid.setc(self.pt, self.type)
