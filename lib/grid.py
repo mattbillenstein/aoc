@@ -90,7 +90,12 @@ class Grid:
             self.g = [[0] * len(items[0]) for _ in items]
             for y in range(len(items)):
                 for x in range(len(items[y])):
-                    v = chars[items[y][x]]
+                    c = items[y][x]
+                    try:
+                        v = chars[c]
+                    except KeyError:
+                        chars[c] = v = ord(c)
+
                     if v:
                         self.g[y][x] = v
         else:
@@ -216,7 +221,12 @@ class SparseGrid(Grid):
             self.g = {}
             for y in range(len(items)):
                 for x in range(len(items[y])):
-                    v = self.chars[items[y][x]]
+                    c = items[y][x]
+                    try:
+                        v = chars[c]
+                    except KeyError:
+                        chars[c] = v = ord(c)
+
                     if v:
                         self.g[(x, y)] = v
         else:
