@@ -11,3 +11,4 @@
 11: Finding max over rolling grid sums
 12: Linear automata problem with large number of generations...
 13: Carts on tracks grid problem
+14: Number generator problem
