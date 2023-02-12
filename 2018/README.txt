@@ -12,3 +12,5 @@
 12: Linear automata problem with large number of generations...
 13: Carts on tracks grid problem
 14: Number generator problem
+15: Grid elves/goblins battle to the death - grid, bfs, simulation
+16: Simple cpu instruction mapping problem
