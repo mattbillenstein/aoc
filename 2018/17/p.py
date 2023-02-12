@@ -32,7 +32,7 @@ def parse_input():
             x0 = int(L[3])
             x1 = int(L[4])
 
-        if x0 < 550 and y0 < 50:
+        if x0 < 550 and y0 < 150:
             for x in range(x0, x1 + 1):
                 for y in range(y0, y1 + 1):
                     g.setc((x, y), '#')
