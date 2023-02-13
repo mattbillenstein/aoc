@@ -92,9 +92,10 @@ class Grid:
                 for x in range(len(items[y])):
                     c = items[y][x]
                     try:
-                        v = chars[c]
+                        v = self.chars[c]
                     except KeyError:
-                        chars[c] = v = ord(c)
+                        self.chars[c] = v = ord(c)
+                        self.values[v] = c
 
                     if v:
                         self.g[y][x] = v
@@ -112,6 +113,9 @@ class Grid:
                 s += self.values.get(v, '?')
             print(s)
 
+    def hash(self):
+        return hash(tuple([tuple(_) for _ in self.g]))
+        
     # props
     @property
     def box(self):
@@ -223,9 +227,10 @@ class SparseGrid(Grid):
                 for x in range(len(items[y])):
                     c = items[y][x]
                     try:
-                        v = chars[c]
+                        v = self.chars[c]
                     except KeyError:
-                        chars[c] = v = ord(c)
+                        self.chars[c] = v = ord(c)
+                        self.values[v] = c
 
                     if v:
                         self.g[(x, y)] = v
@@ -271,10 +276,8 @@ class SparseGrid(Grid):
     def get(self, pt, default=None):
         return self.g.get(pt, default)
 
-    def getc(self, pt, default=None):
-        v = self.get(pt)
-        if v is None:
-            return default
+    def getc(self, pt):
+        v = self.get(pt, 0)
         return self.values[v]
 
     # mutate
@@ -313,14 +316,16 @@ class SparseGrid(Grid):
         return step(pt, dir)
 
     # dict/set ish methods
-    def __iter__(self):
-        return iter(dict(self.g))
-
-    def __contains__(self, k):
-        return k in self.g
-
-    def __len__(self):
-        return len(self.g)
+# mattb - should I be overriding these at all?
+# make this behave like Grid
+#    def __iter__(self):
+#        return iter(dict(self.g))
+#
+#    def __contains__(self, k):
+#        return k in self.g
+#
+#    def __len__(self):
+#        return len(self.g)
 
     # transformations
     def flip_x(self):

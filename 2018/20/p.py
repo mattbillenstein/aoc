@@ -8,7 +8,7 @@ import time
 from collections import defaultdict
 from pprint import pprint
 
-
+from graph import bfs
 from grid import SparseGrid
 
 DEBUG = sys.argv.count('-v')
@@ -40,7 +40,7 @@ def walk(regex, idx, g, pt):
             for npt in g.neighbors4d(pt):
                 g.setc(npt, '#')
             for npt in g.neighbors4(pt):
-                if not g.getc(npt):
+                if not g.get(npt):
                     g.setc(npt, '?')
         elif c == '(':
             idx, pt = walk(regex, idx+1, g, pt)
@@ -53,8 +53,10 @@ def walk(regex, idx, g, pt):
 
         idx += 1
 
-def part1(regex):
-    print(regex)
+    return idx, pt
+
+def run(regex):
+    debug(regex)
     g = SparseGrid([], {'.': 0, '#': 1, '|': 2, '-': 3, '?': 4, 'X': 5})
 
     pt = (0, 0)
@@ -64,24 +66,37 @@ def part1(regex):
     for npt in g.neighbors4(pt):
         g.setc(npt, '?')
 
-    walk(regex, 0, g, pt)
+    idx, pt = walk(regex, 0, g, pt)
+    g.remove(pt)
 
     for pt in g:
         if g.getc(pt) == '?':
             g.setc(pt, '#')
 
-    print()
-    g.print()
+    if DEBUG:
+        print()
+        g.print()
 
-def part2(data):
-    pass
+    def neighbors(pt):
+        return [_ for _ in g.neighbors4(pt) if g.getc(_) in '.|-']
+
+    ends = set()
+    for pt in g:
+        if g.getc(pt) == '.':
+            ends.add(pt)
+
+    pt = (0, 0)
+    found = bfs(pt, neighbors, ends)
+
+    # doors passed through is half distance
+    print(max(_[1]//2 for _ in found))
+
+    # part2
+    print(sum(1 for _ in found if (_[1] // 2) >= 1000))
 
 def main():
     data = parse_input()
-    if '1' in sys.argv:
-        part1(data)
-    if '2' in sys.argv:
-        part2(data)
+    run(data)
 
 if __name__ == '__main__':
     main()
