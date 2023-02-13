@@ -66,6 +66,8 @@ def part2(grid):
             period = i - seen[h]
             print(h, seen[h], i, period)
 
+            # when we're on the same pattern as would show up in iteration 1B,
+            # break and compute resources...
             if (N - i) % period == 0:
                 break
 
