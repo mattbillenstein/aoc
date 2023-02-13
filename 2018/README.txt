@@ -15,3 +15,4 @@
 15: Grid elves/goblins battle to the death - grid, bfs, simulation
 16: Simple cpu instruction mapping problem
 17: Grid water filling problem - ala sand filling in 2022
+18: Grid automata with large number of iterations / repeating pattern
