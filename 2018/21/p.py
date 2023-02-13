@@ -70,21 +70,20 @@ def execute(inst, regs):
         assert 0
 
 def run(ipreg, prog, regs):
-    i = 0
     ip = 0
     while 0 <= ip < len(prog):
         regs[ipreg] = ip
+        if DEBUG:
+            print(f'{ip:2d} {str(prog[ip]):25s} {regs}')
         if ip == 28:
             yield regs[4]
-#            print(f'{ip:2d} {str(prog[ip]):25s} {regs}')
         execute(prog[ip], regs)
         ip = regs[ipreg]
         ip += 1
-        i += 1
 
 def part(ipreg, prog):
-    # at instruction 28 is eqrr - we can just peek values out of that register
-    # until the sequence repeats...
+    # at instruction 28 is eqrr - we can just peek values out of the expected
+    # value at reg4 until the sequence repeats...
     seen = set()
     last = None
 
