@@ -16,3 +16,4 @@
 16: Simple cpu instruction mapping problem
 17: Grid water filling problem - ala sand filling in 2022
 18: Grid automata with large number of iterations / repeating pattern
+19: Simple cpu from #16 program - speed up long running thing
