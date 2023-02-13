@@ -18,3 +18,4 @@
 18: Grid automata with large number of iterations / repeating pattern
 19: Simple cpu from #16 program - speed up long running thing
 20: Grid walking from a regex - grid, bfs, regex
+21: Simple cpu program reverse engineering
