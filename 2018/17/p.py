@@ -32,14 +32,14 @@ def parse_input():
             x0 = int(L[3])
             x1 = int(L[4])
 
-        if 1 or x0 < 570 and y0 < 150:
-            for x in range(x0, x1 + 1):
-                for y in range(y0, y1 + 1):
-                    g.setc((x, y), '#')
+        for x in range(x0, x1 + 1):
+            for y in range(y0, y1 + 1):
+                g.setc((x, y), '#')
 
     return g
 
 def drop(pt, grid, maxy):
+    # drop down from pt to wall or water and fill visited points with sand
     while 1:
         npt = grid.step(pt, 'v')
         if npt[1] > maxy:
@@ -61,6 +61,7 @@ def fill(startpt, grid, srcs):
 
     scan = {}
 
+    # scan left and right from given point
     for dir in '<>':
         pt = startpt
         while 1:
@@ -76,6 +77,7 @@ def fill(startpt, grid, srcs):
                     break
                 pt = npt
 
+    # fill left to right with still water if wall, otherwise sand
     L, R = scan['<'], scan['>']
     c = '|'
     if L[0] == R[0] == 'wall':
@@ -85,19 +87,26 @@ def fill(startpt, grid, srcs):
     for x in range(L[1][0], R[1][0]+1):
         pt = (x, y)
         grid.setc(pt, c)
+
+        # if we set a source to still water, remove it
         if c == '~' and pt in srcs:
             srcs.remove(pt)
 
+    # if we found a new source, add it
     for tup in (L, R):
         if tup[0] == 'drop':
             srcs.add(tup[1])
         
-def part1(grid):
+def run(grid):
+    miny = min(_[1] for _ in grid)
+    maxy = max(_[1] for _ in grid)
+
     faucet = (500, 0)
     grid.setc(faucet, '+')
 
-    maxy = max(_[1] for _ in grid)
-
+    # keep a set of sources where we drop water from, these are added as we
+    # fill and spillover and removed as we fill and replace them with still
+    # water
     srcs = set([faucet])
 
     while 1:
@@ -108,42 +117,42 @@ def part1(grid):
             grid.print()
 
         for pt in list(srcs):
+            # we modify srcs along the way, make sure pt is still valid
             if pt not in srcs:
                 continue
 
+            # drop from the given point, if we fall off the grid, we get
+            # None...
             pt = drop(pt, grid, maxy)
             if pt is None:
                 continue
 
+            # fill either still water or sand from the given point
             fill(pt, grid, srcs)
 
         if g.g == grid.g:
             break
 
-    if 1 or DEBUG:
+    if DEBUG:
         print()
         grid.print()
 
-    cnt = 0
+    # count amount of water/sand
+    cnts = defaultdict(int)
     for pt in grid:
-        if pt[1] > maxy:
-            continue
+        if miny <= pt[1] <= maxy:
+            c = grid.getc(pt)
+            cnts[c] += 1
 
-        c = grid.getc(pt)
-        if c in '~|':
-            cnt += 1
+    # part1
+    print(cnts['~'] + cnts['|'])
 
-    print(cnt)
-
-def part2(data):
-    pass
+    # part2
+    print(cnts['~'])
 
 def main():
     data = parse_input()
-    if '1' in sys.argv:
-        part1(data)
-    if '2' in sys.argv:
-        part2(data)
+    run(data)
 
 if __name__ == '__main__':
     main()
