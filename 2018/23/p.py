@@ -67,9 +67,6 @@ def split_box(box):
         ((x1, y1, z1), (x2, y2, z2)),
     ]
 
-def box_size(box):
-    return box[1][0] - box[0][0]
-
 def part2(bots):
     # box solution
     origin = (0, 0, 0)
@@ -84,35 +81,33 @@ def part2(bots):
 
     # split the box into 8 octants and keep the best scoring ones by size - as
     # the boxes get smaller, they will be in range of less bots...
-    best = defaultdict(list)
-    best[box_size(box)].append((count_in_range(box, bots), box))
+    boxes = [(count_in_range(box, bots), box)]
 
     while 1:
-        # examine all boxes with the same score at the smallest size
-        size = min(best)
-        boxes = best[size]
-        boxes.sort(reverse=True)
-        boxes = [_[1] for _ in boxes if _[0] == boxes[0][0]]
-
-        # small enough, just spin through all left points
-        if size < 8:
-            break
-
-        for box in boxes:
-            debug(box_size(box), box, count_in_range(box, bots))
+        newboxes = []
+        for cnt, box in boxes:
+            debug(box, cnt)
             for b in split_box(box):
-                size = box_size(b)
                 cnt = count_in_range(b, bots)
-                debug('  ', box_size(b), b, count_in_range(b, bots))
-                best[size].append((cnt, b))
+                debug('  ', b, cnt)
+                newboxes.append((cnt, b))
+
+        boxes = newboxes
+        boxes.sort(reverse=True)
+        boxes = [_ for _ in boxes if _[0] == boxes[0][0]]
+
+        # small enough box, break
+        cnt, box = boxes[0]
+        if (box[1][0] - box[0][0]) < 8:
+            break
 
     # now brute force search all points in remaining boxes keeping point with
     # best score and lowest manhattan distance to origin...
     pt = None
-    cnt = 0
+    score = 0
     dist = 0
-    for box in boxes:
-        debug(box_size(box), box, count_in_range(box, bots))
+    for cnt, box in boxes:
+        debug(box, cnt)
 
         for x in range(box[0][0], box[1][0]):
             for y in range(box[0][1], box[1][1]):
@@ -120,9 +115,9 @@ def part2(bots):
                     npt = (x, y, z)
                     ndist = manhattan_distance(origin, npt)
                     ncnt = sum(1 for b, r in bots if manhattan_distance(npt, b) <= r)
-                    if ncnt > cnt or (ncnt == cnt and ndist < dist):
+                    if ncnt > score or (ncnt == score and ndist < dist):
                         pt = npt
-                        cnt = ncnt
+                        score = ncnt
                         dist = ndist
 
     print(pt, cnt, dist)
