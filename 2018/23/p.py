@@ -49,7 +49,7 @@ def part2(bots):
     # best point we've found along the way...
     #
     # This never exits, let it run and try what it outputs, should find a
-    # solution in ~5m
+    # solution in a few minutes...
 
     # Here are some of them with the same manhattan distance::
     # (54127929, 16826164, 30645449) 945 101599542
@@ -64,6 +64,8 @@ def part2(bots):
     # (54127928, 17023757, 30447855) 977 101599540 *
     # (54127928, 17023757, 30447854) 977 101599539
 
+    start = time.time()
+
     origin = (0, 0, 0)
 
     # start at an average point among all the bots
@@ -75,7 +77,7 @@ def part2(bots):
     score = count_in_range(pt, bots)
     dist = manhattan_distance(origin, pt)
 
-    print(pt, score, dist)
+    print(pt, score, dist, time.time() - start)
 
     lastpt = None
 
@@ -91,11 +93,16 @@ def part2(bots):
         d, b, r = random.choice(L)
         d = abs(d)
 
-        # try 1000 random points
-        for i in range(100):
-            # randomly divide manhattan distance away among the axis
-            px = random.randrange(0, d)
-            py = random.randrange(0, d - px)
+        # try random points on the surface
+        bad = 0
+        for i in range(1000):
+            # randomly divide manhattan distance away among each axis
+            dx = min(d, abs(pt[0]-b[0]))
+            px = random.randrange(0, dx)
+
+            dy = min(d-px, abs(pt[1]-b[1]))
+            py = random.randrange(0, dy)
+
             pz = d - px - py
 
             if pt[0] > b[0]:
@@ -107,15 +114,27 @@ def part2(bots):
 
             npt = (pt[0] + px, pt[1] + py, pt[2] + pz)
 
+            ndist = manhattan_distance(b, npt)
+            if ndist > r:
+                # d remainder overflowed pz, just throw in a random point
+                step = max(i, 1)
+                npt = (
+                    random.randrange(pt[0] - step, pt[0] + step),
+                    random.randrange(pt[1] - step, pt[1] + step),
+                    random.randrange(pt[1] - step, pt[1] + step),
+                )
+
             cnt = count_in_range(npt, bots)
-            if cnt >= score:
-                mdist = manhattan_distance(origin, npt)
-                if cnt > score or (cnt == score and mdist < dist):
-                    score = cnt
-                    dist = mdist
-                    pt = npt
-                    print(pt, score, dist)
-                    break
+            mdist = manhattan_distance(origin, npt)
+            if cnt > score or (cnt == score and mdist < dist):
+                score = cnt
+                dist = mdist
+                pt = npt
+
+                print(pt, score, dist, time.time() - start)
+
+                # point changed, recompute L
+                break
 
 def main():
     data = parse_input()
