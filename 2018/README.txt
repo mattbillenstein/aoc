@@ -19,4 +19,4 @@
 19: Simple cpu from #16 program - speed up long running thing
 20: Grid walking from a regex - grid, bfs, regex
 21: Simple cpu program reverse engineering
-22: Generative grid traversal - shortest path
+22: Generative grid traversal - shortest path - dijkstra
