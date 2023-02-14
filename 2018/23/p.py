@@ -10,15 +10,6 @@ from pprint import pprint
 
 DEBUG = sys.argv.count('-v')
 
-primes = [
-#    10_000_019, 8_000_009, 7_000_003, 6_000_011, 5_000_011,
-#    4_000_037, 3_000_017, 2_000_003,
-    1_000_003, 
-    900_001, 800_011, 600_011, 500_009, 300_007, 200_003, 100_003,
-    50_021, 25_013, 10_007,
-    5003, 2003, 1009, 503, 251, 101, 53, 23, 11, 5, 2, 1
-]
-
 def debug(*args):
     if DEBUG:
         print(*args)
@@ -38,6 +29,9 @@ def parse_input():
 def manhattan_distance(a, b):
     return sum(abs(x-y) for x, y in zip(a, b))
 
+def count_in_range(pt, bots):
+    return sum(1 for b, r in bots if manhattan_distance(pt, b) <= r)
+
 def part1(bots):
     bots.sort(key=lambda x: x[1])
 
@@ -50,96 +44,27 @@ def part1(bots):
 
     print(cnt)
 
-def count_in_range(pt, bots):
-    return sum(1 for b, r in bots if manhattan_distance(pt, b) <= r)
-
-origin = (0, 0, 0)
-
-def prime_search(pt, bots):
-    score = count_in_range(pt, bots)
-    dist = manhattan_distance(origin, pt)
-
-    times = 5
-    for step in primes:
-        for x in range(-step * times, step * times, step):
-            for y in range(-step * times, step * times, step):
-                for z in range(-step * times, step * times, step):
-                    npt = (pt[0] + x, pt[1] + y, pt[2] + z)
-
-                    cnt = count_in_range(npt, bots)
-                    if cnt >= score:
-                        mdist = manhattan_distance(origin, npt)
-                        if cnt > score or (cnt == score and mdist < dist):
-                            score = cnt
-                            dist = mdist
-                            pt = npt
-
-    print('prime', pt, score, dist, step)
-
-    return pt, score, dist
-
-def random_search(pt, bots, times=1_000_000):
-    score = count_in_range(pt, bots)
-    dist = manhattan_distance(origin, pt)
-
-    pt = list(pt)
-
-    step = 1024 * 1024
-    while step > 8:
-        for _ in range(times):
-            npt = list(pt)
-
-            while npt == pt:
-                for i in range(3):
-                    if random.random() < 0.5:
-                        npt[i] += random.randrange(-step, step)
-
-            cnt = count_in_range(npt, bots)
-#            print('rnd', pt, npt, cnt)
-            if cnt >= score:
-                mdist = manhattan_distance(origin, npt)
-                if cnt > score or (cnt == score and mdist < dist):
-                    score = cnt
-                    dist = mdist
-                    pt = npt
-
-        step //= 2
-
-        print('rando', pt, score, dist, step)
-
-    return pt, score, dist
-
-def sequential_search(pt, bots):
-    score = count_in_range(pt, bots)
-    dist = manhattan_distance(origin, pt)
-
-    n = 8
-    rx = range(pt[0] - n, pt[0] + n + 1)
-    ry = range(pt[1] - n, pt[1] + n + 1)
-    rz = range(pt[2] - n, pt[2] + n + 1)
-
-    for x in rx:
-        for y in ry:
-            for z in rz:
-                npt = (x, y, z)
-
-                cnt = count_in_range(npt, bots)
-                if cnt >= score:
-                    mdist = manhattan_distance(origin, npt)
-                    if cnt > score or (cnt == score and mdist < dist):
-                        score = cnt
-                        dist = mdist
-                        pt = npt
-
-    print('seq  ', pt, score, dist)
-
-    return pt, score, dist
-
 def part2(bots):
-    # Mostly random search, but we get a good start by walking primes and
-    # keeping the best point we find...
+    # Iteratively try to move in range of an out of range point keeping the
+    # best point we've found along the way...
+    #
+    # This never exits, let it run and try what it outputs, should find a
+    # solution in ~5m
 
-    # a solution: [55223783, 15927903, 30447854] 952 101599540 0
+    # Here are some of them with the same manhattan distance::
+    # (54127929, 16826164, 30645449) 945 101599542
+    # (54127928, 16826164, 30645448) 947 101599540 *
+    # (54144077, 17007607, 30447855) 948 101599539
+    # (54144079, 17007607, 30447854) 952 101599540 *
+    # (54127927, 17023734, 30447877) 966 101599538
+    # (54127928, 17023741, 30447871) 971 101599540 *
+    # (54127928, 17023747, 30447866) 972 101599541
+    # (54127929, 17023757, 30447857) 973 101599543
+    # (54127928, 17023756, 30447856) 974 101599540 *
+    # (54127928, 17023757, 30447855) 977 101599540 *
+    # (54127928, 17023757, 30447854) 977 101599539
+
+    origin = (0, 0, 0)
 
     # start at an average point among all the bots
     pt = (
@@ -150,31 +75,47 @@ def part2(bots):
     score = count_in_range(pt, bots)
     dist = manhattan_distance(origin, pt)
 
-    prime_done = set()
-    seq_done = set()
+    print(pt, score, dist)
+
+    lastpt = None
 
     while 1:
-        if pt not in prime_done:
-            prime_done.add(pt)
-            npt, nscore, ndist = prime_search(pt, bots)
-            if nscore > score or (nscore == score and ndist < dist):
-                pt = tuple(npt)
-                score = nscore
-                dist = ndist
+        # if point changed, recompute list of out of range points
+        if pt != lastpt:
+            lastpt = pt
+            L = [(r - manhattan_distance(pt, b), b, r) for b, r in bots]
+            L = [tup for tup in L if tup[0] < 0]
+            L.sort(reverse=True)
 
-        npt, nscore, ndist = random_search(pt, bots, 100_000)
-        if nscore > score or (nscore == score and ndist < dist):
-            pt = tuple(npt)
-            score = nscore
-            dist = ndist
+        # pick a random closer one
+        d, b, r = random.choice(L)
+        d = abs(d)
 
-        if pt not in seq_done:
-            seq_done.add(pt)
-            npt, nscore, ndist = sequential_search(pt, bots)
-            if nscore > score or (nscore == score and ndist < dist):
-                pt = tuple(npt)
-                score = nscore
-                dist = ndist
+        # try 1000 random points
+        for i in range(100):
+            # randomly divide manhattan distance away among the axis
+            px = random.randrange(0, d)
+            py = random.randrange(0, d - px)
+            pz = d - px - py
+
+            if pt[0] > b[0]:
+                px = -px
+            if pt[1] > b[1]:
+                py = -py
+            if pt[2] > b[2]:
+                pz = -pz
+
+            npt = (pt[0] + px, pt[1] + py, pt[2] + pz)
+
+            cnt = count_in_range(npt, bots)
+            if cnt >= score:
+                mdist = manhattan_distance(origin, npt)
+                if cnt > score or (cnt == score and mdist < dist):
+                    score = cnt
+                    dist = mdist
+                    pt = npt
+                    print(pt, score, dist)
+                    break
 
 def main():
     data = parse_input()
