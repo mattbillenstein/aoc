@@ -114,9 +114,13 @@ def sequential_search(pt, bots):
     dist = manhattan_distance(origin, pt)
 
     n = 8
-    for x in range(pt[0] - n, pt[0] + n + 1):
-        for y in range(pt[1] - n, pt[1] + n + 1):
-            for z in range(pt[2] - n, pt[2] + n + 1):
+    rx = range(pt[0] - n, pt[0] + n + 1)
+    ry = range(pt[1] - n, pt[1] + n + 1)
+    rz = range(pt[2] - n, pt[2] + n + 1)
+
+    for x in rx:
+        for y in ry:
+            for z in rz:
                 npt = (x, y, z)
 
                 cnt = count_in_range(npt, bots)
