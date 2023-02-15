@@ -39,6 +39,13 @@ def part1(bots):
 def box_intersect(box, bot, r):
     # this little bit is cribbed - this manhattan distance intersection
     # requires a bit more study...
+
+    # basically think of this as we can extend the manhattan distance from the
+    # bot to the box on each axis until a point is in the range of the box on
+    # that axis...
+    #
+    # see: https://www.reddit.com/r/adventofcode/comments/a8s17l/comment/ecl4emt/?utm_source=share&utm_medium=web2x&context=3
+
     d = 0
     for i in range(3):
         low, high = box[0][i], box[1][i] - 1
