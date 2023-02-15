@@ -40,7 +40,7 @@ def bot_in_range(box, bot, r):
     # compute manhattan distance from bot to box and then check if it's <= r
     d = 0
     for i in range(3):
-        if not box[0][i] <= bot[i] < box[1][i]:
+        if not box[0][i] <= bot[i] <= box[1][i]:
             # min manhattan distance on this axis of the two box edges if the
             # bot is not inside the box on this axis...
             d += min(abs(box[0][i]-bot[i]), abs(box[1][i]-bot[i]))
@@ -70,7 +70,6 @@ def count_in_range_pt(pt, bots):
     return sum(1 for b, r in bots if manhattan_distance(pt, b) <= r)
 
 def part2(bots):
-    # box solution
     origin = (0, 0, 0)
 
     # make a large box in range of all bots
@@ -81,8 +80,8 @@ def part2(bots):
             break
         size *= 2
 
-    # split the box into 8 octants and keep the best scoring ones by size - as
-    # the boxes get smaller, they will be in range of less bots...
+    # split the box into 8 sub-boxes and keep the best scoring ones by size -
+    # as the boxes get smaller, they will be in range of less bots...
     boxes = [(count_in_range(box, bots), box)]
 
     while 1:
@@ -103,7 +102,8 @@ def part2(bots):
         if (box[1][0] - box[0][0]) == 1:
             break
 
-    # find the max count and min manhattan distance
+    # find the max count and min manhattan distance of first corner of
+    # remaining size 1 boxes
     pts = [_[1][0] for _ in boxes]
     L = [(count_in_range_pt(_, bots), -manhattan_distance(origin, _), _) for _ in pts]
     L.sort()
