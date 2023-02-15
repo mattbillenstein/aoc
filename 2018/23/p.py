@@ -66,6 +66,9 @@ def split_box(box):
         ((x1, y1, z1), (x2, y2, z2)),
     ]
 
+def count_in_range_pt(pt, bots):
+    return sum(1 for b, r in bots if manhattan_distance(pt, b) <= r)
+
 def part2(bots):
     # box solution
     origin = (0, 0, 0)
@@ -95,31 +98,17 @@ def part2(bots):
         boxes.sort(reverse=True)
         boxes = [_ for _ in boxes if _[0] == boxes[0][0]]
 
-        # small enough box, break
+        # box size 1, we can just inspect the first point of each box now
         cnt, box = boxes[0]
-        if (box[1][0] - box[0][0]) < 8:
+        if (box[1][0] - box[0][0]) == 1:
             break
 
-    # now brute force search all points in remaining boxes keeping point with
-    # best score and lowest manhattan distance to origin...
-    pt = None
-    score = 0
-    dist = 0
-    for cnt, box in boxes:
-        debug(box, cnt)
-
-        for x in range(box[0][0], box[1][0]):
-            for y in range(box[0][1], box[1][1]):
-                for z in range(box[0][2], box[1][2]):
-                    npt = (x, y, z)
-                    ndist = manhattan_distance(origin, npt)
-                    ncnt = sum(1 for b, r in bots if manhattan_distance(npt, b) <= r)
-                    if ncnt > score or (ncnt == score and ndist < dist):
-                        pt = npt
-                        score = ncnt
-                        dist = ndist
-
-    print(pt, cnt, dist)
+    # find the max count and min manhattan distance
+    pts = [_[1][0] for _ in boxes]
+    L = [(count_in_range_pt(_, bots), -manhattan_distance(origin, _), _) for _ in pts]
+    L.sort()
+    cnt, dist, pt = L[-1]
+    print(pt, cnt, -dist)
 
 def main():
     data = parse_input()
