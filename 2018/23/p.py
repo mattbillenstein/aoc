@@ -36,26 +36,18 @@ def part1(bots):
 
     print(cnt)
 
-def box_intersect(box, bot, r):
-    # this little bit is cribbed - this manhattan distance intersection
-    # requires a bit more study...
-
-    # basically think of this as we can extend the manhattan distance from the
-    # bot to the box on each axis until a point is in the range of the box on
-    # that axis...
-    #
-    # see: https://www.reddit.com/r/adventofcode/comments/a8s17l/comment/ecl4emt/?utm_source=share&utm_medium=web2x&context=3
-
+def bot_in_range(box, bot, r):
+    # compute manhattan distance from bot to box and then check if it's <= r
     d = 0
     for i in range(3):
-        low, high = box[0][i], box[1][i] - 1
-        d += abs(bot[i] - low) + abs(bot[i] - high)
-        d -= high - low
-    d //= 2
+        if not box[0][i] <= bot[i] < box[1][i]:
+            # min manhattan distance on this axis of the two box edges if the
+            # bot is not inside the box on this axis...
+            d += min(abs(box[0][i]-bot[i]), abs(box[1][i]-bot[i]))
     return d <= r
 
 def count_in_range(box, bots):
-    return sum(1 for b, r in bots if box_intersect(box, b, r))
+    return sum(1 for b, r in bots if bot_in_range(box, b, r))
 
 def split_box(box):
     x0, y0, z0 = box[0]
