@@ -21,3 +21,5 @@
 21: Simple cpu program reverse engineering
 22: Generative grid traversal - shortest path - dijkstra
 23: 3d beacons problem - search for point most covered...
+24: Rather tedious battle simulation
+25: 4d points in constellations merging on manhattan distance
