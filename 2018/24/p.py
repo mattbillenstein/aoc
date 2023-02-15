@@ -134,6 +134,8 @@ def part2(teams):
         for g in x[0]['groups']:
             g['ad'] += boost
 
+        # boost 58 never terminates because the attacker doesn't have enough hp
+        # to kill the last defender...
         finished = sim(x)
         if not finished:
             continue
