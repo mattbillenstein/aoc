@@ -1,2 +1,3 @@
 01: Simple conditional addition of numbers in a list mod length of list...
 02: Sum of array of numbers meeting some conditions
+03: Spiral grid problems
