@@ -8,3 +8,4 @@
 08: Simple cpu instructions
 09: String parsing/counting
 10: Iterative list of ints reversal
+11: Simpler hexgrid problem
