@@ -7,3 +7,4 @@
 07: Recursive weight balancing problem
 08: Simple cpu instructions
 09: String parsing/counting
+10: Iterative list of ints reversal
