@@ -9,3 +9,4 @@
 09: String parsing/counting
 10: Iterative list of ints reversal
 11: Simpler hexgrid problem
+12: Connected groups of sets problem
