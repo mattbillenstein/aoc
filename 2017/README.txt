@@ -10,3 +10,4 @@
 10: Iterative list of ints reversal
 11: Simpler hexgrid problem
 12: Connected groups of sets problem
+13: Evading layers of scanners - repeating long sequence search
