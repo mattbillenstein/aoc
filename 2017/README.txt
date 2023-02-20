@@ -13,4 +13,5 @@
 13: Evading layers of scanners - repeating long sequence search
 14: Knot hash onto grid and find regions of neighboring points
 15: Simple number generator problem
-16: Iterative list mutations - part2 large number of times...
+16: Iterative list mutations - part2 large number of times.
+17: Iterative inserting values into a list at a computed position.
