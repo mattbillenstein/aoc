@@ -11,4 +11,5 @@
 11: Simpler hexgrid problem
 12: Connected groups of sets problem
 13: Evading layers of scanners - repeating long sequence search
-13: Knot hash onto grid and find regions of neighboring points
+14: Knot hash onto grid and find regions of neighboring points
+15: Simple number generator problem

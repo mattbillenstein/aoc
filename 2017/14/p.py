@@ -70,7 +70,7 @@ def part2(s):
         pts[pt] = 1
         break
 
-    # iterate points and set
+    # iterate points and set to a group
     for pt, g in pts.items():
         # neighboring points in a group
         L = [pts[_] for _ in neighbors(pt, pts) if pts[_] is not None]
