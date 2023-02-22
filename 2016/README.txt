@@ -4,3 +4,4 @@
 04: String rot decryption
 05: Decoding encryption using md5 hex hashes
 06: Simple character frequency decoding
+07: Substring matching
