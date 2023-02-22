@@ -3,3 +3,4 @@
 03: Count valid triangles from list of side lengths
 04: String rot decryption
 05: Decoding encryption using md5 hex hashes
+06: Simple character frequency decoding
