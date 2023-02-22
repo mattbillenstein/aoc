@@ -22,3 +22,4 @@
 22: Different for of grid automata - grid
 23: Asm program - debug and speedup for part2
 24: Building bridge of components - recursive search
+25: Simple state machine sim
