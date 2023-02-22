@@ -21,3 +21,4 @@
 21: Grid "Fractal" - grid slice/place
 22: Different for of grid automata - grid
 23: Asm program - debug and speedup for part2
+24: Building bridge of components - recursive search
