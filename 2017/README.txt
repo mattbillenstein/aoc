@@ -19,3 +19,4 @@
 19: Simple path tracing - grid
 20: Particle pos/vel/acc simulation, manhattan distance
 21: Grid "Fractal" - grid slice/place
+22: Different for of grid automata - grid
