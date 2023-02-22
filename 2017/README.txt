@@ -17,3 +17,5 @@
 17: Iterative inserting values into a list at a computed position.
 18: Small concurrent asm programs passing values - generators
 19: Simple path tracing - grid
+20: Particle pos/vel/acc simulation, manhattan distance
+21: Grid "Fractal" - grid slice/place
