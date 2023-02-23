@@ -6,3 +6,4 @@
 06: Simple character frequency decoding
 07: Substring matching
 08: Grid manipulation, letter spelling problem
+09: String manipulation producing much longer string
