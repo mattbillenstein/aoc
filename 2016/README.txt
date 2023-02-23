@@ -14,3 +14,4 @@
 14: Finding repeated characters in a sequence of md5 hashes
 15: Easier 2017 Day 13 - timed gate passing problem
 16: Binary string repeated manipulation
+17: Pathfinding in doored maze with md5 hash of path defining open doors
