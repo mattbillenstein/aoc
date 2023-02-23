@@ -41,6 +41,22 @@ def check(floors):
     return True
 
 def move(floors, E, steps, best, visited):
+    if not check(floors):
+        return
+
+    if steps > best[0]:
+        return
+
+    poss = steps
+    for i in (1, 2, 3):
+        # leaving out a factor of 2 twice here, we carry two and need to go up
+        # and down... Seems very approximately correct and speeds this all up,
+        # but not tested thoroughly...
+        poss += len(floors[i]) * (4-i)
+
+    if poss > best[0]:
+        return
+
     state = hash((E, tuple([(k, frozenset(v)) for k, v in floors.items()])))
     if visited.get(state, sys.maxsize) <= steps:
         return
@@ -60,37 +76,40 @@ def move(floors, E, steps, best, visited):
         return
 
     if E < 4:
-        for tup in itertools.combinations(sorted(floors[E]), 2):
+        for tup in itertools.combinations(floors[E], 2):
             for x in tup:
                 floors[E+1].add(x)
                 floors[E].remove(x)
-            if check(floors):
-                move(floors, E+1, steps+1, best, visited)
+
+            move(floors, E+1, steps+1, best, visited)
+
             for x in tup:
                 floors[E+1].remove(x)
                 floors[E].add(x)
 
     if E > 1:
         # try moving every single item down
-        for item in sorted(floors[E]):
+        for item in floors[E]:
             floors[E].remove(item)
             floors[E-1].add(item)
-            if check(floors):
-                move(floors, E-1, steps+1, best, visited)
+
+            move(floors, E-1, steps+1, best, visited)
+
             floors[E].add(item)
             floors[E-1].remove(item)
 
-        # and every pair
-        for tup in itertools.combinations(sorted(floors[E]), 2):
+        # and pairs
+        for tup in itertools.combinations(floors[E], 2):
             # skip G/G, may not work on all inputs?
-            if tup[0][1] == 'G' and tup[1][1] == 'G':
+            if tup[0][1] == tup[1][1] == 'G':
                 continue
 
             for x in tup:
                 floors[E-1].add(x)
                 floors[E].remove(x)
-            if check(floors):
-                move(floors, E-1, steps+1, best, visited)
+
+            move(floors, E-1, steps+1, best, visited)
+
             for x in tup:
                 floors[E-1].remove(x)
                 floors[E].add(x)
