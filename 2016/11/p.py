@@ -2,12 +2,8 @@
 
 import copy
 import itertools
-import math
 import re
 import sys
-import time
-from collections import defaultdict
-from pprint import pprint
 
 DEBUG = sys.argv.count('-v')
 
@@ -33,102 +29,84 @@ def parse_input():
         floors[k] = set([d[_[0]] + _[1] for _ in floors[k]])
     return floors
 
+def other(s):
+    return s[0] + 'G' if s[1] == 'M' else 'M'
+
+def check(floors):
+    # return True if we're good...
+    for f, s in floors.items():
+        gens = [_ for _ in s if _[1] == 'G']
+        if gens and any(other(_) not in gens for _ in s if _[1] == 'M'):
+            return False
+    return True
+
+def move(floors, E, steps, best, visited):
+    state = hash((E, tuple([(k, frozenset(v)) for k, v in floors.items()])))
+    if visited.get(state, sys.maxsize) <= steps:
+        return
+
+    visited[state] = steps
+
+    if DEBUG:
+        print(E, steps, best)
+        for k, v in floors.items():
+            print(k, v)
+        print()
+
+    if all(not floors[_] for _ in (1, 2, 3)):
+        if steps < best[0]:
+            print(steps)
+            best[0] = steps
+        return
+
+    if E < 4:
+        for tup in itertools.combinations(sorted(floors[E]), 2):
+            for x in tup:
+                floors[E+1].add(x)
+                floors[E].remove(x)
+            if check(floors):
+                move(floors, E+1, steps+1, best, visited)
+            for x in tup:
+                floors[E+1].remove(x)
+                floors[E].add(x)
+
+    if E > 1:
+        # try moving every single item down
+        for item in sorted(floors[E]):
+            floors[E].remove(item)
+            floors[E-1].add(item)
+            if check(floors):
+                move(floors, E-1, steps+1, best, visited)
+            floors[E].add(item)
+            floors[E-1].remove(item)
+
+        # and every pair
+        for tup in itertools.combinations(sorted(floors[E]), 2):
+            # skip G/G, may not work on all inputs?
+            if tup[0][1] == 'G' and tup[1][1] == 'G':
+                continue
+
+            for x in tup:
+                floors[E-1].add(x)
+                floors[E].remove(x)
+            if check(floors):
+                move(floors, E-1, steps+1, best, visited)
+            for x in tup:
+                floors[E-1].remove(x)
+                floors[E].add(x)
+
 def part1(floors):
-    # so if you have everything on level N, moving everything to N+1 (empty)
-    # proceeds:
-    #
-    # 3 pairs ABC
-    #  0. Initial           [AM AG BM BG CM CG] -> []
-    #  1. lift AM BM        [AG BG CM CG]       -> [AM BM]
-    #  2. drop AM           [AM AG BG CM CG]    -> [BM]
-    #  3. lift AM CM        [AG BG CG]          -> [AM BM CM]
-    #  4. drop AM           [AM AG BG CG]       -> [BM CM]
-    #  5. lift BG CG        [AM AG]             -> [BM BG CM CG]
-    #  6. drop BM BG        [AM AG BM BG]       -> [CM CG]        # drop 2 since no single works...
-    #  7. lift AG BG        [AM BM]             -> [AG BG CM CG]
-    #  8. drop CM           [AM BM CM]          -> [AG BG CG]
-    #  9. lift AM BM        [CM]                -> [AM AG BM BG CG]
-    # 10. drop AM           [AM CM]             -> [AG BM BG CG]
-    # 11. lift AM CM        []                  -> [AM AG BM BG CM CG]
+    best = [sys.maxsize]
+    move(floors, 1, 0, best, {})
+    print(best[0])
 
-    # so my input starts with two micros on the next level up, lets just unwind
-    # that and I'll add 4 at the start...
-    floors[1].update(floors[2])
-    floors[2].clear()
+def part2(floors):
+    # two new pairs added to floor 1
+    floors[1].update(['FM', 'FG', 'GM', 'GG'])
 
-    E = 1
-    E1 = 1
-    E2 = 2
-    steps = 4
-
-    def other(s):
-        return s[0] + 'G' if s[1] == 'M' else 'M'
-
-    while floors[E1]:
-        pprint(floors)
-
-        src_gens = [_ for _ in floors[E1] if _[1] == 'G']
-        src_mics = [_ for _ in floors[E1] if _[1] == 'M']
-        for mic in src_mics:
-            if other(mic) not in src_gens and src_gens:
-                assert 0
-
-        tgt_gens = [_ for _ in floors[E2] if _[1] == 'G']
-        tgt_mics = [_ for _ in floors[E2] if _[1] == 'M']
-        for mic in tgt_mics:
-            if other(mic) not in tgt_gens and tgt_gens:
-                assert 0
-
-        if E == E1:
-            if len(tgt_gens) == 0:
-                if len(tgt_mics) < 2:
-                    # lift two mics if there are two, else mic and gen
-                    for i in range(2):
-                        x = src_mics.pop() if src_mics else src_gens.pop()
-                        floors[E2].add(x)
-                        floors[E1].remove(x)
-                else:
-                    gens = [other(_) for _ in tgt_mics if other(_) not in tgt_gens]
-                    if not gens:
-                        # if none unpaired, lift two others
-                        gens = list(src_gens)
-                        print(gens)
-                        duh
-
-                    # lift two gens
-                    for i in range(2):
-                        x = gens.pop()
-                        floors[E2].add(x)
-                        floors[E1].remove(x)
-            else:
-                duh
-
-            E = E2
-        else:
-            # drop one if legal, else pair
-            found = None
-            for mic in tgt_mics:
-                o = other(mic)
-                if o in src_gens:
-                    found = mic
-                    break
-
-            if found:
-                floors[E2].remove(found)
-                floors[E1].add(found)
-            else:
-                # drop pair
-                x = tgt_mics[0]
-                o = other(x)
-                floors[E2].remove(x)
-                floors[E2].remove(o)
-                floors[E1].add(x)
-                floors[E1].add(o)
-
-            E = E1
-
-def part2(data):
-    pass
+    best = [sys.maxsize]
+    move(floors, 1, 0, best, {})
+    print(best[0])
 
 def main():
     data = parse_input()
