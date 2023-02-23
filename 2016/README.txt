@@ -11,3 +11,4 @@
 11: Moving items between floors of bldg given constraints - recursive search
 12: Simple asm program
 13: Generate grid and bfs
+14: Finding repeated characters in a sequence of md5 hashes
