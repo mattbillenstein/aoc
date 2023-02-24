@@ -44,7 +44,7 @@ def part(blocks):
     # count ips between blocks
     for i in range(len(blocks)-1):
         a, b = blocks[i:i+2]
-        cnt += max(0, b[0] - a[1] - 1)
+        cnt += b[0] - a[1] - 1
 
     # end of range
     cnt += 2**32-1 - blocks[-1][1]
