@@ -22,3 +22,4 @@
 22: Pathfinding moving data between mostly full servers - bfs
 23: Another asm debugging program - self-modifying this time...
 24: Traveling salesman - bfs, dfs, grid
+25: Simple asm program
