@@ -16,3 +16,4 @@
 16: Binary string repeated manipulation
 17: Pathfinding in doored maze with md5 hash of path defining open doors
 18: Grid automata tile counting
+19: Removing elements from a large circle - part2 ran snow...
