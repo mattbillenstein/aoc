@@ -1,12 +1,6 @@
 #!/usr/bin/env pypy3
 
-import copy
-import itertools
-import math
 import sys
-import time
-from collections import defaultdict
-from pprint import pprint
 
 from graph import bfs
 from grid import Grid
@@ -71,12 +65,7 @@ def part2(nodes):
     g = Grid(['.' * sx] * sy, {'.': 0, '#': 1, '0': 2, 'G': 3, 'E': 4})
 
     end = (0, 0)
-
-    y, x = 0, 1
-    while (x, y) in nodes:
-        x += 1
-    x -= 1
-    goal = (x, y)
+    goal = (sx-1, 0)
 
 #    print_nodes(nodes)
 
@@ -108,16 +97,16 @@ def part2(nodes):
 
     # takes 5 steps to move G one - shuffle the hole around, G has moved 1
     # after the hole takes its place, and we can just walk it over to y=0
-    tot = dist + 5 * (goal[0] - 1)
+    tot = dist + 5 * (goal[0] - 1 - end[0])
 
     print(tot)
 
 def main():
     data = parse_input()
     if '1' in sys.argv:
-        part1(copy.deepcopy(data))
+        part1(data)
     if '2' in sys.argv:
-        part2(copy.deepcopy(data))
+        part2(data)
 
 if __name__ == '__main__':
     main()
