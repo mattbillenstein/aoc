@@ -3,3 +3,4 @@
 03: Counting uniq points over step directions
 04: Find N leading zeros of md5
 05: Substring pattern counting
+06: Sum of 1000x1000 array altered by some commands...
