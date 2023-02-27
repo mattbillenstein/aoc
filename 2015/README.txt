@@ -7,3 +7,4 @@
 07: Simple computer circuit program
 08: String literal encoding
 09: Travelling salesman - dfs
+10: Look-and-Say sequence
