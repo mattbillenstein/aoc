@@ -9,3 +9,4 @@
 09: Travelling salesman - dfs
 10: Look-and-Say sequence
 11: Counting through a password string
+12: Recursively sum all numbers in a json blob
