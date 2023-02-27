@@ -5,3 +5,4 @@
 05: Substring pattern counting
 06: Sum of 1000x1000 array altered by some commands...
 07: Simple computer circuit program
+08: String literal encoding
