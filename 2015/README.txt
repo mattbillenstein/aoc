@@ -13,3 +13,4 @@
 13: Score all possible seating arrangments for a party
 14: Reindeer flying / resting simulation
 15: Computing optimal cookie recipe - just iteration
+16: Matching attributes to a list of candidates
