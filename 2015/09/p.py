@@ -45,15 +45,10 @@ class State:
 
     def next(self):
         # next states
-        if not self.path:
-            for c in self.cities:
-                yield self.__class__([c], 0, self.cities)
-        else:
-            pos = self.path[-1]
-            for c in self.cities:
-                if c not in self.path:
-                    dist = self.cities[pos][c]
-                    yield self.__class__(self.path + [c], self.dist + dist, self.cities)
+        for c in self.cities:
+            if c not in self.path:
+                dist = self.cities[self.path[-1]][c] if self.path else 0
+                yield self.__class__(self.path + [c], self.dist + dist, self.cities)
 
     def __repr__(self):
         return f'State({self.path}, {self.dist})'
