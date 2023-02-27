@@ -1,5 +1,6 @@
 #!/usr/bin/env pypy3
 
+import copy
 import itertools
 import math
 import sys
@@ -28,9 +29,9 @@ def part2(data):
 def main():
     data = parse_input()
     if '1' in sys.argv:
-        part1(data)
+        part1(copy.deepcopy(data))
     if '2' in sys.argv:
-        part2(data)
+        part2(copy.deepcopy(data))
 
 if __name__ == '__main__':
     main()

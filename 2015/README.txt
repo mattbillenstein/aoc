@@ -11,3 +11,4 @@
 11: Counting through a password string
 12: Recursively sum all numbers in a json blob
 13: Score all possible seating arrangments for a party
+14: Reindeer flying / resting simulation
