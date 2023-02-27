@@ -14,3 +14,4 @@
 14: Reindeer flying / resting simulation
 15: Computing optimal cookie recipe - just iteration
 16: Matching attributes to a list of candidates
+17: Number of ways to fill many smaller containers with given amount of liquid
