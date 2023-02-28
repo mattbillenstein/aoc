@@ -1,14 +1,8 @@
 #!/usr/bin/env pypy3
 
-import copy
-import itertools
-import math
 import sys
-import time
-from collections import defaultdict
-from pprint import pprint
 
-from graph import rdfs, dfs
+from graph import dfs
 
 DEBUG = sys.argv.count('-v')
 
