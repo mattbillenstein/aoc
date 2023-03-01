@@ -22,3 +22,4 @@
 22: More difficult RPG
 23: Simple asm prog
 24: Balance packages into N groups
+25: Given formula, compute number at position in grid filled diagonally
