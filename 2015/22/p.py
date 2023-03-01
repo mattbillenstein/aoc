@@ -14,13 +14,13 @@ def debug(*args):
 
 def parse_input():
     lines = [_.strip('\r\n') for _ in sys.stdin]
-    d = {}
+    boss = {}
     for line in lines:
         a, b = line.split(': ')
         if a == 'Hit Points':
             a = 'hp'
         a = a.lower()
-        d[a] = int(b)
+        boss[a] = int(b)
 
     spells = []
     for line in open('spells.txt'):
@@ -42,59 +42,65 @@ def parse_input():
             'mana': mana,
         })
 
-    return d, spells
+    player = {
+        'hp': 50,
+        'mana': 500,
+        'armor': 0,
+        'mana_used': 0,
+        'effects': {},
+    }
+    if boss['hp'] < 50:
+        player.update({'hp': 10, 'mana': 250})
+
+    return player, boss, spells
 
 class BadState(Exception):
     pass
 
 class State:
-    def __init__(self, player, boss, spells, spell=None):
+    def __init__(self, player, boss, spells, part, spell=None):
         self.player = copy.deepcopy(player)
         self.boss = copy.deepcopy(boss)
         self.spells = spells
 
-        if spell:
-            if DEBUG > 2:
-                print('Fight')
-                print(spell)
-                print(self.player)
-                print(self.boss)
+        self.part = part
 
+        if spell:
+            if self.part == 2:
+                self.player['hp'] -= 1
+                if self.player['hp'] <= 0:
+                    raise BadState('Player Died')
+
+            # fight yielding a valid new state or raising BadState
             self.do_effects()
             if self.boss['hp'] <= 0:
                 return
 
             # player casts
             if self.player['mana'] < spell['cost']:
-                raise BadState()
+                raise BadState('No mana')
 
             # cast
             self.player['mana'] -= spell['cost']
             self.player['mana_used'] += spell['cost']
             if spell['turns']:
                 if spell['name'] in self.player['effects']:
-                    raise BadState()
+                    raise BadState('Effect in use')
                 self.player['effects'][spell['name']] = spell = copy.deepcopy(spell)
             else:
-                self.boss['hp'] -= spell['damage']
                 self.player['hp'] += spell['hp']
-
-            if self.boss['hp'] > 0:
-                # boss fights
-                self.do_effects()
+                self.boss['hp'] -= spell['damage']
                 if self.boss['hp'] <= 0:
                     return
 
-                self.player['hp'] -= max(1, self.boss['damage'] - self.player['armor'])
+            # boss turn
+            self.do_effects()
+            if self.boss['hp'] <= 0:
+                return
 
-                if self.player['hp'] <= 0:
-                    raise BadState('Player Died')
-
-            if DEBUG > 2:
-                print(self.player)
-                print(self.boss)
-                print('End Fight')
-                print()
+            self.player['hp'] -= max(1, self.boss['damage'] - self.player['armor'])
+            if self.player['hp'] <= 0:
+                raise BadState('Player Died')
 
     def do_effects(self):
         self.player['armor'] = 0
@@ -122,7 +128,7 @@ class State:
 
     @property
     def key(self):
-        # the key into the visited dict
+        # the key into the visited dict if applicable
         return ''
 
     @property
@@ -134,42 +140,39 @@ class State:
         # next states
         for spell in self.spells:
             try:
-                yield self.__class__(self.player, self.boss, self.spells, spell)
+                yield self.__class__(self.player, self.boss, self.spells, self.part, spell)
             except BadState:
-                if DEBUG > 2:
-                    print('Bad')
-                    print()
                 pass
 
     def __repr__(self):
         return f'State({self.player}, {self.boss}, {self.cost})'
 
-def part(boss, spells):
-    player = {
-        'hp': 50,
-        'mana': 500,
-        'armor': 0,
-        'mana_used': 0,
-        'effects': {},
-    }
-    if boss['hp'] < 50:
-        # test
-        player.update({'hp': 10, 'mana': 250})
-
+def part1(player, boss, spells):
     if DEBUG:
         print(player)
         print(boss)
         pprint(spells)
 
-    state = State(player, boss, spells)
-    print(state)
-
+    state = State(player, boss, spells, 1)
     best = dfs(state)
-    print(best)
+    print(best.cost)
+
+def part2(player, boss, spells):
+    if DEBUG:
+        print(player)
+        print(boss)
+        pprint(spells)
+
+    state = State(player, boss, spells, 2)
+    best = dfs(state)
+    print(best.cost)
 
 def main():
     data = parse_input()
-    part(*data)
+    if '1' in sys.argv:
+        part1(*data)
+    if '2' in sys.argv:
+        part2(*data)
 
 if __name__ == '__main__':
     main()

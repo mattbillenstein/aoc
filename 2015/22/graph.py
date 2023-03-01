@@ -68,6 +68,9 @@ def dfs(state):
 
     while q:
         state = q.pop_task()
+        if best and state.cost > best.cost:
+            continue
+
         if DEBUG > 1:
             if time.time() - _last > 10:
                 _last = time.time()
@@ -82,7 +85,7 @@ def dfs(state):
             if not best or state.cost < best.cost:
                 best = state
                 debug('Found best:', best)
-                continue
+            continue
 
         if state.key:
             if state.key in visited and visited[state.key] <= state.cost:
@@ -99,6 +102,9 @@ def rdfs(state, visited, best):
     # recursive dfs - idk if this is needed, but it's here in case...
     global _last
 
+    if best[0] and state.cost > best[0].cost:
+        return
+
     if DEBUG > 1:
         if time.time() - _last > 10:
             _last = time.time()
@@ -113,7 +119,7 @@ def rdfs(state, visited, best):
         if not best[0] or state.cost < best[0].cost:
             best[0] = state
             debug('Found best:', best[0])
-            return
+        return
 
     if state.key:
         if state.key in visited and visited[state.key] <= state.cost:
