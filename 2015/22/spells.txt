@@ -1,0 +1,6 @@
+-               Cost  Damage  Armor  HP   Turns  Mana
+Magic_Missile    53     4       0     0     0      0
+Drain            73     2       0     2     0      0
+Shield          113     0       7     0     6      0
+Poison          173     3       0     0     6      0
+Recharge        229     0       0     0     5    101

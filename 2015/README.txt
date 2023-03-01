@@ -19,3 +19,4 @@
 19: Reducing a molecule from a list of known substitutions - dfs
 20: Sum of factors problem
 21: RPG simulator
+22: More difficult RPG
