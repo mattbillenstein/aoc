@@ -20,3 +20,5 @@
 20: Sum of factors problem
 21: RPG simulator
 22: More difficult RPG
+23: Simple asm prog
+24: Balance packages into N groups
