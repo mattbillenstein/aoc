@@ -1,12 +1,9 @@
 #!/usr/bin/env pypy3
 
-import math
 import sys
-import time
 from collections import defaultdict
-from pprint import pprint
 
-DEBUG = '--debug' in sys.argv
+DEBUG = sys.argv.count('-v')
 
 def debug(*args):
     if DEBUG:
@@ -14,7 +11,6 @@ def debug(*args):
 
 def parse_input():
     lines = [_.strip('\r\n') for _ in sys.stdin]
-#    lines = [int(_) for _ in lines]
     lines = [int(_.split()[-1]) for _ in lines]
     return lines
 
@@ -47,9 +43,6 @@ def part1(data):
     print(min(s1, s2) * rolls)
 
 def play_round(p1, p2, s1, s2, universes, outcomes, depth=''):
-#    print(depth, p1, p2, s1, s2, universes)
-#    time.sleep(1)
-
     w1 = 0
     w2 = 0
 

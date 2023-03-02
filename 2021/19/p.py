@@ -1,14 +1,12 @@
 #!/usr/bin/env pypy3
 
-import math
 import random
 import sys
-import time
 from collections import defaultdict
 from itertools import permutations
 from pprint import pprint
 
-DEBUG = '--debug' in sys.argv
+DEBUG = sys.argv.count('-v')
 
 def debug(*args):
     if DEBUG:

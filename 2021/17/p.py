@@ -1,12 +1,10 @@
 #!/usr/bin/env pypy3
 
 import sys
-import time
-from collections import defaultdict
-from pprint import pprint
 
 from grid import SparseGrid
 
+DEBUG = sys.argv.count('-v')
 
 def parse_input():
     lines = [_.strip('\r\n') for _ in sys.stdin]
@@ -18,9 +16,6 @@ def parse_input():
     return target
 
 def run(target):
-    print(target)
-    debug = '--debug' in sys.argv
-
     g = SparseGrid([], {'.': 0, '#': 1, 'T': 2})
 
     g.set((0, 0), 1)
@@ -29,7 +24,7 @@ def run(target):
         for x in range(target[0][0], target[1][0]+1):
             g.set((x, y), 2)
     
-    if debug:
+    if DEBUG:
         g.print()
 
     velocities = []
@@ -62,7 +57,7 @@ def run(target):
                     if maxy > MAX[0]:
                         MAX = (maxy, DX, DY)
                     velocities.append((DX, DY, maxy))
-                    if debug:
+                    if DEBUG:
                         print(DX, DY, maxy, MAX)
                         e.flip_x()
                         e.print()
@@ -75,15 +70,14 @@ def run(target):
                 dy -= 1
 
 
-    print()
-    if debug:
+    if DEBUG:
         velocities.sort()
         for v in velocities:
             print(v)
         print()
 
+    print(MAX[0])
     print(len(velocities))
-    print(MAX)
     
 def main():
     data = parse_input()

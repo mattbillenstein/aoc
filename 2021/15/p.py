@@ -1,12 +1,12 @@
 #!/usr/bin/env pypy3
 
 import sys
-import time
 from collections import defaultdict
-from pprint import pprint
 
 from graph import dijkstra
 from grid import Grid
+
+DEBUG = sys.argv.count('-v')
 
 def parse_input():
     lines = [_.strip('\r\n') for _ in sys.stdin]
@@ -24,12 +24,13 @@ def part1(data):
     start, end = zip(*g.box)
     path = dijkstra(graph, start, end)
 
-    printer = Grid([[0] * g.size[0] for _ in range(g.size[1])], {'.': 0, '*': 1})
+    if DEBUG:
+        printer = Grid([[0] * g.size[0] for _ in range(g.size[1])], {'.': 0, '*': 1})
 
-    for pt, cost in path:
-        printer.set(pt, 1)
+        for pt, cost in path:
+            printer.set(pt, 1)
 
-#    printer.print()
+        printer.print()
 
     print(path[-1][1])
 

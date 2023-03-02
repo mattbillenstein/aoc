@@ -3,6 +3,8 @@
 import math
 import sys
 
+DEBUG = sys.argv.count('-v')
+
 SUM, PRODUCT, MIN, MAX, LITERAL, GT, LT, EQ = range(8)
 MIN_PACKET_LENGTH = 11 # version (3), type (3), loop (1), 4-bit literal?
 
@@ -111,14 +113,16 @@ def decode_packet(bits, idx):
 def run(data):
     for line in data:
         bits = hex_to_bin(line)
-        print(line, bits)
+        if DEBUG:
+            print(line, bits)
 
         idx = 0
         while len(bits) - idx >= MIN_PACKET_LENGTH:
             pkt, idx = decode_packet(bits, idx)
-            print(pkt, idx)
-            print('Sum versions:', pkt.versions_sum())
-            print('Calc:', pkt.calc())
+            if DEBUG:
+                print(pkt, idx)
+            print(pkt.versions_sum())
+            print(pkt.calc())
 
 def main():
     data = parse_input()

@@ -1,16 +1,11 @@
 #!/usr/bin/env pypy3
 
-import itertools
-import math
 import sys
-import time
-from collections import defaultdict
-from pprint import pprint
 
 from cube import Cube
 from grid3d import SparseGrid3D
 
-DEBUG = '--debug' in sys.argv
+DEBUG = sys.argv.count('-v')
 
 def debug(*args):
     if DEBUG:
@@ -18,7 +13,6 @@ def debug(*args):
 
 def parse_input():
     lines = [_.strip('\r\n') for _ in sys.stdin]
-#    lines = [int(_) for _ in lines]
     cubes = []
     for line in lines:
         for s in ('..', 'x=', ',y=', ',z='):

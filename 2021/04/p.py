@@ -1,9 +1,6 @@
 #!/usr/bin/env pypy3
 
 import sys
-import time
-from collections import defaultdict
-from pprint import pprint
 
 def parse_input():
     lines = [_.strip() for _ in sys.stdin]
@@ -59,7 +56,6 @@ def part1(data):
             if won:
                 score = n * unmarked
                 print(score)
-                print()
                 return
 
 def part2(data):

@@ -1,9 +1,7 @@
 #!/usr/bin/env pypy3
 
+import copy
 import sys
-import time
-from collections import defaultdict
-from pprint import pprint
 
 def parse_input():
     lines = [_.strip('\r\n') for _ in sys.stdin]
@@ -74,11 +72,9 @@ def part2(grid):
 def main():
     data = parse_input()
     if '1' in sys.argv:
-        grid = [list(_) for _ in data]
-        part1(grid)
+        part1(copy.deepcopy(data))
     if '2' in sys.argv:
-        grid = [list(_) for _ in data]
-        part2(grid)
+        part2(copy.deepcopy(data))
 
 if __name__ == '__main__':
     main()

@@ -3,7 +3,7 @@
 import json
 import sys
 
-debug = '--debug' in sys.argv
+DEBUG = sys.argv.count('-v')
 
 def parse_input():
     lines = [json.loads(_.strip('\r\n')) for _ in sys.stdin]
@@ -64,7 +64,7 @@ def explode(num):
     if not x:
         return False
 
-    if debug:
+    if DEBUG:
         print('explode', num, x)
 
     if 1:
@@ -133,7 +133,7 @@ def split(num):
     if not x:
         return False
 
-    if debug:
+    if DEBUG:
         print('split', num, x)
 
     # create Node(Int, Int) with proper values
@@ -186,7 +186,9 @@ def part1(data):
     data = [to_tree(_) for _ in data]
 
     num = snail_sum(data)
-    print(num)
+    if DEBUG:
+        print(num)
+
     print(num.magnitude)
 
 def part2(data):
@@ -201,8 +203,11 @@ def part2(data):
                 if mag > mx[-1]:
                     mx = [a, b, c, mag]
 
-    for item in mx:
-        print(item)
+    if DEBUG:
+        for item in mx[:3]:
+            print(item)
+
+    print(mx[3])
 
 def main():
     data = parse_input()

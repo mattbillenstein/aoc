@@ -1,11 +1,7 @@
 #!/usr/bin/env pypy3
 
-import itertools
-import math
 import sys
 import time
-from collections import defaultdict
-from pprint import pprint
 
 DEBUG = '--debug' in sys.argv
 
@@ -197,7 +193,6 @@ def dfs(state, best):
         print(best[0] and best[0].energy)
         state.print()
         print()
-#        time.sleep(3)
 
     # costly
     if 'D' in state.hall[:2]:
@@ -226,8 +221,6 @@ def dfs(state, best):
     if state.finished():
         if not best[0] or state.energy < best[0].energy:
             best[0] = state
-#            best[0].print()
-#            print()
         return
 
     # can we put a pod into a room? Push state for every pod we could place
@@ -270,7 +263,8 @@ def dfs(state, best):
 
 def part1(rooms, hall):
     state = State(rooms, hall)
-    state.print()
+    if DEBUG:
+        state.print()
 
     best = [None]
     dfs(state, best)
@@ -288,7 +282,7 @@ def part1(rooms, hall):
             s.print()
             print()
 
-    print('BEST', best.energy)
+    print(best.energy)
 
 def part2(rooms, hall):
     # splice new data into rooms between first and second row

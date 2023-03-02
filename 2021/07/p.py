@@ -1,9 +1,6 @@
 #!/usr/bin/env pypy3
 
 import sys
-import time
-from collections import defaultdict
-from pprint import pprint
 
 def parse_input():
     lines = [_.strip('\r\n') for _ in sys.stdin]

@@ -1,9 +1,6 @@
 #!/usr/bin/env pypy3
 
 import sys
-import time
-from collections import defaultdict
-from pprint import pprint
 
 def parse_input():
     lines = [_.strip('\r\n') for _ in sys.stdin]
@@ -16,7 +13,7 @@ def num_increased(data):
             cnt += 1
     return cnt
 
-def part1(data):
+def part(data):
     print(num_increased(data))
 
     sums = []
@@ -28,7 +25,7 @@ def part1(data):
 def main(argv):
     data = parse_input()
 
-    part1(data)
+    part(data)
 
 if __name__ == '__main__':
     main(sys.argv)

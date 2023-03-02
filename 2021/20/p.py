@@ -1,14 +1,10 @@
 #!/usr/bin/env pypy3
 
-import math
 import sys
-import time
-from collections import defaultdict
-from pprint import pprint
 
 from grid import SparseGrid
 
-DEBUG = '--debug' in sys.argv
+DEBUG = sys.argv.count('-v')
 
 def debug(*args):
     if DEBUG:

@@ -1,11 +1,6 @@
 #!/usr/bin/env pypy3
 
-import itertools
-import math
 import sys
-import time
-from collections import defaultdict
-from pprint import pprint
 
 from grid import Grid
 
@@ -20,12 +15,12 @@ def debug(*args):
 
 def parse_input():
     lines = [_.strip('\r\n') for _ in sys.stdin]
-#    lines = [int(_) for _ in lines]
     g = Grid(lines, {'.': 0, '>': EAST, 'v': SOUTH})
     return g
 
 def part1(grid):
-    grid.print()
+    if DEBUG:
+        grid.print()
 
     steps = 0
     while 1:
@@ -61,8 +56,9 @@ def part1(grid):
         if not moved:
             break
 
-    print()
-    grid.print()
+    if DEBUG:
+        print()
+        grid.print()
 
     print(steps)
 
