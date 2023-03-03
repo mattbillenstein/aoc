@@ -10,7 +10,7 @@ EMPTY = 0
 TILE = 1
 WALL = 2
 
-DEBUG = '--debug' in sys.argv
+DEBUG = sys.argv.count('-v')
 
 def parse_input():
     lines = [_.strip('\r\n') for _ in sys.stdin]

@@ -7,7 +7,7 @@ import time
 from collections import defaultdict
 from pprint import pprint
 
-DEBUG = '--debug' in sys.argv
+DEBUG = sys.argv.count('-v')
 
 from grid import SparseGrid
 

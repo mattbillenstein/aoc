@@ -9,7 +9,7 @@ from pprint import pprint
 
 from intcode import intcode
 
-DEBUG = '--debug' in sys.argv
+DEBUG = sys.argv.count('-v')
 
 def debug(*args):
     if DEBUG:

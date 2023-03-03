@@ -4,7 +4,7 @@ import sys
 
 from grid import Grid
 
-DEBUG = '--debug' in sys.argv
+DEBUG = sys.argv.count('-v')
 
 EAST = 1
 SOUTH = 2

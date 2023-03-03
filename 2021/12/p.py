@@ -3,6 +3,8 @@
 import sys
 from collections import defaultdict
 
+DEBUG = sys.argv.count('-v')
+
 def parse_input():
     lines = [_.strip('\r\n') for _ in sys.stdin]
     edges = defaultdict(list)
@@ -40,7 +42,7 @@ def part1(edges):
     
     dfs(['start'], 'end', edges, defaultdict(int), paths)
 
-    if '--debug' in sys.argv:
+    if DEBUG:
         for path in paths:
             print(','.join(path))
 
@@ -55,7 +57,7 @@ def part2(edges):
             dfs(['start'], 'end', edges, defaultdict(int), paths, visit_twice=node)
 
     paths = sorted(set(paths))
-    if '--debug' in sys.argv:
+    if DEBUG:
         for path in paths:
             print(','.join(path))
 

@@ -3,7 +3,7 @@
 import sys
 import time
 
-DEBUG = '--debug' in sys.argv
+DEBUG = sys.argv.count('-v')
 
 def debug(*args):
     if DEBUG:

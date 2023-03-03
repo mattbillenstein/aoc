@@ -9,7 +9,7 @@ from pprint import pprint
 
 from grid import Grid
 
-DEBUG = '--debug' in sys.argv
+DEBUG = sys.argv.count('-v')
 
 def debug(*args):
     if DEBUG:

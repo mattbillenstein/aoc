@@ -1,6 +1,6 @@
 import sys
 
-DEBUG = '--debug' in sys.argv
+DEBUG = '--debug-intcode' in sys.argv
 
 def debug(*args):
     if DEBUG:

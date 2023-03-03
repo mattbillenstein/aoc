@@ -10,7 +10,7 @@ from grid import SparseGrid
 from grid3d import SparseGrid3D
 from grid4d import SparseGrid4D
 
-DEBUG = '--debug' in sys.argv
+DEBUG = sys.argv.count('-v')
 
 def debug(*args):
     if DEBUG:

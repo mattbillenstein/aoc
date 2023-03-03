@@ -8,7 +8,7 @@ from pprint import pprint
 
 from grid import Grid
 
-DEBUG = '--debug' in sys.argv
+DEBUG = sys.argv.count('-v')
 
 class Tile(Grid):
     def __init__(self, items, id):
