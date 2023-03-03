@@ -16,135 +16,94 @@ def parse_input():
             line[-1] = int(line[-1])
     return lines
 
-def run(prog, inp, regs=None):
-    if not regs:
-        regs = {_: 0 for _ in 'wxyz'}
+def translate(prog):
+    s = '''
+def func(input):
+    w = x = y = z = 0
 
-    idx = 0
+'''
+    icnt = 0
 
     for instr in prog:
         op, reg, *rest = instr
         if rest:
             v = rest[0]
-            if isinstance(v, str):
-                v = regs[v]
 
         if op == 'inp':
-            regs[reg] = int(inp[idx])
-            idx += 1
+            s += f'    {reg} = input[{icnt}]\n'
+            icnt += 1
         elif op == 'mul':
-            regs[reg] *= v
+            s += f'    {reg} *= {v}\n'
         elif op == 'add':
-            regs[reg] += v
+            s += f'    {reg} += {v}\n'
         elif op == 'mod':
-            regs[reg] %= v
+            s += f'    {reg} %= {v}\n'
         elif op == 'div':
-            regs[reg] //= v
+            s += f'    {reg} //= {v}\n'
         elif op == 'eql':
-            regs[reg] = int(regs[reg] == v)
+            s += f'    {reg} = int({reg} == {v})\n'
         else:
             assert 0, op
 
-        if DEBUG:
-            print(' '.join(str(_) for _ in instr), ' -- ', ' '.join(f'{k}:{v}' for k, v in regs.items()), inp[idx] if idx < len(inp) else '')
+    s += '    return {"w": w, "x": x, "y": y, "z": z}\n'
 
-    return regs
-
-def recurse(num, prog, z):
-    # eh, this is slow, we could pick apart the asm and optimize, but yolo
-    digit = len(num)
-    for w in range(1, 10):
-        sw = str(w)
-        regs = {_: 0 for _ in 'wxy'}
-        regs['z'] = z
-        run(prog[digit], sw, regs)
-        if digit == 13 and regs['z'] == 0:
-            yield num + sw
-        # hard-code number here - if it's too small, we won't find z=0 at the
-        # end...
-        elif digit < 13 and regs['z'] < 500_000:
-            for x in recurse(num + sw, prog, regs['z']):
-                yield x
+    return s
 
 def part(prog):
-    DIGITS = 14
-    N = len(prog) // DIGITS
-    assert len(prog) % N == 0
+    # faster implementation - translate to python and then spin through some of
+    # the digits and look for low z to spin through the other ones...  Bit of
+    # trial and error getting this working.
 
-    prog = [prog[_*N:_*N+N] for _ in range(DIGITS)]
+    s = translate(prog)
+    debug(s)
+    exec(s, globals())
 
-    mn = '9' * DIGITS
-    mx = '1' * DIGITS
-    cnt = 0
-    for x in recurse('', prog, 0):
-        cnt += 1
-        print(x)
-        if x < mn:
-            mn = x
-        elif x > mx:
-            mx = x
+    rng = range(1, 10)
 
-    print(mn, mx, cnt)
+    mn = int(''.join('9' * 14))
+    mx = int(''.join('1' * 14))
+
+    L = [5 for _ in range(14)]
+
+    for L[0] in rng:
+     for L[1] in rng:
+      for L[2] in rng:
+       for L[3] in rng:
+        for L[4] in rng:
+         for L[5] in rng:
+          for L[6] in rng:
+           for L[13] in rng:
+            d = func(L)
+            if DEBUG:
+              print(L, d['z'])
+            if d['z'] < 500_000:
+              for L[7] in rng:
+               for L[8] in rng:
+                for L[9] in rng:
+                 for L[10] in rng:
+                  for L[11] in rng:
+                   for L[12] in rng:
+                      d = func(L)
+                      if d['z'] == 0:
+                        n = int(''.join(str(_) for _ in L))
+                        if n < mn:
+                          mn = n
+                        if n > mx:
+                          mx = n
+
+    print(mx)
+    print(mn)
 
 def do_bin(prog):
+    exec(translate(prog), globals())
     for i in range(10):
-        regs = run(prog, str(i))
+        regs = func([i])
         print(i, regs)
 
 def test_monad(prog):
-    x = sys.argv[2]
-    regs = run(prog, x)
+    exec(translate(prog), globals())
+    regs = func([int(_) for _ in sys.argv[2]])
     print(regs)
-
-def test_alu():
-    regs = run([
-        ['inp', 'w'],
-        ['inp', 'x'],
-        ['add', 'x', 'w'],
-    ], '34')
-    assert regs == {'w': 3, 'x': 7, 'y': 0, 'z': 0}, regs
-
-    regs = run([
-        ['inp', 'w'],
-        ['inp', 'x'],
-        ['add', 'x', 14],
-    ], '34')
-    assert regs == {'w': 3, 'x': 18, 'y': 0, 'z': 0}, regs
-
-    regs = run([
-        ['inp', 'w'],
-        ['inp', 'x'],
-        ['mul', 'x', 'w'],
-    ], '34')
-    assert regs == {'w': 3, 'x': 12, 'y': 0, 'z': 0}, regs
-
-    regs = run([
-        ['inp', 'w'],
-        ['inp', 'x'],
-        ['mul', 'x', -1],
-    ], '34')
-    assert regs == {'w': 3, 'x': -4, 'y': 0, 'z': 0}, regs
-
-    regs = run([
-        ['inp', 'w'],
-        ['inp', 'x'],
-        ['mod', 'x', 'w'],
-    ], '47')
-    assert regs == {'w': 4, 'x': 3, 'y': 0, 'z': 0}, regs
-
-    regs = run([
-        ['inp', 'w'],
-        ['inp', 'x'],
-        ['eql', 'x', 'w'],
-    ], '33')
-    assert regs == {'w': 3, 'x': 1, 'y': 0, 'z': 0}, regs
-
-    regs = run([
-        ['inp', 'w'],
-        ['inp', 'x'],
-        ['eql', 'x', 'w'],
-    ], '34')
-    assert regs == {'w': 3, 'x': 0, 'y': 0, 'z': 0}, regs
 
 def main():
     if 'bin' in sys.argv:
@@ -152,9 +111,7 @@ def main():
         do_bin(data)
     elif 'monad' in sys.argv:
         data = parse_input()
-        monad(data)
-    elif 'test' in sys.argv:
-        test_alu()
+        test_monad(data)
     else:
         data = parse_input()
         part(data)
