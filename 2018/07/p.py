@@ -1,9 +1,6 @@
 #!/usr/bin/env pypy3
 
-import itertools
-import math
 import sys
-import time
 from collections import defaultdict
 from pprint import pprint
 
@@ -117,7 +114,7 @@ def part2(steps):
                 if step:
                     slots[i] = [step, base_duration + duration(step)]
 
-        print(t, slots, completed)
+        debug(t, slots, completed)
 
         # done?
         if len(completed) == len(all_steps):

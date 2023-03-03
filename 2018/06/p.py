@@ -1,10 +1,6 @@
 #!/usr/bin/env pypy3
 
-import itertools
-import math
-import string
 import sys
-import time
 from collections import defaultdict
 from pprint import pprint
 
@@ -16,7 +12,6 @@ def debug(*args):
 
 def parse_input():
     lines = [_.strip('\r\n') for _ in sys.stdin]
-#    lines = [int(_) for _ in lines]
     points = []
     for line in lines:
         x, y = line.replace(',', '').split()

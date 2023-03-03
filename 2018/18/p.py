@@ -1,11 +1,7 @@
 #!/usr/bin/env pypy3
 
-import itertools
-import math
 import sys
-import time
 from collections import defaultdict
-from pprint import pprint
 
 from grid import Grid
 
@@ -64,7 +60,7 @@ def part2(grid):
         h = g.hash()
         if h in seen:
             period = i - seen[h]
-            print(h, seen[h], i, period)
+            debug(h, seen[h], i, period)
 
             # when we're on the same pattern as would show up in iteration 1B,
             # break and compute resources...

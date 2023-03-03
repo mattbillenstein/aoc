@@ -1,22 +1,10 @@
 #!/usr/bin/env pypy3
 
-import itertools
-import math
 import sys
-import time
-from collections import defaultdict
-from pprint import pprint
-
-DEBUG = sys.argv.count('-v')
-
-def debug(*args):
-    if DEBUG:
-        print(*args)
 
 def parse_input():
     lines = [_.strip('\r\n') for _ in sys.stdin]
-    data = [int(_) for _ in lines[0].split()]
-    return data
+    return [int(_) for _ in lines[0].split()]
 
 class Node:
     def __init__(self, nodes, metadata):
@@ -71,7 +59,6 @@ def part(data):
 
     # part2
     print(nodes[0].value)
-
 
 def main():
     data = parse_input()

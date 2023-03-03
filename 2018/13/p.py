@@ -1,19 +1,10 @@
 #!/usr/bin/env pypy3
 
-import itertools
-import math
 import sys
-import time
-from collections import defaultdict
-from pprint import pprint
 
 from grid import Grid
 
 DEBUG = sys.argv.count('-v')
-
-def debug(*args):
-    if DEBUG:
-        print(*args)
 
 def parse_input():
     lines = [_.strip('\r\n') for _ in sys.stdin]
@@ -95,7 +86,7 @@ def run(data, part):
                     remove.append(cart)
                     remove.append(cart2)
 
-                    if part == '1':
+                    if part == 1:
                         # print first collision
                         print('Collision:', npt)
                         return
@@ -123,7 +114,10 @@ def run(data, part):
 
 def main():
     data = parse_input()
-    run(data, sys.argv[1])
+    if '1' in sys.argv:
+        run(data, 1)
+    if '2' in sys.argv:
+        run(data, 2)
 
 if __name__ == '__main__':
     main()

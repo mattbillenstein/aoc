@@ -1,22 +1,10 @@
 #!/usr/bin/env pypy3
 
-import itertools
-import math
 import sys
-import time
-from collections import defaultdict
-from pprint import pprint
-
-DEBUG = sys.argv.count('-v')
-
-def debug(*args):
-    if DEBUG:
-        print(*args)
 
 def parse_input():
     lines = [_.strip('\r\n') for _ in sys.stdin]
-    data = [tuple([int(x) for x in _.split(',')]) for _ in lines]
-    return data
+    return [tuple([int(x) for x in _.split(',')]) for _ in lines]
 
 def manhattan(a, b):
     return sum(abs(x-y) for x, y in zip(a, b))

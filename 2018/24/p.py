@@ -1,12 +1,8 @@
 #!/usr/bin/env pypy3
 
 import copy
-import itertools
-import math
 import re
 import sys
-import time
-from collections import defaultdict
 from pprint import pprint
 
 DEBUG = sys.argv.count('-v')
