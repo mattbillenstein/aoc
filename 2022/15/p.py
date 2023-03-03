@@ -1,16 +1,60 @@
-#!/usr/bin/env pypy3
+#!/usr/bin/env python3
 
 import re
 import sys
 
+DEBUG = sys.argv.count('-v')
+
+def debug(*args):
+    if DEBUG:
+        print(*args)
+
 def manhattan(a, b):
     return abs(b[0] - a[0]) + abs(b[1] - a[1])
+
+def parse_input():
+    lines = [_.strip('\r\n') for _ in sys.stdin]
+
+    sensors = {}
+    beacons = set()
+    for line in lines:
+        mobj = re.match('Sensor at x=([-0-9]+), y=([-0-9]+): closest beacon is at x=([-0-9]+), y=([-0-9]+)', line)
+        sx, sy, bx, by = [int(_) for _ in mobj.groups()]
+
+        sensors[(sx, sy)] = manhattan((sx, sy), (bx, by))
+        beacons.add((bx, by))
+
+    return sensors, beacons
+
+def part1(sensors, beacons, y):
+    minx = sys.maxsize
+    maxx = 0
+
+    for pt, dist in sensors.items():
+        if pt[0] - dist < minx:
+            minx = pt[0] - dist
+        if pt[0] + dist > maxx:
+            maxx = pt[0] + dist
+
+    debug('Search x:', minx, maxx)
+
+    cnt = 0
+    for x in range(minx, maxx+1):
+        if (x, y) in beacons:
+            continue
+
+        for sensor, dist in sensors.items():
+            newdist = manhattan((x, y), sensor)
+            if newdist <= dist:
+                cnt += 1
+                break
+
+    print(cnt)
 
 def intersection(r1, r2):
     if r1[1] < r2[0] or r2[1] < r1[0]:
         return None
     return (max(r1[0], r2[0]), min(r1[1], r2[1]))
-
 
 def merge_intervals(intervals):
     # Sort the array on the basis of start values of intervals.
@@ -28,23 +72,8 @@ def merge_intervals(intervals):
 
     return stack
 
-
-def main(argv):
-    with open(argv[1]) as f:
-        lines = [_.strip('\r\n') for _ in f]
-
-    sensors = {}
-    beacons = set()
-    for line in lines:
-        mobj = re.match('Sensor at x=([-0-9]+), y=([-0-9]+): closest beacon is at x=([-0-9]+), y=([-0-9]+)', line)
-        sx, sy, bx, by = [int(_) for _ in mobj.groups()]
-
-        sensors[(sx, sy)] = dist = manhattan((sx, sy), (bx, by))
-        beacons.add((bx, by))
-
+def part2(sensors, beacons, area):
     num_sensors = len(sensors)
-
-    area = int(sys.argv[2])
 
     num_covered = lambda pt: sum(manhattan(pt, s) <= d for s, d in sensors.items())
 
@@ -78,14 +107,22 @@ def main(argv):
             x0 = a[1]+1
             x1 = b[0]
 
-            print(f'Scan y={y} x={x0}-{x1}')
+            debug(f'Scan y={y} x={x0}-{x1}')
             for x in range(x0, x1+1):
                 cnt = num_covered((x, y))
                 if cnt == 0 and pt not in beacons:
                     pt = (x, y)
                     break
 
-    print(pt, pt[0] * 4000000 + pt[1])
+    debug(pt)
+    print(pt[0] * area + pt[1])
+
+def main():
+    data = parse_input()
+    if '1' in sys.argv:
+        part1(*data, 2_000_000)
+    if '2' in sys.argv:
+        part2(*data, 4_000_000)
 
 if __name__ == '__main__':
-    main(sys.argv)
+    main()

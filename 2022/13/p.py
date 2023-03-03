@@ -42,9 +42,8 @@ def cmp(L, R):
 
     assert 0, types
 
-def main(argv):
-    with open(argv[1]) as f:
-        lines = [_.strip('\r\n') for _ in f]
+def parse_input():
+    lines = [_.strip('\r\n') for _ in sys.stdin]
 
     pairs = []
     item = []
@@ -55,9 +54,12 @@ def main(argv):
                 pairs.append(tuple(item))
                 item.clear()
 
+    return pairs
+
+def part(data):
     # part 1, sum of index of sorted items, first is 1
     i = sum = 0
-    for a, b in pairs:
+    for a, b in data:
         i += 1
         x = cmp(a, b)
         if x == -1:
@@ -68,9 +70,9 @@ def main(argv):
     # part 2 - product of index of these two markers
     markers = [[[2]], [[6]]]
     items = list(markers)
-    for line in lines:
-        if line:
-            items.append(json.loads(line))
+    for a, b in data:
+        items.append(a)
+        items.append(b)
 
     items.sort(key=cmp_to_key(cmp))
 
@@ -83,5 +85,9 @@ def main(argv):
 
     print(tot)
 
+def main():
+    data = parse_input()
+    part(data)
+
 if __name__ == '__main__':
-    main(sys.argv)
+    main()
