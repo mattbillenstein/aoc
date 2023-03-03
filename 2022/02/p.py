@@ -51,6 +51,14 @@ opp_result_play = {
     ('S', 'Z'): 'R',
 }
 
+def parse_input():
+    lines = [_.strip('\r\n') for _ in sys.stdin]
+    matches = []
+    for line in lines:
+        opp, result = line.strip().split()
+        matches.append((opp, result))
+    return matches
+
 def score_round(opp, me):
     opp = opp_code[opp]
     me = me_code[me]
@@ -61,26 +69,26 @@ def score_round_result(opp, result):
     me = opp_result_play[(opp, result)]
     return thing_score[me] + opp_me_score[(opp, me)]
 
-def p1(argv):
+def part1(matches):
     tot = 0
-    with open(argv[1]) as f:
-        for line in f:
-            opp, me = line.strip().split()
-            tot += score_round(opp, me)
+    for opp, me in matches:
+        tot += score_round(opp, me)
 
     print(tot)
 
-def p2(argv):
+def part2(matches):
     tot = 0
-    with open(argv[1]) as f:
-        for line in f:
-            opp, result = line.strip().split()
-            tot += score_round_result(opp, result)
+    for opp, result in matches:
+        tot += score_round_result(opp, result)
 
     print(tot)
 
-def main(argv):
-    p1(argv)
-    p2(argv)
+def main():
+    data = parse_input()
+    if '1' in sys.argv:
+        part1(data)
+    if '2' in sys.argv:
+        part2(data)
+
 if __name__ == '__main__':
-    main(sys.argv)
+    main()
