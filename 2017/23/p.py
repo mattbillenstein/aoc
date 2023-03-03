@@ -1,11 +1,7 @@
 #!/usr/bin/env pypy3
 
-import itertools
-import math
 import sys
-import time
-from collections import defaultdict, deque
-from pprint import pprint
+from collections import defaultdict
 
 DEBUG = sys.argv.count('-v')
 

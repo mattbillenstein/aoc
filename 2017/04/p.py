@@ -1,22 +1,9 @@
 #!/usr/bin/env pypy3
 
-import itertools
-import math
 import sys
-import time
-from collections import defaultdict
-from pprint import pprint
-
-DEBUG = sys.argv.count('-v')
-
-def debug(*args):
-    if DEBUG:
-        print(*args)
-
 def parse_input():
     lines = [_.strip('\r\n') for _ in sys.stdin]
-    lines = [_.split() for _ in lines]
-    return lines
+    return [_.split() for _ in lines]
 
 def part1(data):
     print(sum(1 for _ in data if len(_) == len(set(_))))

@@ -1,17 +1,6 @@
 #!/usr/bin/env pypy3
 
-import itertools
-import math
 import sys
-import time
-from collections import defaultdict
-from pprint import pprint
-
-DEBUG = sys.argv.count('-v')
-
-def debug(*args):
-    if DEBUG:
-        print(*args)
 
 def parse_input():
     lines = [_.strip('\r\n') for _ in sys.stdin]
@@ -39,10 +28,15 @@ def part2(data):
     seen = set()
     i = 0
     last = 0
+    last_loop = 0
     while 1:
         if tuple(data) in seen:
-            print(i, i - last)
+            loop = i - last
+            if loop == last_loop:
+                print(loop)
+                return
             last = i
+            last_loop = loop
             seen.clear()
 
         seen.add(tuple(data))
