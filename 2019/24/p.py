@@ -1,11 +1,7 @@
 #!/usr/bin/env pypy3
 
-import itertools
-import math
 import sys
-import time
 from collections import defaultdict
-from pprint import pprint
 
 from grid import Grid
 
@@ -17,8 +13,7 @@ def debug(*args):
 
 def parse_input():
     lines = [_.strip('\r\n') for _ in sys.stdin]
-    grid = Grid(lines)
-    return grid
+    return Grid(lines)
 
 def part1(grid):
     states = set()

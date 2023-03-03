@@ -1,20 +1,9 @@
 #!/usr/bin/env pypy3
 
-import random
-import itertools
-import math
 import sys
-import time
 from collections import defaultdict, deque
-from pprint import pprint
 
 from intcode import intcode
-
-DEBUG = sys.argv.count('-v')
-
-def debug(*args):
-    if DEBUG:
-        print(*args)
 
 def parse_input():
     lines = [_.strip('\r\n') for _ in sys.stdin]

@@ -1,24 +1,13 @@
 #!/usr/bin/env pypy3
 
 import itertools
-import math
 import sys
-import time
-from collections import defaultdict
-from pprint import pprint
 
 from intcode import intcode
 
-DEBUG = sys.argv.count('-v')
-
-def debug(*args):
-    if DEBUG:
-        print(*args)
-
 def parse_input():
     lines = [_.strip('\r\n') for _ in sys.stdin]
-    mem = [int(_) for _ in lines[0].split(',')]
-    return mem
+    return [int(_) for _ in lines[0].split(',')]
 
 def run_thrusters(mem, phases, repeat=False):
     v = 0

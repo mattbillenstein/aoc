@@ -1,25 +1,14 @@
 #!/usr/bin/env pypy3
 
 import random
-import itertools
-import math
 import sys
-import time
 from collections import defaultdict
-from pprint import pprint
 
 from intcode import intcode
 
-DEBUG = sys.argv.count('-v')
-
-def debug(*args):
-    if DEBUG:
-        print(*args)
-
 def parse_input():
     lines = [_.strip('\r\n') for _ in sys.stdin]
-    mem = [int(_) for _ in lines[0].split(',')]
-    return mem
+    return [int(_) for _ in lines[0].split(',')]
 
 def next_input(prog):
     stuff = defaultdict(list)
@@ -100,8 +89,6 @@ def main():
     data = parse_input()
     if '1' in sys.argv:
         part1(data)
-    if '2' in sys.argv:
-        part2(data)
 
 if __name__ == '__main__':
     main()

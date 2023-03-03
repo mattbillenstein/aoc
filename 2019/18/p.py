@@ -1,11 +1,7 @@
 #!/usr/bin/env pypy3
 
-import itertools
-import math
-import random
 import sys
 import time
-from collections import defaultdict
 from pprint import pprint
 
 from grid import Grid
@@ -18,7 +14,6 @@ def debug(*args):
 
 def parse_input():
     lines = [_.strip('\r\n') for _ in sys.stdin]
-#    lines = [int(_) for _ in lines]
 
     chars = {'.': 0, '#': 1, '@': 64}
     for c in 'abcdefghijklmnopqrstuvwxyz':
@@ -113,7 +108,8 @@ def dfs(state, best):
             dfs(s, best)
 
 def part1(grid):
-    grid.print()
+    if DEBUG:
+        grid.print()
 
     edges = {}
     all_keys = set()
@@ -151,7 +147,8 @@ def part2(grid):
 
     global best_at
 
-    grid.print()
+    if DEBUG:
+        grid.print()
 
     points = {}
 

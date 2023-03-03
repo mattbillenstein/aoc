@@ -1,12 +1,7 @@
 #!/usr/bin/env pypy3
 
 import random
-import itertools
-import math
 import sys
-import time
-from collections import defaultdict
-from pprint import pprint
 
 from graph import bfs
 from grid import SparseGrid
