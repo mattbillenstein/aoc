@@ -1,21 +1,12 @@
 #!/usr/bin/env pypy3
 
 import sys
-import time
-from collections import defaultdict
-from pprint import pprint
-
-DEBUG = '--debug' in sys.argv
-
-def debug(*args):
-    if DEBUG:
-        print(*args)
 
 def parse_input():
     lines = [_.strip('\r\n') for _ in sys.stdin]
     return lines
 
-def run(data):
+def part(data):
     seats = []
     for line in data:
         bn = line.translate(line.maketrans('FBLR', '0101'))
@@ -35,7 +26,7 @@ def run(data):
 
 def main():
     data = parse_input()
-    run(data)
+    part(data)
 
 if __name__ == '__main__':
     main()
