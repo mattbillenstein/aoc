@@ -67,6 +67,7 @@ def dfs(state):
     q.add_task(state, state.cost)
 
     while q:
+        assert len(q) < 1_000_000, 'Too much fanout?'
         state = q.pop_task()
         if best and state.cost > best.cost:
             continue
@@ -228,3 +229,5 @@ class PriorityQueue:
     def __bool__(self):
         return bool(self.entry_finder)
 
+    def __len__(self):
+        return len(self.entry_finder)
