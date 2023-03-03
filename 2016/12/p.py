@@ -1,17 +1,7 @@
 #!/usr/bin/env pypy3
 
-import itertools
-import math
 import sys
-import time
-from collections import defaultdict, deque
-from pprint import pprint
-
-DEBUG = sys.argv.count('-v')
-
-def debug(*args):
-    if DEBUG:
-        print(*args)
+from collections import defaultdict
 
 def parse_input():
     lines = [_.strip('\r\n') for _ in sys.stdin]

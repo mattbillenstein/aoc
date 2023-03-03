@@ -1,7 +1,6 @@
 #!/usr/bin/env pypy3
 
 import sys
-from collections import defaultdict
 from pprint import pprint
 
 from graph import bfs, dfs
