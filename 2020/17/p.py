@@ -1,10 +1,6 @@
 #!/usr/bin/env pypy3
 
-import math
 import sys
-import time
-from collections import defaultdict
-from pprint import pprint
 
 from grid import SparseGrid
 from grid3d import SparseGrid3D
@@ -18,7 +14,6 @@ def debug(*args):
 
 def parse_input():
     lines = [_.strip('\r\n') for _ in sys.stdin]
-#    lines = [int(_) for _ in lines]
     g = SparseGrid(lines)
     return set(g)
 

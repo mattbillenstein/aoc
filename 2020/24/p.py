@@ -1,18 +1,8 @@
 #!/usr/bin/env pypy3
 
-import math
 import sys
-import time
-from collections import defaultdict
-from pprint import pprint
 
 from hexgrid import HexSparseGrid
-
-DEBUG = sys.argv.count('-v')
-
-def debug(*args):
-    if DEBUG:
-        print(*args)
 
 def parse_input():
     lines = [_.strip('\r\n') for _ in sys.stdin]
