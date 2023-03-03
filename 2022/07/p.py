@@ -1,6 +1,16 @@
-#!/usr/bin/env python3
+#!/usr/bin/env pypy3
 
 import sys
+
+DEBUG = sys.argv.count('-v')
+
+def debug(*args):
+    if DEBUG:
+        print(*args)
+
+def parse_input():
+    lines = [_.strip('\r\n') for _ in sys.stdin]
+    return lines
 
 def compute_dir_size(d, path):
     size = 0
@@ -12,14 +22,11 @@ def compute_dir_size(d, path):
             size += item['size']
     return size
 
-def main(argv):
-    with open(argv[1]) as f:
-        lines = f.readlines()
-
+def part(data):
     # the disk, directory path as tuple -> dict of name -> fileobj
     d = {}
     path = ()  # root dir
-    for line in lines:
+    for line in data:
         if line.startswith('$'):
             in_ls = False
             _, cmd, *rest = line.split()
@@ -53,7 +60,7 @@ def main(argv):
     free_size = 70_000_000 - total_size
     delete_size = 30_000_000 - free_size
 
-    print(f'Tot:{total_size} Free:{free_size} Delete:{delete_size}')
+    debug(f'Tot:{total_size} Free:{free_size} Delete:{delete_size}')
 
     smallest = (1e9, None)
     tot = 0
@@ -72,5 +79,9 @@ def main(argv):
     print(tot)
     print(smallest[0], '/' + '/'.join(smallest[1]))
 
+def main():
+    data = parse_input()
+    part(data)
+
 if __name__ == '__main__':
-    main(sys.argv)
+    main()

@@ -1,7 +1,17 @@
-#!/usr/bin/env python3
+#!/usr/bin/env pypy3
 
 import string
 import sys
+
+DEBUG = sys.argv.count('-v')
+
+def debug(*args):
+    if DEBUG:
+        print(*args)
+
+def parse_input():
+    lines = [_.strip('\r\n') for _ in sys.stdin]
+    return [tuple(_.split()) for _ in lines]
 
 class Thing:
     def __init__(self, name):
@@ -173,43 +183,6 @@ class Thing:
         if self.tail:
             self.tail.follow(self)
 
-def main(argv):
-    num_knots = int(argv[2])
-    letters = string.printable
-    knots = [Thing(letters[_]) for _ in range(num_knots)]
-    for i in range(1, len(knots)):
-        knots[i-1].tail = knots[i]
-
-    head = knots[0]
-    tail = knots[-1]
-
-    with open(argv[1]) as f:
-        lines = [_.strip('\r\n') for _ in f]
-
-    visited = set()
-
-    for line in lines:
-        dir, cnt = line.split()
-        cnt = int(cnt)
-        print(f'head {head}')
-        print(f'tail {tail}')
-        print()
-        print(f'line "{line}"')
-        for i in range(cnt):
-            # my original bad code, propagating moves head -> tail
-#            head.move(dir)
-
-            # better solution having knot[i+1] follow knot [i]
-            head.step(dir)
-
-            visited.add(tail.pos())
-
-        print_grid(knots)
-        print()
-
-    print(len(visited))
-
-
 def print_grid(knots):
     buffer = 10
     minx = min(_.x for _ in knots) - buffer
@@ -235,6 +208,46 @@ def print_grid(knots):
 
         print(s)
 
+def part(moves, num_knots):
+    letters = string.printable
+    knots = [Thing(letters[_]) for _ in range(num_knots)]
+    for i in range(1, len(knots)):
+        knots[i-1].tail = knots[i]
+
+    head = knots[0]
+    tail = knots[-1]
+
+    visited = set()
+
+    for dir, cnt in moves:
+        cnt = int(cnt)
+        if DEBUG:
+            print(f'head {head}')
+            print(f'tail {tail}')
+            print()
+            print(f'move "{dir} {cnt}"')
+
+        for i in range(cnt):
+            # my original bad code, propagating moves head -> tail
+#            head.move(dir)
+
+            # better solution having knot[i+1] follow knot [i]
+            head.step(dir)
+
+            visited.add(tail.pos())
+
+        if DEBUG:
+            print_grid(knots)
+            print()
+
+    print(len(visited))
+
+def main():
+    data = parse_input()
+    if '1' in sys.argv:
+        part(data, 2)
+    if '2' in sys.argv:
+        part(data, 10)
 
 if __name__ == '__main__':
-    main(sys.argv)
+    main()

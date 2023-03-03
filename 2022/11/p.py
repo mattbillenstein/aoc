@@ -1,9 +1,43 @@
 #!/usr/bin/env python3
 
+import copy
 import functools
 import math
 import re
 import sys
+
+DEBUG = sys.argv.count('-v')
+
+def parse_input():
+    lines = [_.strip() for _ in sys.stdin]
+
+    monkies = {}
+    divisors = []
+
+    for line in lines:
+        if line.startswith('Monkey '):
+            id = int(line.replace(':', '').split()[1])
+            m = Monkey(id)
+            monkies[id] = m
+        elif line.startswith('Starting items:'):
+            m.items = [Item(int(_)) for _ in line.split(':')[1].replace(' ', '').split(',')]
+        elif line.startswith('Operation:'):
+            s = line.split(':')[1].strip()
+            mobj = re.match('new = old ([+*]) ([0-9]+|old)', s)
+            oper, val = mobj.groups()
+            m.operation = functools.partial(op, oper, val)
+        elif line.startswith('Test:'):
+            s = line.split(':')[-1].strip()
+            assert s.startswith('divisible by ')
+            div = int(s.split()[-1])
+            divisors.append(div)
+            m.test = functools.partial(test, div)
+        elif line.startswith('If true:'):
+            m.t = int(line.split()[-1])
+        elif line.startswith('If false:'):
+            m.f = int(line.split()[-1])
+
+    return monkies, divisors
 
 class Item:
     def __init__(self, worry):
@@ -44,7 +78,6 @@ class Monkey:
 
         self.items.clear()
 
-
 def op(op, val, other):
     if op == '*':
         if val == 'old':
@@ -55,48 +88,16 @@ def op(op, val, other):
         x = int(val) + other
     return x
 
-
 def test(div, other):
     return other % div == 0
 
+def part(data, part):
+    monkies, divisors = data
 
-def main(argv):
-    with open(argv[1]) as f:
-        lines = [_.strip('\r\n') for _ in f]
+    rounds = 20
+    handle_worry = lambda x: x // 3
 
-    part = int(argv[2])
-
-    monkies = {}
-    divisors = []
-
-    for line in lines:
-        line = line.strip()
-        if line.startswith('Monkey '):
-            id = int(line.replace(':', '').split()[1])
-            m = Monkey(id)
-            monkies[id] = m
-        elif line.startswith('Starting items:'):
-            m.items = [Item(int(_)) for _ in line.split(':')[1].replace(' ', '').split(',')]
-        elif line.startswith('Operation:'):
-            s = line.split(':')[1].strip()
-            mobj = re.match('new = old ([+*]) ([0-9]+|old)', s)
-            oper, val = mobj.groups()
-            m.operation = functools.partial(op, oper, val)
-        elif line.startswith('Test:'):
-            s = line.split(':')[-1].strip()
-            assert s.startswith('divisible by ')
-            div = int(s.split()[-1])
-            divisors.append(div)
-            m.test = functools.partial(test, div)
-        elif line.startswith('If true:'):
-            m.t = int(line.split()[-1])
-        elif line.startswith('If false:'):
-            m.f = int(line.split()[-1])
-
-    if part == 1:
-        rounds = 20
-        handle_worry = lambda x: x // 3
-    elif part == 2:
+    if part == 2:
         rounds = 10000
         # you have to kinda guess at this part, or iterate through numbers
         # having guessed the correct function is modulus - rational for this is
@@ -105,19 +106,25 @@ def main(argv):
         # down fast...  Not a fan of this part of the problem.
         div = math.lcm(*divisors)
         handle_worry = lambda x: x % div
-    else:
-        assert 0
 
     for round in range(rounds):
         for id, m in monkies.items():
             for x, item in m.inspect(handle_worry):
                 monkies[x].items.append(item)
 
-    for id, m in monkies.items():
-        print(m)
+    if DEBUG:
+        for id, m in monkies.items():
+            print(m)
 
     business = sorted([_.inspected for _ in monkies.values()])[-2:]
     print(business[0] * business[1])
 
+def main():
+    data = parse_input()
+    if '1' in sys.argv:
+        part(copy.deepcopy(data), 1)
+    if '2' in sys.argv:
+        part(copy.deepcopy(data), 2)
+
 if __name__ == '__main__':
-    main(sys.argv)
+    main()

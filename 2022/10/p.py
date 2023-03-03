@@ -1,13 +1,20 @@
-#!/usr/bin/env python3
+#!/usr/bin/env pypy3
 
 import sys
 
-def main(argv):
-    with open(argv[1]) as f:
-        lines = [_.strip('\r\n') for _ in f]
+def parse_input():
+    lines = [_.strip('\r\n') for _ in sys.stdin]
+    prog = []
+    for line in lines:
+        L = line.split()
+        if len(L) > 1:
+            L[1] = int(L[1])
+        prog.append(L)
+    return prog
 
+def part(prog):
     # reverse and use pop to consume instructions
-    lines.reverse()
+    prog.reverse()
 
     tot = 0
     crt = [['.'] * 40 for _ in range(6)]
@@ -16,11 +23,11 @@ def main(argv):
     instr = None
     cycle = 0
     while cycle := cycle + 1:
-        if not instr and not lines:
+        if not instr and not prog:
             break
 
         if not instr:
-            instr = lines.pop().split()
+            instr = prog.pop()
             if instr[0] == 'noop':
                 instr.append(1)
             elif instr[0] == 'addx':
@@ -53,5 +60,9 @@ def main(argv):
     for line in crt:
         print(''.join(line))
 
+def main():
+    data = parse_input()
+    part(data)
+
 if __name__ == '__main__':
-    main(sys.argv)
+    main()
