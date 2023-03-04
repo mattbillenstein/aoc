@@ -4,6 +4,8 @@ import sys
 
 from hexgrid import HexSparseGrid
 
+DEBUG = sys.argv.count('-v')
+
 def parse_input():
     lines = [_.strip('\r\n') for _ in sys.stdin]
     directions = []
@@ -40,8 +42,9 @@ def part1(directions):
             cnt += 1
     print(cnt)
 
-#    g.set((0, 0), 100)
-    g.print()
+    if DEBUG:
+        g.set((0, 0), 100)
+        g.print()
 
     return g
 
@@ -75,9 +78,11 @@ def part2(directions):
     for pt in g:
         if g.get(pt):
             cnt += 1
-    print(i+1, cnt)
 
-    g.print()
+    print(cnt)
+
+    if DEBUG:
+        g.print()
 
 def main():
     data = parse_input()

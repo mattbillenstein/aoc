@@ -6,6 +6,8 @@ from collections import defaultdict
 
 from intcode import intcode
 
+DEBUG = sys.argv.count('-v')
+
 def parse_input():
     lines = [_.strip('\r\n') for _ in sys.stdin]
     return [int(_) for _ in lines[0].split(',')]
@@ -42,8 +44,14 @@ def next_input(prog):
                 stuff.clear()
                 stuff['room'] = ' '.join(s.split()[1:-1])
                 key = None
+            elif 'typing' in s:
+                L = s.split()
+                i = L.index('typing')
+                print(L[i+1])
 
-            print(s)
+            if DEBUG:
+                print(s)
+
             s = ''
         else:
             s += c
@@ -56,7 +64,8 @@ def part1(mem):
     inv = []
 
     def send(s):
-        print('SEND:', s)
+        if DEBUG:
+            print('SEND:', s)
         for c in s:
             prog.send(ord(c))
         prog.send(ord('\n'))
@@ -66,8 +75,9 @@ def part1(mem):
         if stuff is None:
             break
 
-        print('Stuff:', dict(stuff))
-        print('Items:', inv)
+        if DEBUG:
+            print('Stuff:', dict(stuff))
+            print('Items:', inv)
 
         if stuff['items'] and random.random() < 0.5:
             item = random.choice(stuff['items'])
