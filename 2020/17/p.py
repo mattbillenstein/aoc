@@ -15,7 +15,7 @@ def debug(*args):
 def parse_input():
     lines = [_.strip('\r\n') for _ in sys.stdin]
     g = SparseGrid(lines)
-    return set(g)
+    return set([_ for _ in g if g.get(_)])
 
 def part1(data):
     # 2d -> 3d
