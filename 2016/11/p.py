@@ -63,7 +63,7 @@ def move(floors, E, steps, best, visited):
 
     visited[state] = steps
 
-    if DEBUG:
+    if DEBUG > 1:
         print(E, steps, best)
         for k, v in floors.items():
             print(k, v)
@@ -71,7 +71,8 @@ def move(floors, E, steps, best, visited):
 
     if all(not floors[_] for _ in (1, 2, 3)):
         if steps < best[0]:
-            print(steps)
+            if DEBUG:
+                print(steps)
             best[0] = steps
         return
 
