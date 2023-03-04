@@ -303,7 +303,10 @@ class SparseGrid(Grid):
 
     # mutate
     def set(self, pt, v):
-        self.g[pt] = v
+        if v == 0:
+            self.g.pop(pt, 0)
+        else:
+            self.g[pt] = v
 
     def setc(self, pt, c):
         v = self.chars[c]
