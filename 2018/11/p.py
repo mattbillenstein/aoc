@@ -8,6 +8,10 @@ def debug(*args):
     if DEBUG:
         print(*args)
 
+def parse_input():
+    lines = [_.strip('\r\n') for _ in sys.stdin]
+    return int(lines[0])
+
 def find_max_power(grid_serial_number, size):
     mxpt = None
     mx = -sys.maxsize
@@ -32,14 +36,11 @@ def find_max_power(grid_serial_number, size):
 
     return mxpt, mx
 
-def part1():
-    grid_serial_number = 7400
+def part1(grid_serial_number):
     mxpt, mx = find_max_power(grid_serial_number, 3)
     print('%s,%s' % mxpt, mx)
 
-def part2():
-    grid_serial_number = 7400
-
+def part2(grid_serial_number):
     mxpt = None
     mx = -sys.maxsize
     mxsize = 1
@@ -54,10 +55,11 @@ def part2():
     print('%s,%s,%s' % (mxpt[0], mxpt[1], mxsize), mx)
 
 def main():
+    data = parse_input()
     if '1' in sys.argv:
-        part1()
+        part1(data)
     if '2' in sys.argv:
-        part2()
+        part2(data)
 
 if __name__ == '__main__':
     main()
