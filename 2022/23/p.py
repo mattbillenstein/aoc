@@ -5,12 +5,15 @@ from collections import defaultdict
 
 from grid import SparseGrid
 
+DEBUG = sys.argv.count('-v')
+
 def parse_input():
     lines = [_.strip('\r\n') for _ in sys.stdin]
     return SparseGrid(lines)
 
 def part(grid, part_num):
-#    grid.print()
+    if DEBUG:
+        grid.print()
 
     dirs = ['N', 'S', 'W', 'E']
 
@@ -57,7 +60,9 @@ def part(grid, part_num):
                 print(rnd)
                 break
 
-#    grid.print()
+    if DEBUG:
+        print()
+        grid.print()
 
 def main():
     grid = parse_input()

@@ -58,9 +58,9 @@ def mix(data, key=1, rounds=1):
     for i in range(3):
         for _ in range(1000):
             n = n.next
-        print(n.value)
         sum += n.value
-    print('SUM', sum)
+
+    print(sum)
 
 def part1(data):
     mix(data)
@@ -70,9 +70,11 @@ def part2(data):
 
 def main(argv):
     data = parse_input()
-    part1(data)
-    print()
-    part2(data)
+    if '1' in sys.argv:
+        part1(data)
+
+    if '2' in sys.argv:
+        part2(data)
 
 if __name__ == '__main__':
     main(sys.argv)

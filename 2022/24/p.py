@@ -1,8 +1,7 @@
 #!/usr/bin/env pypy3
 
 import sys
-from collections import defaultdict, deque
-from pprint import pprint
+from collections import deque
 
 from grid import SparseGrid
 
@@ -123,7 +122,7 @@ def run(grid):
         if x:
             ds = (i-steps) + x
             steps += ds
-            print(ds, steps)
+#            print(ds, steps)
             break
 
     for i in range(steps, steps+10):
@@ -132,8 +131,10 @@ def run(grid):
         if x:
             ds = (i-steps) + x
             steps += ds
-            print(ds, steps)
+#            print(ds, steps)
             break
+
+    print(steps)
 
 def main():
     grid = parse_input()

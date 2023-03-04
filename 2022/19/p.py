@@ -1,13 +1,7 @@
 #!/usr/bin/env pypy3
 
-import json
 import re
 import sys
-import time
-from collections import defaultdict
-from multiprocessing import Pool
-from pprint import pprint
-
 
 def parse_input():
     lines = [_.strip('\r\n') for _ in sys.stdin]
@@ -53,8 +47,6 @@ def simulate(minutes, robots, resources, blueprint):
     # dfs
     robots = dict(robots)
     resources = dict(resources)
-
-#    print(json.dumps(blueprint, indent=4))
 
     best = 0
 
@@ -163,23 +155,10 @@ def run(blueprints, minutes):
     robots = {'ore': 1, 'clay': 0, 'obsidian': 0, 'geode': 0}
     resources = {'ore': 0, 'clay': 0, 'obsidian': 0, 'geode': 0}
 
-    start = time.time()
-
     L = []
-
-    if '-m' in sys.argv:
-        results = []
-        with Pool(processes=8) as pool:
-            for b in blueprints:
-                res = pool.apply_async(simulate, (minutes, robots, resources, b))
-                results.append(res)
-
-            for res in results:
-                L.append(res.get())
-    else:
-        for b in blueprints:
-            bid, geodes = simulate(minutes, robots, resources, b)
-            L.append((bid, geodes))
+    for b in blueprints:
+        bid, geodes = simulate(minutes, robots, resources, b)
+        L.append((bid, geodes))
 
     return L
 
@@ -188,7 +167,6 @@ def part1(blueprints):
 
     sum_quality = 0
     for bid, geodes in results:
-#        print(bid, geodes)
         sum_quality += bid * geodes
 
     print(sum_quality)
@@ -200,7 +178,6 @@ def part2(blueprints):
 
     product = 1
     for bid, geodes in results:
-#        print(bid, geodes)
         product *= geodes
 
     print(product)

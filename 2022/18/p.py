@@ -108,17 +108,14 @@ def part2_bfs(cubes):
 def main(argv):
     data = parse_input()
 
-    start = time.time()
-    part1(data)
-    print(time.time()-start)
+    if '1' in sys.argv:
+        part1(data)
 
-    start = time.time()
-    part2(data)
-    print(time.time()-start)
+    if '2a' in sys.argv:
+        part2(data)
 
-    start = time.time()
-    part2_bfs(data)
-    print(time.time()-start)
+    if '2' in sys.argv:
+        part2_bfs(data)
 
 if __name__ == '__main__':
     main(sys.argv)
