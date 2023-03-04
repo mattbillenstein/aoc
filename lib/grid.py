@@ -295,8 +295,8 @@ class SparseGrid(Grid):
         maxx = max(_[1] for _ in self.g)
         return range(minx, maxx+1)
 
-    def get(self, pt, default=None):
-        return self.g.get(pt, default)
+    def get(self, pt):
+        return self.g.get(pt, 0)
 
     def getc(self, pt):
         v = self.get(pt, 0)
@@ -311,13 +311,15 @@ class SparseGrid(Grid):
         self.set(pt, v)
 
     def remove(self, pt):
-        del self.g[pt]
+        self.g.pop(pt, 0)
 
     def add(self, pt):
         self.g[pt] = 1
 
     def move(self, pt, newpt):
-        self.g[newpt] = self.g.pop(pt)
+        self.g[newpt] = v = self.g.pop(pt, 0)
+        if not v:
+            del self.g[newpt]
 
     def clear(self):
         self.g.clear()
@@ -338,16 +340,14 @@ class SparseGrid(Grid):
         return step(pt, dir)
 
     # dict/set ish methods
-# mattb - should I be overriding these at all?
-# make this behave like Grid
-#    def __iter__(self):
-#        return iter(dict(self.g))
-#
-#    def __contains__(self, k):
-#        return k in self.g
-#
-#    def __len__(self):
-#        return len(self.g)
+    def __iter__(self):
+        return iter(dict(self.g))
+
+    def __contains__(self, k):
+        return k in self.g
+
+    def __len__(self):
+        return len(self.g)
 
     # transformations
     def flip_x(self):

@@ -22,16 +22,17 @@ def run(grid, algo, times):
     if DEBUG:
         g.print()
 
+    ng = g.copy()
+
     box = g.box
     for i in range(times):
-        ng = g.copy()
         ng.clear()
 
         # supposed to be an infinite grid, so the pixels set way outside the
         # grid get cancelled out on the real input, so, just artificially
         # increase the grid every iteration and then trim it back
-        for y in range(box[0][1]-times*10, box[1][1]+times*10):
-            for x in range(box[0][0]-times*10, box[1][0]+times*10):
+        for y in range(box[0][1]-times*4, box[1][1]+times*4):
+            for x in range(box[0][0]-times*4, box[1][0]+times*4):
                 value = 0
                 shift = 8
                 for ny in range(y-1, y+2):
@@ -42,10 +43,10 @@ def run(grid, algo, times):
                 v = algo[value]
                 if v:
                     ng.set((x, y), v)
-                elif (x, y) in ng:
+                else:
                     ng.remove((x, y))
 
-        g = ng
+        g, ng = ng, g
 
         if DEBUG:
             print()
@@ -53,8 +54,8 @@ def run(grid, algo, times):
 
     # now trim our inflated box
     for pt in list(g):
-        if not (box[0][0]-times*5 <= pt[0] <= box[1][0]+times*5) \
-            or not (box[0][1]-times*5 <= pt[1] <= box[1][1]+times*5):
+        if not (box[0][0]-times*2 <= pt[0] <= box[1][0]+times*2) \
+            or not (box[0][1]-times*2 <= pt[1] <= box[1][1]+times*2):
             g.remove(pt)
 
     if DEBUG:

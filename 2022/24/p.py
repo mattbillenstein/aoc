@@ -100,14 +100,14 @@ def bfs(grids, v1=START, v2=END):
             if not (0 <= npt[0] < size[0] and 0 <= npt[1] < size[1]):
                 continue
 
-            v = grid.get(npt, EMPTY)
+            v = grid.get(npt)
             if v == EMPTY or npt == end:
                 seen.add((npt, step+1))
                 queue.append((npt, step+1))
 
         # wait if we can - we need to check we're not currently sitting on an
         # occupied spot...
-        if grid.get(vertex, EMPTY) == EMPTY:
+        if grid.get(vertex) == EMPTY:
             seen.add((vertex, step+1))
             queue.append((vertex, step+1))
 
