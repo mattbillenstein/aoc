@@ -97,7 +97,7 @@ def dfs(state, best):
 
     if time.time() - _last > 10:
         _last = time.time()
-        print(best[0], state)
+        debug(best[0], state)
 
     for v, d, doors in state.edges[state.pos]:
         if v not in state.keys and state.keys.issuperset(doors):
@@ -144,8 +144,22 @@ def part1(grid):
 
 def part2(grid):
     # Min steps with 4 robots - one in each quadrant
-
     global best_at
+
+    # draw in the cross and 4 start points if there's only one start point...
+    if sum(1 for _ in grid if grid.getc(_) == '@') == 1:
+        pt = [_ for _ in grid if grid.getc(_) == '@'][0]
+        grid.setc(pt, '#')
+
+        grid.setc((pt[0], pt[1]-1), '#')
+        grid.setc((pt[0], pt[1]+1), '#')
+        grid.setc((pt[0]-1, pt[1]), '#')
+        grid.setc((pt[0]+1, pt[1]), '#')
+
+        grid.setc((pt[0]-1, pt[1]-1), '@')
+        grid.setc((pt[0]+1, pt[1]-1), '@')
+        grid.setc((pt[0]-1, pt[1]+1), '@')
+        grid.setc((pt[0]+1, pt[1]+1), '@')
 
     if DEBUG:
         grid.print()
