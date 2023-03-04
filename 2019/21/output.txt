@@ -1,0 +1,8 @@
+Input instructions:
+Walking...
+
+19352720
+Input instructions:
+Running...
+
+1143652885

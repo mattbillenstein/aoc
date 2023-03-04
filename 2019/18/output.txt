@@ -1,0 +1,17 @@
+3222 State(o, 2784, qacxvriewsujfkdypgo)
+3222 State(r, 2894, qactuxwsojlfkdypgmzr)
+3222 State(e, 3160, qacusiwxmjlfrve)
+3222 State(l, 2140, qazmutiewsjfkl)
+3166 State(r, 2782, qaiwctusxohjlfkdmzr)
+3166 State(c, 2492, qatuwszmohjlfkdypc)
+3166 State(e, 3148, qaswcxturvmojflhe)
+3166 State(r, 2766, qawsutcxzohjfkdyplr)
+3146 State(z, 2706, qcxaewisrumojz)
+3146 State(z, 2570, qcxwiasvruohz)
+3146 State(t, 2862, qiweasucjlfkxvt)
+3146 State(r, 2718, qsiwactumojlfkdzxr)
+3146 State(z, 2246, qwascumohjflz)
+3146 State(e, 3096, cqxsaiwturjlfkde)
+3146 State(l, 2428, cqsaiwxturvzmojl)
+3146
+0
