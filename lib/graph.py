@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/env pypy3
 
 # I really need a set of canned graph algorithms I can rely on - reinventing
 # the wheel every problem is killing a lot of nights...

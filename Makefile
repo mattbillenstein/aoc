@@ -23,5 +23,5 @@ endef
 
 $(foreach D,$(DAYS),$(eval $(DAYRULE)))
 
-check.txt: */*/output.txt */*/answers.txt check.sh
+check.txt: $(OUTPUTS) $(shell ls */*/answers.txt) check.sh
 	yes | ./check.sh > check.txt

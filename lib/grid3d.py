@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/env pypy3
 
 class SparseGrid3D:
     def __init__(self, items, chars={'.': 0, '#': 1}):
