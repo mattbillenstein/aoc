@@ -1,6 +1,7 @@
 #!/usr/bin/env pypy3
 
 import sys
+from collections import defaultdict
 
 def parse_input():
     lines = [_.strip('\r\n') for _ in sys.stdin]
