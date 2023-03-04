@@ -42,7 +42,7 @@ def part(mem):
 
     intersections = []
     for pt in g:
-        if all(g.get(g.step(pt, _)) == chars['#'] for _ in '<>v^'):
+        if g.get(pt) == chars['#'] and all(g.get(g.step(pt, _)) == chars['#'] for _ in '<>v^'):
             intersections.append(pt)
 
     debug(intersections)
