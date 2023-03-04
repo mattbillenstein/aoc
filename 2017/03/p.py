@@ -53,7 +53,7 @@ def part2(num):
         if i == 1:
             g.set(pt, i)
         else:
-            x = sum(g.get(npt, 0) for npt in g.neighbors8(pt))
+            x = sum(g.get(npt) for npt in g.neighbors8(pt))
             if x > num:
                 print(x)
                 break

@@ -32,7 +32,7 @@ def part(mem, start=0):
             next(prog) # run up to yield...
 
             # feed value of current tile and read color to paint
-            v = g.get(pt, 0)
+            v = g.get(pt)
             color = prog.send(v)
 
             # paint the grid and record the painted tile

@@ -53,7 +53,7 @@ def drop(pt, grid, maxy):
 
 def fill(startpt, grid, srcs):
     # check we're on something...
-    assert grid.get(grid.step(startpt, 'v'), 0)
+    assert grid.get(grid.step(startpt, 'v'))
 
     scan = {}
 

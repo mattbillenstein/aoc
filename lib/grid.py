@@ -299,8 +299,7 @@ class SparseGrid(Grid):
         return self.g.get(pt, 0)
 
     def getc(self, pt):
-        v = self.get(pt, 0)
-        return self.values[v]
+        return self.values[self.get(pt)]
 
     # mutate
     def set(self, pt, v):
@@ -340,8 +339,10 @@ class SparseGrid(Grid):
         return step(pt, dir)
 
     # dict/set ish methods
-    def __iter__(self):
-        return iter(dict(self.g))
+# this was just iterating over the set points - I think iterating over the
+# entire box is more correct/expected...
+#    def __iter__(self):
+#        return iter(dict(self.g))
 
     def __contains__(self, k):
         return k in self.g

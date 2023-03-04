@@ -37,7 +37,7 @@ def run(grid, algo, times):
                 shift = 8
                 for ny in range(y-1, y+2):
                     for nx in range(x-1, x+2):
-                        value |= g.get((nx, ny), 0) << shift
+                        value |= g.get((nx, ny)) << shift
                         shift -= 1
 
                 v = algo[value]
@@ -62,7 +62,7 @@ def run(grid, algo, times):
         print()
         g.print()
 
-    print(sum(g.get(_, 0) for _ in g))
+    print(sum(g.get(_) for _ in g))
 
 def part1(grid, algo):
     run(grid, algo, 2)

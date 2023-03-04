@@ -22,7 +22,7 @@ def run(data):
         for dir, cnt in wire:
             for _ in range(cnt):
                 pt = g.step(pt, dir)
-                v = g.get(pt, 0)
+                v = g.get(pt)
 
                 if i == 0:
                     g.set(pt, 1)

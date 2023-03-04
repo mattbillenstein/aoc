@@ -59,7 +59,7 @@ def part(mem):
     # initial conditions
     cnt = 0
     for pt in g:
-        v = g.get(pt, 0)
+        v = g.get(pt)
         c = chr(v)
         if c in '<>^v':
             pos = pt
