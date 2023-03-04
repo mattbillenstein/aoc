@@ -19,21 +19,20 @@ def parse_input():
 def fold(grid, folds):
     for axis, z in folds:
         for pt in grid:
-            if grid.get(pt):
-                if axis == 'x':
-                    if pt[0] > z:
-                        newpt = (z - (pt[0]-z), pt[1])
-                        grid.move(pt, newpt)
-                elif axis == 'y':
-                    if pt[1] > z:
-                        newpt = (pt[0], z - (pt[1]-z))
-                        grid.move(pt, newpt)
+            if axis == 'x':
+                if pt[0] > z:
+                    newpt = (z - (pt[0]-z), pt[1])
+                    grid.move(pt, newpt)
+            elif axis == 'y':
+                if pt[1] > z:
+                    newpt = (pt[0], z - (pt[1]-z))
+                    grid.move(pt, newpt)
 
-def part1(grid, folds):
+def part1(grid,folds):
     fold(grid, folds[:1])
-    print(sum(1 for _ in grid if grid.get(_)))
+    print(len(grid))
 
-def part2(grid, folds):
+def part2(grid,folds):
     fold(grid, folds)
     grid.print()
 
