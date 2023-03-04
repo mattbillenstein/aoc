@@ -31,7 +31,6 @@ def part1(data):
 
         if g.size[1] < 20:
             g.print()
-            print()
 
         for pt, vel in data:
             pt[0] += vel[0]

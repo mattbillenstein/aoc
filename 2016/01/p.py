@@ -44,11 +44,11 @@ def run(data, stop_at_second_visit=False):
 
 def part1(data):
     x, y = run(data)
-    print(x, y, abs(x) + abs(y))
+    print(abs(x) + abs(y))
 
 def part2(data):
     x, y = run(data, True)
-    print(x, y, abs(x) + abs(y))
+    print(abs(x) + abs(y))
 
 def main():
     data = parse_input()

@@ -28,7 +28,7 @@ def part1(salt, stretch=False):
                     if c3*5 in h2:
                         cnt += 1
                         if cnt == 64:
-                            print(cnt, i)
+                            print(i)
                 break
 
         if cnt >= 64:

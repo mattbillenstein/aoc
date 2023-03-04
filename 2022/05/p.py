@@ -41,8 +41,7 @@ def part(stacks, ops, part):
         items = stacks[s1][-cnt:]
         del stacks[s1][-cnt:]
 
-        # for p2, comment this out
-        if part == 2:
+        if part == 1:
             items.reverse()
 
         stacks[s2].extend(items)

@@ -4,6 +4,8 @@ import sys
 
 from intcode import intcode
 
+DEBUG = sys.argv.count('-v')
+
 def parse_input():
     lines = [_.strip('\r\n') for _ in sys.stdin]
     mem = [int(_) for _ in lines[0].split(',')]
@@ -26,7 +28,8 @@ def next_input(prog):
 
         c = chr(o)
         if c == '\n':
-            print(s)
+            if DEBUG:
+                print(s)
             s = ''
         else:
             s += c

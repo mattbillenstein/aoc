@@ -61,7 +61,12 @@ def part1(data, longest=False):
     move((0, 0), [], neighbors, best, longest)
 
     path = best[0]
-    print(len(path), path)
+
+    if longest:
+        print(len(path))
+    else:
+        debug(len(path))
+        print(path)
 
     return path
 
@@ -74,8 +79,8 @@ def main():
         data = 'ulqzkmiv'
         s = part1(data)
         assert s == 'DRURDRUDDLLDLUURRDULRLDUUDDDRR'
-        s = part1(data, True)
-        assert len(s) == 830
+        n = part1(data, True)
+        assert n == 830
 
     if '1' in sys.argv:
         part1(data)

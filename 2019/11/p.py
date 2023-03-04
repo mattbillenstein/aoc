@@ -9,7 +9,7 @@ def parse_input():
     lines = [_.strip('\r\n') for _ in sys.stdin]
     return [int(_) for _ in lines[0].split(',')]
 
-def part(mem, start=0):
+def part(mem, start=0, part=1):
     g = SparseGrid([])
     pt = (0, 0)
     g.set(pt, start)
@@ -46,17 +46,17 @@ def part(mem, start=0):
         except StopIteration:
             break
 
-    print()
-    g.print()
-
-    print(len(painted))
+    if part == 1:
+        print(len(painted))
+    else:
+        g.print()
 
 def main():
     data = parse_input()
     if '1' in sys.argv:
         part(data)
     if '2' in sys.argv:
-        part(data, 1)
+        part(data, 1, 2)
 
 if __name__ == '__main__':
     main()

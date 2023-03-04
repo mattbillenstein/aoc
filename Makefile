@@ -5,9 +5,9 @@ SHELL=/bin/bash
 DAYS := $(shell ls */[0-9][0-9]/input.txt | sed -e 's:/input.txt::')
 OUTPUTS := $(DAYS:%=%/output.txt)
 
-all: $(OUTPUTS) $(OUTPUTS_MOD)
+all: $(OUTPUTS) $(OUTPUTS_MOD) check.txt
 clean:
-	rm -f */*/output.txt
+	rm -f */*/output.txt check.txt
 
 define DAYRULE
 $D/output.txt: $D/*.py $D/input*.txt
@@ -22,3 +22,6 @@ $D/output.txt: $D/*.py $D/input*.txt
 endef
 
 $(foreach D,$(DAYS),$(eval $(DAYRULE)))
+
+check.txt: */*/output.txt */*/answers.txt check.sh
+	yes | ./check.sh > check.txt

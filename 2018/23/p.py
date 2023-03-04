@@ -108,7 +108,8 @@ def part2(bots):
     L = [(count_in_range_pt(_, bots), -manhattan_distance(origin, _), _) for _ in pts]
     L.sort()
     cnt, dist, pt = L[-1]
-    print(pt, cnt, -dist)
+    debug(pt, cnt)
+    print(-dist)
 
 def main():
     data = parse_input()

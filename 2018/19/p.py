@@ -74,7 +74,7 @@ def run(ipreg, prog, regs):
 def part1(ipreg, prog):
     regs = [0] * 6
     run(ipreg, prog, regs)
-    print(regs)
+    print(regs[0])
     
 def part2(ipreg, prog):
     regs = [0] * 6
@@ -114,7 +114,7 @@ def part2(ipreg, prog):
         ip = regs[ipreg]
         ip += 1
 
-    print(regs)
+    print(regs[0])
 
 def main():
     data = parse_input()

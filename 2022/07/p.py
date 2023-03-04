@@ -77,7 +77,9 @@ def part(data):
                 smallest = (size, path)
 
     print(tot)
-    print(smallest[0], '/' + '/'.join(smallest[1]))
+
+    debug('/' + '/'.join(smallest[1]))
+    print(smallest[0])
 
 def main():
     data = parse_input()

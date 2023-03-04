@@ -48,7 +48,6 @@ def part(cmds):
                     g.set((x, y), v)
 
     print(sum(g.get(pt) for pt in g))
-    print()
     g.print()
 
 def main():

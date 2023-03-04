@@ -88,7 +88,7 @@ def run(data, part):
 
                     if part == 1:
                         # print first collision
-                        print('Collision:', npt)
+                        print(f'{npt[0]},{npt[1]}')
                         return
 
             cart.pt = npt
@@ -104,7 +104,8 @@ def run(data, part):
 
         # part2, only one cart left, print its location
         if len(carts) == 1:
-            print(carts[0])
+            pt = carts[0].pt
+            print(f'{pt[0]},{pt[1]}')
             break
 
         if DEBUG:

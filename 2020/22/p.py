@@ -1,5 +1,6 @@
 #!/usr/bin/env pypy3
 
+import copy
 import sys
 from collections import deque
 
@@ -42,7 +43,7 @@ def part1(data):
     for i, c in enumerate(reversed(d1 or d2)):
         tot += (i+1) * c
 
-    print(rounds, tot)
+    print(tot)
 
 def combat(d1, d2, level=0):
     debug(d1, d2, level)
@@ -94,9 +95,9 @@ def part2(data):
 def main():
     data = parse_input()
     if '1' in sys.argv:
-        part1(data)
+        part1(copy.deepcopy(data))
     if '2' in sys.argv:
-        part2(data)
+        part2(copy.deepcopy(data))
 
 if __name__ == '__main__':
     main()

@@ -30,12 +30,13 @@ def balance(pkgs, N):
     for i, p in enumerate(pkgs):
         groups[i % len(groups)].append(p)
 
-    for i in range(2_000_000):
+    for i in range(4_000_000):
         weights = [sum(_) for _ in groups]
-        if all(_ == weights[0] for _ in weights):
+        if all(_ == weights[0] for _ in weights[1:]):
             score = min((len(_), qe(_)) for _ in groups)
             if score < best:
                 best = score
+                debug([(len(_), sum(_), qe(_)) for _ in groups])
                 debug(best)
 
             # randomly swap
@@ -58,7 +59,8 @@ def balance(pkgs, N):
             groups[i].remove(x)
             groups[j].append(x)
 
-    print(best)
+    debug(best)
+    print(best[-1])
 
 def part1(pkgs):
     balance(pkgs, 3)

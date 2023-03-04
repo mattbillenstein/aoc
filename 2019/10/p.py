@@ -69,7 +69,8 @@ def part(grid):
             mx = len(L)
             mxpt = pt
 
-    print(mxpt, mx)
+    debug(mxpt)
+    print(mx)
 
     if DEBUG:
         g = grid.copy()
@@ -135,7 +136,8 @@ def part(grid):
             assert can_see(mxpt, pt, rocks)
             i += 1
             if i == 200:
-                print('Vaporize', i, pt, pt[0]*100 + pt[1])
+                debug('Vaporize', i, pt, pt[0]*100 + pt[1])
+                print(pt[0]*100 + pt[1])
             g.set(pt, 0)
             rocks.remove(pt)
             remove.add(tup)

@@ -139,7 +139,7 @@ def part2(teams):
         if sum(_['units'] for _ in x[0]['groups']):
             break
 
-    print(boost)
+    debug(boost)
     units = sum(_['units'] for _ in x[0]['groups'])
     print(units)
 

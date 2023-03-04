@@ -152,7 +152,8 @@ def run(grid, eap=3):
     return rounds, points, rounds * points, elf_losses
 
 def part1(grid):
-    print(run(grid))
+    tup = run(grid)
+    print(tup[2])
 
 def part2(grid):
     eap = 4
@@ -163,7 +164,7 @@ def part2(grid):
             break
         eap += 1
 
-    print(tup, eap)
+    print(tup[2])
 
 def main():
     grid = parse_input()

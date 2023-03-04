@@ -45,7 +45,8 @@ def part1(num):
     for pt, i in spiral():
         if i == num:
             break
-    print(pt, manhattan((0, 0), pt))
+#    print(pt)
+    print(manhattan((0, 0), pt))
 
 def part2(num):
     g = SparseGrid([])

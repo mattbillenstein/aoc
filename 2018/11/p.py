@@ -38,7 +38,8 @@ def find_max_power(grid_serial_number, size):
 
 def part1(grid_serial_number):
     mxpt, mx = find_max_power(grid_serial_number, 3)
-    print('%s,%s' % mxpt, mx)
+    debug(mx)
+    print('%s,%s' % mxpt)
 
 def part2(grid_serial_number):
     mxpt = None
@@ -52,7 +53,7 @@ def part2(grid_serial_number):
             mxsize = size
             debug('%s,%s,%s' % (mxpt[0], mxpt[1], mxsize), mx)
 
-    print('%s,%s,%s' % (mxpt[0], mxpt[1], mxsize), mx)
+    print('%s,%s,%s' % (mxpt[0], mxpt[1], mxsize))
 
 def main():
     data = parse_input()

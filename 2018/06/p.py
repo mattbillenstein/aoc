@@ -72,7 +72,8 @@ def part(points):
     mx = max(cnts.values())
     for pt, area in cnts.items():
         if area == mx:
-            print(pt, area)
+            debug(pt)
+            print(area)
 
     # part2, size of area where sum of manhattan distance to all points < 10000
     print(tot)

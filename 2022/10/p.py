@@ -55,7 +55,6 @@ def part(prog):
             instr = None
 
     print(tot)
-    print()
 
     for line in crt:
         print(''.join(line))

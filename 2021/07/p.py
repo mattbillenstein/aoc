@@ -12,7 +12,7 @@ def part1(crabs):
         fuel = sum(abs(pos-_) for _ in crabs)
         if fuel < best[1]:
             best = (pos, fuel)
-    print(*best)
+    print(best[1])
 
 def part2(crabs):
     best = (-1, 1e18)
@@ -21,7 +21,7 @@ def part2(crabs):
         fuel = sum(abs(pos-_)*(abs(pos-_)+1)//2 for _ in crabs)
         if fuel < best[1]:
             best = (pos, fuel)
-    print(*best)
+    print(best[1])
 
 def main(argv):
     data = parse_input()

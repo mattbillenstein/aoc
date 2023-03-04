@@ -101,7 +101,7 @@ def part2(data):
 
     w1, w2 = play_round(p1, p2, 0, 0, 1, outcomes)
 
-    print(w1, w2)
+    print(w2)
 
 def main():
     data = parse_input()

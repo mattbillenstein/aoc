@@ -35,7 +35,8 @@ def part1(pt):
             y = lasty + 1
             lasty = y
 
-    print(x, y, c)
+    debug(x, y)
+    print(c)
 
 def part2(data):
     pass

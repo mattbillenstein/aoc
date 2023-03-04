@@ -91,7 +91,8 @@ def part1(grid, part=1):
 
     best = dfs(state)
 
-    print(best.cost, best.path)
+    debug(best.path)
+    print(best.cost)
 
 def part2(grid):
     part1(grid, 2)

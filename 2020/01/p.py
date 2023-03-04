@@ -12,7 +12,7 @@ def parse_input():
 def run(data, num):
     for x in combinations(data, num):
         if sum(x) == 2020:
-            print(x, prod(x))
+            print(prod(x))
             break
 
 def part1(data):

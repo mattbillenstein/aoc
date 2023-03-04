@@ -48,7 +48,8 @@ def part2(data):
     for room, cksum, sid in valid:
         s = rotate(room, sid)
         if 'north' in s:
-            print(s, sid)
+            print(sid)
+            break
 
 def main():
     data = parse_input()

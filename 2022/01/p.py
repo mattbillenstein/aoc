@@ -19,10 +19,10 @@ def part(elves):
     elves.sort(key=lambda x: x[1])
 
     # part 1
-    print(len(elves), elves[-1])
+    print(elves[-1][1])
 
     # part 2, sum of top 3
-    print(elves[-3:])
+#    print(elves[-3:])
     print(sum(_[1] for _ in elves[-3:]))
 
 def main():

@@ -18,7 +18,9 @@ def part(data):
                 cnt += 1
                 d[N] += 1
     print(cnt)
-    print(min(d), d[min(d)])
+
+#    print(min(d))
+    print(d[min(d)])
 
 def main():
     data = parse_input()

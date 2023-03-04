@@ -20,9 +20,7 @@ def parse_input():
         chars[c] = ord(c)
         chars[c.upper()] = ord(c.upper())
 
-    g = Grid(lines, chars)
-
-    return g
+    return Grid(lines, chars)
 
 def bfs(frontier, grid, end=None):
     # Record key/door position and distance reachable from given point...
@@ -209,9 +207,9 @@ def part2(grid):
 def main():
     data = parse_input()
     if '1' in sys.argv:
-        part1(data)
+        part1(data.copy())
     if '2' in sys.argv:
-        part2(data)
+        part2(data.copy())
 
 if __name__ == '__main__':
     main()
