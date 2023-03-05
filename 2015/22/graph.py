@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/env pypy3
 
 # I really need a set of canned graph algorithms I can rely on - reinventing
 # the wheel every problem is killing a lot of nights...
@@ -50,6 +50,8 @@ def bfs(frontier, neighbors, end=None):
         if not frontier:
             if isinstance(end, set):
                 return found
+            if end:
+                return None
             return distance
 
         distance += 1
