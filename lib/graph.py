@@ -73,9 +73,9 @@ def dfs(state):
         state = q.pop_task()
 
 # what about maximizing a score on an incomplete solution?
-#        if best and state.cost > best.cost:
+        if best and state.cost > best.cost:
 #            print('done best', state, best)
-#            continue
+            continue
 
         if DEBUG > 1:
             if time.time() - _last > 10:
@@ -103,39 +103,6 @@ def dfs(state):
             q.add_task(s, s.cost)
 
     return best
-
-def rdfs(state, visited, best):
-    # recursive dfs - idk if this is needed, but it's here in case...
-    global _last
-
-# what about maximizing a score on an incomplete solution?
-#    if best[0] and state.cost > best[0].cost:
-#        return
-
-    if DEBUG > 1:
-        if time.time() - _last > 10:
-            _last = time.time()
-            print(state, best[0])
-            if visited:
-                mn = min(visited.values())
-                for k, v in visited.items():
-                    if v == mn:
-                        print('  ', k, v)
-
-    if state.done:
-        if not best[0] or state.cost < best[0].cost:
-            best[0] = state
-            debug('Found best:', best[0])
-        return
-
-    if state.key:
-        if state.key in visited and visited[state.key] <= state.cost:
-            return
-
-        visited[state.key] = state.cost
-
-    for s in state.next():
-        rdfs(s, visited, best)
 
 def dijkstra(graph, start, end=None):
     '''
