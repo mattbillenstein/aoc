@@ -13,10 +13,10 @@ define DAYRULE
 $D/output.txt: $D/*.py $D/input*.txt
 	cd $D; \
 	if [ -e input-mod.txt ]; then \
-	  ./p.py 1 < input.txt > output.txt; \
-	  ./p.py 2 < input-mod.txt >> output.txt; \
+	  time ./p.py 1 < input.txt > output.txt; \
+	  time ./p.py 2 < input-mod.txt >> output.txt; \
 	else \
-	  ./p.py 1 2 < input.txt > output.txt; \
+	  time ./p.py 1 2 < input.txt > output.txt; \
 	fi; \
 	cd ../..
 endef

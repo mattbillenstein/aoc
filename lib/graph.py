@@ -68,8 +68,13 @@ def dfs(state):
     q = PriorityQueue()
     q.add_task(state, state.cost)
 
+#    maxl = 0
     while q:
-        assert len(q) < 1_000_000, 'Too much fanout?'
+#        if len(q) > maxl:
+#            maxl = len(q)
+#            print(maxl)
+
+        assert len(q) < 10_000_000, 'Too much fanout?'
         state = q.pop_task()
 
 # what about maximizing a score on an incomplete solution?

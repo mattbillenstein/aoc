@@ -80,10 +80,21 @@ class State:
     @property
     def cost(self):
         # cost, lower is better
+
+        # we're discarding states that need further exploration in dfs - need
+        # to emit bogus score until we're done...
+        if not self.done:
+            return -sys.maxsize
+
         return -self.score
 
     def next(self):
         # next states
+
+        # discard some low-quality states
+        if self.t >= 20 and len(self.opened) < len(self.edges) // 2:
+            return
+
         for k, v in self.edges[self.pos]:
             if k not in self.opened and self.t + v <= self.max_minutes:
                 # check opening and not opening this valve in this step
