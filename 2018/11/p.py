@@ -12,23 +12,32 @@ def parse_input():
     lines = [_.strip('\r\n') for _ in sys.stdin]
     return int(lines[0])
 
+def power(gsn, x, y):
+    rack_id = x + 10
+    p = rack_id * y
+    p += gsn
+    p *= rack_id
+    p = p // 100 % 10
+    p -= 5
+    return p
+
 def find_max_power(grid_serial_number, size):
     mxpt = None
     mx = -sys.maxsize
 
     for x in range(1, 301 - size):
+        tot = None
         for y in range(1, 301 - size):
-            tot = 0
-            for dx in range(x, x + size):
-                for dy in range(y, y + size):
-                    rack_id = dx + 10
-                    power = rack_id * dy
-                    power += grid_serial_number
-                    power *= rack_id
-                    power = power // 100 % 10
-                    power -= 5
-
-                    tot += power
+            if tot is None:
+                tot = 0
+                for dx in range(x, x + size):
+                    for dy in range(y, y + size):
+                        tot += power(grid_serial_number, dx, dy)
+            else:
+                # subtract trailing edge, add leading edge
+                for dx in range(x, x + size):
+                    tot -= power(grid_serial_number, dx, y-1)
+                    tot += power(grid_serial_number, dx, y + size-1)
 
             if tot > mx:
                 mx = tot
@@ -46,10 +55,10 @@ def part2(grid_serial_number):
     mx = -sys.maxsize
     mxsize = 1
     for size in range(1, 300):
-        a, b = find_max_power(grid_serial_number, size)
-        if b > mx:
-            mx = b
-            mxpt = a
+        pt, p = find_max_power(grid_serial_number, size)
+        if p > mx:
+            mx = p
+            mxpt = pt
             mxsize = size
             debug('%s,%s,%s' % (mxpt[0], mxpt[1], mxsize), mx)
 
