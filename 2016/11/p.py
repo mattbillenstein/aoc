@@ -30,7 +30,7 @@ def parse_input():
     return floors
 
 def other(s):
-    return s[0] + 'G' if s[1] == 'M' else 'M'
+    return s[0] + ('G' if s[1] == 'M' else 'M')
 
 def check(floors):
     # return True if we're good...
@@ -39,6 +39,27 @@ def check(floors):
         if gens and any(other(_) not in gens for _ in s if _[1] == 'M'):
             return False
     return True
+
+def canon(floors):
+    map = {}
+    found = []
+    c = 'A'
+    for i in (1, 2, 3, 4):
+        for item in floors[i]:
+            assert len(item) == 2
+            if item not in found:
+                oitem = other(item)
+                found.append(item)
+                found.append(oitem)
+
+                x = c + item[1]
+                y = c + oitem[1]
+                c = chr(ord(c) + 1)
+
+                map[item] = x
+                map[oitem] = y
+
+    return {k: set(map[_] for _ in v) for k, v in floors.items()}
 
 def move(floors, E, steps, best, visited):
     if not check(floors):
@@ -56,6 +77,10 @@ def move(floors, E, steps, best, visited):
 
     if poss > best[0]:
         return
+
+    # any pair is interchangable, so we can remove a lot of intermediate states
+    # by canonicalizing here...
+    floors = canon(floors)
 
     state = hash((E, tuple([(k, frozenset(v)) for k, v in floors.items()])))
     if visited.get(state, sys.maxsize) <= steps:
