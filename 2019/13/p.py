@@ -44,7 +44,7 @@ def part2(mem):
 
     joystick = 0
     def gen():
-        while (x := prog.send(joystick)) is None:
+        while (x := prog.send(joystick)) == 'INPUT':
             pass
         return x
 
