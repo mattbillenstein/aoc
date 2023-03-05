@@ -57,6 +57,11 @@ class State2(State):
     @property
     def cost(self):
         # cost, lower is better
+
+        # maximization - can't return score until done...
+        if not self.done:
+            return -sys.maxsize
+
         return -self.dist
 
 def part1(cities):
