@@ -15,8 +15,8 @@ def parse_input():
 def next_input(prog):
     stuff = defaultdict(list)
     key = None
-
     s = ''
+
     while 1:
         try:
             o = next(prog)
@@ -34,8 +34,6 @@ def next_input(prog):
             if s.startswith('Doors here lead:'):
                 key = 'doors'
             elif s.startswith('Items here:'):
-                key = 'items'
-            elif s.startswith('Items in your inventory:'):
                 key = 'items'
             elif s.startswith('- '):
                 assert key
@@ -56,12 +54,21 @@ def next_input(prog):
         else:
             s += c
 
+def select_item(key, visited, stuff, thing):
+    mi = min(visited[(key, _)] for _ in stuff[thing])
+    for item in stuff[thing]:
+        if visited[(key, item)] == mi:
+            visited[(key, item)] += 1
+            return item
+
 def part1(mem):
     # Eh, couldn't figure out what I was supposed to do before random picking
     # up and dropping of items worked...
 
     prog = intcode(mem)
     inv = []
+
+    visited = defaultdict(int)
 
     def send(s):
         if DEBUG:
@@ -79,20 +86,23 @@ def part1(mem):
             print('Stuff:', dict(stuff))
             print('Items:', inv)
 
+        key = tuple([(k, tuple(v) if isinstance(v, list) else v) for k, v in stuff.items()])
+
         if stuff['items'] and random.random() < 0.5:
-            item = random.choice(stuff['items'])
+            item = select_item(key, visited, stuff, 'items')
             if item not in ('molten lava', 'infinite loop', 'photons', 'giant electromagnet', 'escape pod'):
                 inv.append(item)
                 send('take ' + item)
                 next_input(prog)
 
-        if inv and random.random() < 0.2:
-            item = random.choice(inv)
+        if inv and random.random() < 0.1:
+            item = select_item(key, visited, {'inv': inv}, 'inv')
             inv.remove(item)
             send('drop ' + item)
             next_input(prog)
-            
-        door = random.choice(stuff['doors'])
+
+        door = select_item(key, visited, stuff, 'doors')
+
         send(door)
 
 def main():
