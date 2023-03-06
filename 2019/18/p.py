@@ -72,8 +72,8 @@ class State:
         return f'State({self.pos}, {self.dist}, {keys})'
 
 best_at = {}
+_last = 0.0
 
-_last = time.time()
 def dfs(state, best):
     global _last, best_at
 
@@ -93,12 +93,15 @@ def dfs(state, best):
         if state.dist < best[0]:
             best[0] = state.dist
 
-    if time.time() - _last > 10:
-        _last = time.time()
-        debug(best[0], state)
+#    if time.time() - _last > 10:
+#        _last = time.time()
+#        debug(best[0], state)
 
+    # only search N closest points...
+    cnt = 5
     for v, d, doors in state.edges[state.pos]:
-        if v not in state.keys and state.keys.issuperset(doors):
+        if v not in state.keys and state.keys.issuperset(doors) and cnt > 0:
+            cnt -= 1
             s = state.copy()
             s.pos = v
             s.dist += d
