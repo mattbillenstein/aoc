@@ -28,38 +28,38 @@ def parse_input():
 def execute(inst, regs):
     op, a, b, c = inst
 
-    if op == 'addr':
-        regs[c] = regs[a] + regs[b]
-    elif op == 'addi':
+    if op == 'addi':
         regs[c] = regs[a] + b
-    elif op == 'mulr':
-        regs[c] = regs[a] * regs[b]
-    elif op == 'muli':
-        regs[c] = regs[a] * b
-    elif op == 'banr':
-        regs[c] = regs[a] & regs[b]
-    elif op == 'bani':
-        regs[c] = regs[a] & b
-    elif op == 'borr':
-        regs[c] = regs[a] | regs[b]
-    elif op == 'bori':
-        regs[c] = regs[a] | b
-    elif op == 'setr':
-        regs[c] = regs[a]
+    elif op == 'addr':
+        regs[c] = regs[a] + regs[b]
     elif op == 'seti':
         regs[c] = a
-    elif op == 'gtir':
-        regs[c] = int(a > regs[b])
-    elif op == 'gtri':
-        regs[c] = int(regs[a] > b)
+    elif op == 'muli':
+        regs[c] = regs[a] * b
     elif op == 'gtrr':
         regs[c] = int(regs[a] > regs[b])
+    elif op == 'bani':
+        regs[c] = regs[a] & b
+    elif op == 'gtir':
+        regs[c] = int(a > regs[b])
+    elif op == 'setr':
+        regs[c] = regs[a]
+    elif op == 'bori':
+        regs[c] = regs[a] | b
+    elif op == 'eqrr':
+        regs[c] = int(regs[a] == regs[b])
+    elif op == 'mulr':
+        regs[c] = regs[a] * regs[b]
+    elif op == 'banr':
+        regs[c] = regs[a] & regs[b]
+    elif op == 'borr':
+        regs[c] = regs[a] | regs[b]
+    elif op == 'gtri':
+        regs[c] = int(regs[a] > b)
     elif op == 'eqir':
         regs[c] = int(a == regs[b])
     elif op == 'eqri':
         regs[c] = int(regs[a] == b)
-    elif op == 'eqrr':
-        regs[c] = int(regs[a] == regs[b])
     else:
         assert 0
 
