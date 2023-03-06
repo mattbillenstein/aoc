@@ -63,33 +63,39 @@ def part(prog):
     mn = int(''.join('9' * 14))
     mx = int(''.join('1' * 14))
 
-    L = [5 for _ in range(14)]
+    L = [9 for _ in range(14)]
 
+    # some pairs of numbers always have a consistent offset, just hardcode a
+    # couple and search the rest...
     for L[0] in rng:
-     for L[1] in rng:
-      for L[2] in rng:
-       for L[3] in rng:
-        for L[4] in rng:
-         for L[5] in rng:
-          for L[6] in rng:
-           for L[13] in rng:
-            d = func(L)
-            if DEBUG:
-              print(L, d['z'])
-            if d['z'] < 500_000:
-              for L[7] in rng:
-               for L[8] in rng:
-                for L[9] in rng:
-                 for L[10] in rng:
-                  for L[11] in rng:
-                   for L[12] in rng:
-                      d = func(L)
-                      if d['z'] == 0:
-                        n = int(''.join(str(_) for _ in L))
-                        if n < mn:
-                          mn = n
-                        if n > mx:
-                          mx = n
+      L[13] = L[0] - 4
+      if L[13] < 1:
+        continue
+      for L[1] in rng:
+        for L[2] in rng:
+          L[3] = L[2] + 3
+          if L[3] > 9:
+            continue
+          for L[4] in rng:
+            for L[5] in rng:
+              for L[6] in rng:
+                d = func(L)
+                if DEBUG:
+                  print(L, d['z'])
+                if d['z'] < 500_000:
+                  for L[7] in rng:
+                    for L[8] in rng:
+                      for L[9] in rng:
+                        for L[10] in rng:
+                          for L[11] in rng:
+                            for L[12] in rng:
+                              d = func(L)
+                              if d['z'] == 0:
+                                n = int(''.join(str(_) for _ in L))
+                                if n < mn:
+                                  mn = n
+                                if n > mx:
+                                  mx = n
 
     print(mx)
     print(mn)
