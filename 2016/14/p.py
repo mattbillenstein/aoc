@@ -10,7 +10,7 @@ def parse_input():
 def part1(salt, stretch=False):
 #    salt = 'abc'
     hashes = []
-    for i in range(50_000):
+    for i in range(21_000):
         s = salt + str(i)
         h = hashlib.md5(s.encode('utf8')).hexdigest()
         if stretch:
