@@ -184,7 +184,11 @@ class State:
                 score += dists[(h, end)] * power[c]
         return score
 
+    def hash(self):
+        return hash((tuple(tuple(_) for _ in self.rooms), tuple(self.hall)))
+
 _last = time.time()
+visited = {}
 
 def dfs(state, best):
     global _last
@@ -194,8 +198,18 @@ def dfs(state, best):
         state.print()
         print()
 
+    if state.finished():
+        if not best[0] or state.energy < best[0].energy:
+            best[0] = state
+        return
+
+    h = state.hash()
+    if h in visited and visited[h] < state.energy:
+        return
+    visited[h] = state.energy
+
     # costly
-    if 'D' in state.hall[:2]:
+    if 'D' in state.hall[:4]:
         return
 
     # impossible to solve
@@ -217,11 +231,6 @@ def dfs(state, best):
         # if rooms are clear of other pods and best we could do > best found
         if state.could_solve() and state.best_score() > best[0].energy:
             return
-
-    if state.finished():
-        if not best[0] or state.energy < best[0].energy:
-            best[0] = state
-        return
 
     # can we put a pod into a room? Push state for every pod we could place
     # in a room...
@@ -289,6 +298,8 @@ def part2(rooms, hall):
 
     #D#C#B#A#
     #D#B#A#C#
+
+    visited.clear()
 
     for r, s in enumerate(['DD', 'CB', 'BA', 'AC']):
         for c in s:
