@@ -46,14 +46,18 @@ def part2(mem):
         x = y
 
         # find top right set point
-        v = 0
-        while not v:
-            x -= 1
-            prog = intcode(mem)
-            next(prog)
-            prog.send(x)
-            v = prog.send(y)
-            assert isinstance(v, int), v
+        for step in (50, 25, 10, 1):
+            v = 0
+            while not v:
+                x -= step
+                prog = intcode(mem)
+                next(prog)
+                prog.send(x)
+                v = prog.send(y)
+                assert isinstance(v, int), v
+
+            if step != 1:
+                x += step
 
         # see if bottom left of box is also set - box is 100x100 inclusive, so
         # offset of 99 from found x/y
