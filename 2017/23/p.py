@@ -33,29 +33,27 @@ def part1(prg):
         return x
 
     while 0 <= pc < len(prg):
-        cmd, *rest = prg[pc]
+        cmd, r, x = prg[pc]
+        x = load(x)
+
         pc += 1
 
         if cmd == 'set':
-            r, x = rest
-            regs[r] = load(x)
-        elif cmd == 'mul':
-            r, x = rest
-            regs[r] *= load(x)
-            cnt += 1
-        elif cmd == 'add':
-            r, x = rest
-            regs[r] += load(x)
+            regs[r] = x
         elif cmd == 'sub':
-            r, x = rest
-            regs[r] -= load(x)
+            regs[r] -= x
         elif cmd == 'jnz':
-            x, off = rest
-            x = load(x)
-            off = load(off)
-            if x != 0:
+            r = load(r)
+            if r != 0:
                 pc -= 1
-                pc += off
+                pc += x
+        elif cmd == 'mod':
+            regs[r] %= x
+        elif cmd == 'mul':
+            cnt += 1
+            regs[r] *= x
+        elif cmd == 'add':
+            regs[r] += x
         else:
             assert 0, (cmd, rest)
 
@@ -82,31 +80,26 @@ def part2(prg):
         if DEBUG:
             print(f'{pc:2d} {str(prg[pc]):22s} {regs}')
 
-        cmd, *rest = prg[pc]
+        cmd, r, x = prg[pc]
+        x = load(x)
+
         pc += 1
 
         if cmd == 'set':
-            r, x = rest
-            regs[r] = load(x)
-        elif cmd == 'mul':
-            r, x = rest
-            regs[r] *= load(x)
-        elif cmd == 'add':
-            r, x = rest
-            regs[r] += load(x)
+            regs[r] = x
         elif cmd == 'sub':
-            r, x = rest
-            regs[r] -= load(x)
-        elif cmd == 'mod':
-            r, x = rest
-            regs[r] %= load(x)
+            regs[r] -= x
         elif cmd == 'jnz':
-            x, off = rest
-            x = load(x)
-            off = load(off)
-            if x != 0:
+            r = load(r)
+            if r != 0:
                 pc -= 1
-                pc += off
+                pc += x
+        elif cmd == 'mod':
+            regs[r] %= x
+        elif cmd == 'mul':
+            regs[r] *= x
+        elif cmd == 'add':
+            regs[r] += x
         else:
             assert 0, (cmd, rest)
 
