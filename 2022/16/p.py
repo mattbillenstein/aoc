@@ -47,6 +47,9 @@ def simplify(valves, edges):
         for tup in remove:
             L.remove(tup)
 
+    for L in newedges.values():
+        L.sort(key=lambda x: (x[1], x[0]))
+
     return newedges
 
 class State:
@@ -75,7 +78,7 @@ class State:
     @property
     def key(self):
         # the key into the visited dict
-        return (self.t, ' '.join(sorted(self.opened)), self.is_elephant)
+        return hash(((self.t, ' '.join(sorted(self.opened)), self.is_elephant)))
 
     @property
     def cost(self):
