@@ -81,8 +81,7 @@ def dfs(state, best):
         return
 
     if len(state.keys) > 1:
-        at = tuple(state.keys)
-        at = tuple(sorted(at[:-1])) + (at[-1],)
+        at = (tuple(sorted(state.keys)), state.pos)
         bdist = best_at.get(at, sys.maxsize)
         if state.dist > bdist:
             return
