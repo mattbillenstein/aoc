@@ -85,7 +85,7 @@ def dfs(state):
         if DEBUG > 1:
             if time.time() - _last > 10:
                 _last = time.time()
-                print(state, best)
+                print(state, best, len(q), len(visited))
                 if visited:
                     mn = min(visited.values())
                     for k, v in visited.items():
