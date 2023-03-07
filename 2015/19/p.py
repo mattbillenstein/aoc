@@ -55,7 +55,7 @@ class State:
     @property
     def key(self):
         # the key into the visited dict
-        return self.molecule
+        return hash(self.molecule)
 
     @property
     def cost(self):
@@ -66,7 +66,7 @@ class State:
         # next states
         # greedy, take just a couple of the shortest substitutions...
         ms = list(replacements(self.repls, self.molecule))
-        ms.sort(key=lambda x: len(x))
+        ms.sort(key=lambda x: (len(x), x))
         for m in ms[:2]:
             yield self.__class__(m, self.steps + 1, self.repls)
 
@@ -82,7 +82,7 @@ def part2(repls, molecule):
     rrepls = [(b, a) for a, b in repls]
 
     # greedy, take longest substitutions first
-    rrepls.sort(key=lambda x: len(x[0]), reverse=True)
+    rrepls.sort(key=lambda x: (len(x[0]), x[0]), reverse=True)
 
     state = State(molecule, 0, rrepls)
     best = dfs(state)
