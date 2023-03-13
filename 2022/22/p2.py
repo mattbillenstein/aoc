@@ -39,6 +39,7 @@ def part1(grid, directions, translate=None):
         c = grid.getc(npt)
         if c == ' ':
             if (pt, dir) not in translate:
+                print(pt, dir)
                 a, b = grid.box
                 if dir == '>':
                     npt = (a[0], pt[1])
@@ -94,7 +95,28 @@ def part1(grid, directions, translate=None):
     print(pw)
 
 def trace(grid, pt, dir, dist):
-    print(pt, dir, dist)
+    turns = {
+        '^': ['<', '>'],
+        '>': ['^', 'v'],
+        'v': ['>', '<'],
+        '<': ['v', '^'],
+    }
+
+    pts = []
+    for i in range(dist):
+        # look in each dir
+        dirs = {_: grid.get(grid.step(pt, _)) and 1 for _ in '<>v^'}
+
+        if dirs[dir] and (not pts or not all(dirs[_] for _ in turns[dir])):
+            # we can move in same dir, update pt
+            pt = grid.step(pt, dir)
+        else:
+            # off the grid, turn, stay on same pt
+            dir = [_ for _ in turns[dir] if dirs[_]][0]
+
+        pts.append((pt, [_ for _ in turns[dir] if grid.get(grid.step(pt, _))][0]))
+
+    return pts
 
 def part2(grid, directions):
     # zip the grid from the concave corners generating a translation dict, and
@@ -115,21 +137,40 @@ def part2(grid, directions):
     # length of side - set points // 6 faces, then sqrt
     size = int(math.sqrt(sum(1 for _ in grid if grid.get(_)) // 6))
 
+    odir = {'<': '>', '>': '<', 'v': '^', '^': 'v'}
+
+    translate = {}
     for pt in corners:
         traces = []
         for npt in grid.neighbors4d(pt):
             if not grid.get(npt):
                 if npt[0] > pt[0]:
-                    traces.append(trace(grid, (npt[0], pt[1]), '>', size*2))
+                    traces.append('>')
                 else:
-                    traces.append(trace(grid, (npt[0], pt[1]), '<', size*2))
+                    traces.append('<')
 
                 if npt[1] > pt[1]:
-                    traces.append(trace(grid, (pt[0], npt[1]), 'v', size*2))
+                    traces.append('v')
                 else:
-                    traces.append(trace(grid, (pt[0], npt[1]), '^', size*2))
+                    traces.append('^')
 
-        print(pt, traces)
+        for i in range(len(traces)):
+            traces[i] = trace(grid, pt, traces[i], size*2)
+
+        for a, b in zip(*traces):
+            pt, dir = a
+            c = grid.getc(b[0])
+            translate[(pt, odir[dir])] = (pt, odir[dir])   # '#' in new pos...
+            if c == '.':
+                translate[(pt, odir[dir])] = b
+
+            pt, dir = b
+            c = grid.getc(a[0])
+            translate[(pt, odir[dir])] = (pt, odir[dir])
+            if c == '.':
+                translate[(pt, odir[dir])] = a
+
+    part1(grid, directions, translate)
 
 def main():
     data = parse_input()
