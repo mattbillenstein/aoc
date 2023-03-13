@@ -1,6 +1,7 @@
 #!/usr/bin/env pypy3
 
 import copy
+import math
 import re
 import sys
 import time
@@ -23,7 +24,7 @@ def parse_input():
 
     return grid, directions
 
-def part1(grid, directions):
+def part1(grid, directions, translate=None):
     g = grid.copy()
 
     # start on first tile on the top row facing right
@@ -32,7 +33,7 @@ def part1(grid, directions):
         if g.getc(pt) == '.':
             break
 
-    translate = {}
+    translate = translate or {}
     def move1(grid, pt, dir):
         npt = grid.step(pt, dir)
         c = grid.getc(npt)
@@ -91,6 +92,44 @@ def part1(grid, directions):
 
     pw = ((pt[1]+1) * 1000) + ((pt[0]+1) * 4) + '>V<^'.index(dir)
     print(pw)
+
+def trace(grid, pt, dir, dist):
+    print(pt, dir, dist)
+
+def part2(grid, directions):
+    # zip the grid from the concave corners generating a translation dict, and
+    # then call part1...
+
+    corners = []
+    for pt in grid:
+        if grid.get(pt):
+            cnt = sum(1 for _ in grid.neighbors8(pt) if grid.get(_))
+            if cnt == 7:
+                corners.append(pt)
+
+    # there are 3 corners in test and input - is this always the case?
+    #
+    # there are 12 edges, so 4 per corner, so we simply need to zip 2*size
+    # points from each corner?
+
+    # length of side - set points // 6 faces, then sqrt
+    size = int(math.sqrt(sum(1 for _ in grid if grid.get(_)) // 6))
+
+    for pt in corners:
+        traces = []
+        for npt in grid.neighbors4d(pt):
+            if not grid.get(npt):
+                if npt[0] > pt[0]:
+                    traces.append(trace(grid, (npt[0], pt[1]), '>', size*2))
+                else:
+                    traces.append(trace(grid, (npt[0], pt[1]), '<', size*2))
+
+                if npt[1] > pt[1]:
+                    traces.append(trace(grid, (pt[0], npt[1]), 'v', size*2))
+                else:
+                    traces.append(trace(grid, (pt[0], npt[1]), '^', size*2))
+
+        print(pt, traces)
 
 def main():
     data = parse_input()
