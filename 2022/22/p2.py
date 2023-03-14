@@ -4,9 +4,6 @@ import copy
 import math
 import re
 import sys
-import time
-from collections import defaultdict
-from pprint import pprint
 
 from grid import SparseGrid
 
@@ -38,8 +35,8 @@ def part1(grid, directions, translate=None):
         npt = grid.step(pt, dir)
         c = grid.getc(npt)
         if c == ' ':
+            # off the grid, wrap to other side
             if (pt, dir) not in translate:
-                print(pt, dir)
                 a, b = grid.box
                 if dir == '>':
                     npt = (a[0], pt[1])
@@ -95,6 +92,8 @@ def part1(grid, directions, translate=None):
     print(pw)
 
 def trace(grid, pt, dir, dist):
+    # trace edge of grid and collect points seen and the direction coming onto
+    # the grid at that point...
     turns = {
         '^': ['<', '>'],
         '>': ['^', 'v'],
@@ -119,20 +118,49 @@ def trace(grid, pt, dir, dist):
     return pts
 
 def part2(grid, directions):
-    # zip the grid from the concave corners generating a translation dict, and
+    # zip the grid from the inside-corners generating a translation dict, and
     # then call part1...
 
-    corners = []
+    # there are 3 inside-corners in test and input - is this always the case?
+    #
+    # Test:
+    #       #
+    #     ###
+    #       ##
+    #
+    # Input:
+    #      ##
+    #      #
+    #     ##
+    #     #
+    #
+    # Doesn't have to be - consider:
+    #
+    #      #
+    #     ####
+    #       #
+    #
+    # 4 inside corners - the L/R ends actually connect (same T/B with 90 degree
+    # turn of this) - so there's sorta not a continuity where stoping when
+    # we're at two outside corners works... So below won't generically work,
+    # but may work on all aoc input...
+    #
+    #     #
+    #     ####
+    #     #
+    #
+    # just 2 inside corners, our algorith could connect the ends, but the
+    # terminate on two outside corners logic doesn't work...
+
+    inside_corners = []
+    outside_corners = []
     for pt in grid:
         if grid.get(pt):
             cnt = sum(1 for _ in grid.neighbors8(pt) if grid.get(_))
             if cnt == 7:
-                corners.append(pt)
-
-    # there are 3 corners in test and input - is this always the case?
-    #
-    # there are 12 edges, so 4 per corner, so we simply need to zip 2*size
-    # points from each corner?
+                inside_corners.append(pt)
+            elif cnt == 3:
+                outside_corners.append(pt)
 
     # length of side - set points // 6 faces, then sqrt
     size = int(math.sqrt(sum(1 for _ in grid if grid.get(_)) // 6))
@@ -140,7 +168,7 @@ def part2(grid, directions):
     odir = {'<': '>', '>': '<', 'v': '^', '^': 'v'}
 
     translate = {}
-    for pt in corners:
+    for pt in inside_corners:
         traces = []
         for npt in grid.neighbors4d(pt):
             if not grid.get(npt):
@@ -155,7 +183,8 @@ def part2(grid, directions):
                     traces.append('^')
 
         for i in range(len(traces)):
-            traces[i] = trace(grid, pt, traces[i], size*2)
+            # walk 4 sizes, but discard some later
+            traces[i] = trace(grid, pt, traces[i], size*4)
 
         for a, b in zip(*traces):
             pt, dir = a
@@ -169,6 +198,11 @@ def part2(grid, directions):
             translate[(pt, odir[dir])] = (pt, odir[dir])
             if c == '.':
                 translate[(pt, odir[dir])] = a
+
+            # both points at outside corner at the same time, can't trace
+            # further...
+            if a[0] in outside_corners and b[0] in outside_corners:
+                break
 
     part1(grid, directions, translate)
 
