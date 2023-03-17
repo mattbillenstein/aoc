@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import hashlib
+import os
 import sys
 
 def parse_input():
@@ -9,14 +10,19 @@ def parse_input():
 
 def part1(salt, stretch=False):
 #    salt = 'abc'
-    hashes = []
-    for i in range(21_000):
-        s = salt + str(i)
-        h = hashlib.md5(s.encode('utf8')).hexdigest()
-        if stretch:
-            for _ in range(2016):
-                h = hashlib.md5(h.encode('utf8')).hexdigest()
-        hashes.append(h)
+    fname = f'hashes{"-stretch" if stretch else ""}.txt'
+    if not os.path.exists(fname):
+        with open(fname, 'w') as f:
+            for i in range(50_000):
+                s = salt + str(i)
+                h = hashlib.md5(s.encode('utf8')).hexdigest()
+                if stretch:
+                    for _ in range(2016):
+                        h = hashlib.md5(h.encode('utf8')).hexdigest()
+                f.write(h + '\n')
+    
+    with open(fname) as f:
+        hashes = f.readlines()
 
     cnt = 0
     for i, h in enumerate(hashes):
