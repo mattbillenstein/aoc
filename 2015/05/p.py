@@ -36,7 +36,7 @@ def part2(data):
                 
         for i in range(len(word)-1):
             for j in range(i+2, len(word)-1):
-                if word[i:i+2] == word[j:j+2] and abs(i-j) >= 2:
+                if word[i:i+2] == word[j:j+2]:
                     pairs += 1
                 
 
