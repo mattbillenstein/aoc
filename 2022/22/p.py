@@ -1,31 +1,18 @@
 #!/usr/bin/env pypy3
 
+import copy
+import math
 import re
 import sys
-import time
-from collections import defaultdict
-from pprint import pprint
+
+from grid import SparseGrid
 
 DEBUG = sys.argv.count('-v')
-
-EMPTY = 0
-TILE = 1
-WALL = 2
 
 def parse_input():
     lines = [_.strip('\r\n') for _ in sys.stdin]
 
-    gridx = max(len(_) for _ in lines[:-2])
-    gridy = len(lines)-2
-    grid = [[EMPTY] * gridx for _ in range(gridy)]
-    for y, line in enumerate(lines[:-2]):
-        for x, c in enumerate(line):
-            n = EMPTY
-            if c == '.':
-                n = TILE
-            elif c == '#':
-                n = WALL
-            grid[y][x] = n
+    grid = SparseGrid(lines[:-2], {' ': 0, '.': 1, '#': 2, '>': 3, '<': 4, 'v': 5, '^': 6})
 
     directions = re.findall('\d+|[LR]', lines[-1])
     directions = [int(_) if not _ in 'LR' else _ for _ in directions]
@@ -34,375 +21,197 @@ def parse_input():
 
     return grid, directions
 
-class State:
-    def __init__(self, x, y, dir, grid):
-        self.x = x
-        self.y = y
-        self.dir = dir
-        self.grid = grid
+def part1(grid, directions, translate=None):
+    g = grid.copy()
 
-    def move(self):
-        # move forward one space or stop if we hit a wall, or wrap if needed
-        dx = dy = 0
-        if self.dir == '>':
-            dx = 1
-        elif self.dir == '<':
-            dx = -1
-        elif self.dir == '^':
-            dy = -1
-        elif self.dir == 'v':
-            dy = 1
-        else:
-            assert 0, self.dir
+    # start on first tile on the top row facing right
+    dir = '>'
+    for pt in grid:
+        if g.getc(pt) == '.':
+            break
 
-        while 1:
-            nx = self.x
-            ny = self.y
-            while 1:
-                nx += dx
-                ny += dy
-                ny = ny % len(self.grid)
-                nx = nx % len(self.grid[0])
-                v = self.grid[ny][nx]
-                if v != EMPTY:
-                    break
+    translate = translate or {}
+    def move1(grid, pt, dir):
+        npt = grid.step(pt, dir)
+        c = grid.getc(npt)
+        if c == ' ':
+            # off the grid, wrap to other side
+            if (pt, dir) not in translate:
+                a, b = grid.box
+                if dir == '>':
+                    npt = (a[0], pt[1])
+                elif dir == '<':
+                    npt = (b[0], pt[1])
+                elif dir == 'v':
+                    npt = (pt[0], a[1])
+                elif dir == '^':
+                    npt = (pt[0], b[1])
 
-            if v == WALL:
-                # we didn't move
-                break
-            elif v == TILE:
-                self.x = nx
-                self.y = ny
-                break
+                while not grid.get(npt):
+                    npt = grid.step(npt, dir)
 
-            # else, empty, keep looping...
-            self.x = nx
-            self.y = ny
+                if grid.getc(npt) == '#':
+                    npt = pt
 
-    def turn(self, dir):
-        self.dir = {
-            'R': {'>': 'v', 'v': '<', '<': '^', '^': '>'},
-            'L': {'>': '^', '^': '<', '<': 'v', 'v': '>'},
-        }[dir][self.dir]
+                translate[(pt, dir)] = (npt, dir)
 
-    def password(self):
-        return ((self.y+1) * 1000) + ((self.x+1) * 4) + '>v<^'.index(self.dir)
+            npt, dir =  translate[(pt, dir)]
+        elif c == '.':
+            pass
+        elif c == '#':
+            npt = pt
 
-    def print(self):
-        for y in range(len(self.grid)):
-            s = ''
-            for x in range(len(self.grid[y])):
-                if self.x == x and self.y == y:
-                    s += self.dir
-                else:
-                    s += ' .#'[self.grid[y][x]]
-            print(s)
-
-    def __repr__(self):
-        return f'State({self.x}, {self.y}, {self.dir})'
-
-def part1(grid, directions):
-    # move to start
-    state = State(0, 0, '>', grid)
-    if grid[0][0] == EMPTY:
-        state.move()
+        return npt, dir
 
     for cmd in directions:
         if cmd in ('L', 'R'):
-            state.turn(cmd)
-        else:
-            for i in range(cmd):
-                state.move()
+            dir = {
+                'R': {'>': 'v', 'v': '<', '<': '^', '^': '>'},
+                'L': {'>': '^', '^': '<', '<': 'v', 'v': '>'},
+            }[cmd][dir]
 
-    if DEBUG:
-        print(state)
-        state.print()
+            g.setc(pt, dir)
 
-    print(state.password())
-
-class State2:
-    def __init__(self, x, y, dir, grid):
-        self.x = x
-        self.y = y
-        self.dir = dir
-        self.grid = grid
-
-    def move(self):
-        # move forward one space or stop if we hit a wall
-        nx, ny, nd = self.translate(self.x, self.y, self.dir)
-        if DEBUG:
-            print(nx, ny, nd)
-
-        v = self.grid[ny][nx]
-
-        if v == TILE:
-            found = False
-            self.x = nx
-            self.y = ny
-            self.dir = nd
-
-    def turn(self, dir):
-        self.dir = {
-            'R': {'>': 'v', 'v': '<', '<': '^', '^': '>'},
-            'L': {'>': '^', '^': '<', '<': 'v', 'v': '>'},
-        }[dir][self.dir]
-
-    def dx_dy_from_dir(self, dir):
-        dx = dy = 0
-        if dir == '>':
-            dx = 1
-        elif dir == '<':
-            dx = -1
-        elif dir == '^':
-            dy = -1
-        elif dir == 'v':
-            dy = 1
-        return dx, dy
-
-    def translate(self, x, y, dir):
-        # translate a given x, y, dir into a new x, y, dir in the flat grid,
-        # but considering cube wrapping...
-        size = len(self.grid) // 3
-
-        if dir == '<' and y < size and x == size*2:
-            # Wrap Up to Left
-            return size + y, size, 'v'
-
-        if dir == '^' and y == size and size <= x < size*2:
-            # Wrap Left to Up
-            return size*2, x-size, '>'
-
-        if dir == '>' and y < size and x == size * 3 - 1:
-            # Wrap Up to Right
-            return size*4-1, size*3-1-y, '<'
-
-        if dir == '>' and y >= size*2 and x == size*4 - 1:
-            # Wrap Right to Up
-            return size*3 - 1, (size*3-1 - y), '<'
-
-        if dir == '^' and y == 0 and size*2 <= x < size*3:
-            # wrap Up to Back
-            return size*3-1-x, size, 'v'
-
-        if dir == '^' and y == size and 0 <= x < size:
-            # Wrap Back to Up
-            return size*2 + (size-1-x), 0, 'v'
-
-        if dir == '<' and size <= y < size*2 and x == 0:
-            # Back to Right
-            return size*4-1-(y-size), size*3-1, '^'
-
-        if dir == 'v' and y == size*3-1 and size*3 <= x < size*4:
-            # Right to Back
-            return 0, size + size*4-1-x, '>'
-
-        if dir == 'v' and y == size*2-1 and 0 <= x < size:
-            # Back to Down
-            return size*3-1-x, size*3-1, '^'
-
-        if dir == 'v' and y == size*3-1 and size*2 <= x < size*3:
-            # Down to Back
-            return size*3-1-x, size*2-1, '^'
-
-        if dir == '>' and size <= y < size*2 and x == size*3-1:
-            # Front to Right
-            return size*4-1-(y-size), size*2, 'v'
-
-        if dir == '^' and y == size*2 and size*3 <= x < size*4:
-            # Right to Front
-            return size*3-1, size*2 - 1 - (x-size*3), '<'
-
-        if dir == 'v' and y == size*2-1 and size <= x < size*2:
-            # Left to Down
-            return size*2, size*3-1-(x-size), '>'
-
-        if dir == '<' and size*2 <= y < size*3 and x == size*2:
-            # Down to Left
-            return size*2-1-(y-size*2), size*2-1, '^'
-
-        # no translation
-        dx, dy = self.dx_dy_from_dir(dir)
-        return x+dx, y+dy, dir
-
-    def password(self):
-        return ((self.y+1) * 1000) + ((self.x+1) * 4) + '>v<^'.index(self.dir)
-
-    def print(self, full=False):
-        yr = range(len(self.grid))
-        xr = range(len(self.grid[0]))
-        if not full:
-            yr = range(max(0, self.y-20), min(self.y+20 + 1, len(self.grid)))
-            xr = range(len(self.grid[0]))
-
-        for y in yr:
-            s = f'{y:3} '
-            for x in xr:
-                if self.x == x and self.y == y:
-                    s += self.dir
-                else:
-                    s += ' .#'[self.grid[y][x]]
-            print(s)
-        s = '    '
-        for i in range(10, len(self.grid[0])+10, 10):
-            s += f'{i:10}'
-        print(s)
-
-    def __repr__(self):
-        return f'State2({self.x}, {self.y}, {self.dir})'
-
-def part2(grid, directions):
-    # sigh, they've unfolded differently than in the test...
-
-    # test is
-    #   U
-    # BLF
-    #   DR
-
-    # input is
-    #  UR
-    #  F
-    # LD
-    # B
-
-    # WTF!
-
-    # UFD are in the right spots, just shifted, lets just permute the other
-    # sides to match the test...
-
-    if len(grid) > 100:
-        size = len(grid) // 4
-
-        newgrid = [[0] * size * 4 for _ in range(size*3)]
-
-        # copy UFD unchanged
-        for stride in (0, 1, 2):
-            for y in range(size*stride, size*(stride+1)):
-                for x in range(size, size*2):
-                    ny = y
-                    assert size*stride <= ny < size*(stride+1), ny
-                    nx = x+size
-                    assert size*2 <= nx < size*3
-                    newgrid[ny][nx] = grid[y][x]
-
-        # copy L up rot CW
-        for y in range(size*2, size*3):
-            for x in range(0, size):
-                ny = x+size
-                assert size <= ny < size*2, ny
-                nx = size-y-1 + size*3
-                assert size <= nx < size*2
-                newgrid[ny][nx] = grid[y][x]
-
-        # copy B up rot CW
-        for y in range(size*3, size*4):
-            for x in range(0, size):
-                ny = x+size
-                assert size <= ny < size*2, ny
-                nx = size-y-1 + size*3
-                assert 0 <= nx < size
-                newgrid[ny][nx] = grid[y][x]
-
-        # copy R down, flipY - duh!
-        for y in range(0, size):
-            for x in range(size*2, size*3):
-                ny = size*3-y-1
-                assert size*2 <= ny < size*3
-                nx = size*6-x-1
-                assert size*3 <= nx < size*4
-                newgrid[ny][nx] = grid[y][x]
-
-        grid = newgrid
-
-        # FIXME, these translations need to be reversed on the way back!
-
-    # move to start
-    x = grid[0].index(TILE)
-    state = State2(x, 0, '>', grid)
-
-    if DEBUG:
-        state.print(True)
-        print(state)
-
-    for cmd in directions:
-        if cmd in ('L', 'R'):
-            state.turn(cmd)
             if DEBUG:
                 print()
-                print(cmd)
-                state.print()
-                time.sleep(1)
+                g.print()
         else:
             for i in range(cmd):
-                state.move()
+                g.set(pt, grid.get(pt))
+                pt, dir = move1(grid, pt, dir)
+                g.setc(pt, dir)
+
                 if DEBUG:
                     print()
-                    print(f'{i+1} / {cmd}')
-                    state.print()
-                    time.sleep(0.1)
+                    g.print()
 
     if DEBUG:
-        state.print(True)
-        state.print()
-        print(state)
+        print(pt, dir)
 
-    # translate back to original coordinates
-    state.x -= 50
-    if DEBUG:
-        print(state)
+    pw = ((pt[1]+1) * 1000) + ((pt[0]+1) * 4) + '>V<^'.index(dir)
+    print(pw)
 
-    print(state.password())
+def trace(grid, pt, dir, dist):
+    # trace edge of grid and collect points seen and the direction coming onto
+    # the grid at that point...
+    turns = {
+        '^': ['<', '>'],
+        '>': ['^', 'v'],
+        'v': ['>', '<'],
+        '<': ['v', '^'],
+    }
 
-def test(grid):
-    state = State2(0, 0, '>', grid)
-    state.print()
+    pts = []
+    for i in range(dist):
+        # look in each dir
+        dirs = {_: grid.get(grid.step(pt, _)) and 1 for _ in '<>v^'}
 
-    # Up to Left
-    assert state.translate(8, 1, '<') == (5, 4, 'v')
-    # Left to Up
-    assert state.translate(5, 4, '^') == (8, 1, '>')
+        if dirs[dir] and (not pts or not all(dirs[_] for _ in turns[dir])):
+            # we can move in same dir, update pt
+            pt = grid.step(pt, dir)
+        else:
+            # off the grid, turn, stay on same pt
+            dir = [_ for _ in turns[dir] if dirs[_]][0]
 
-    # Up to Right
-    assert state.translate(11, 1, '>') == (15, 10, '<')
-    # Right to Up
-    assert state.translate(15, 10, '>') == (11, 1, '<')
+        pts.append((pt, [_ for _ in turns[dir] if grid.get(grid.step(pt, _))][0]))
 
-    # Up to Back
-    assert state.translate(9, 0, '^') == (2, 4, 'v')
-    # Back to Up
-    assert state.translate(2, 4, '^') == (9, 0, 'v')
+    return pts
 
-    # Back to Right
-    assert state.translate(0, 5, '<') == (14, 11, '^')
-    # Right to Back
-    assert state.translate(14, 11, 'v') == (0, 5, '>')
+def part2(grid, directions):
+    # zip the grid from the inside-corners generating a translation dict, and
+    # then call part1...
 
-    # Back to Down
-    assert state.translate(1, 7, 'v') == (10, 11, '^')
-    # Down to Back
-    assert state.translate(10, 11, 'v') == (1, 7, '^')
+    # there are 3 inside-corners in test and input - is this always the case?
+    #
+    # Test:
+    #       #
+    #     ###
+    #       ##
+    #
+    # Input:
+    #      ##
+    #      #
+    #     ##
+    #     #
+    #
+    # Doesn't have to be - consider:
+    #
+    #      #
+    #     ####
+    #       #
+    #
+    # 4 inside corners - the L/R ends actually connect (same T/B with 90 degree
+    # turn of this) - so there's sorta not a continuity where stoping when
+    # we're at two outside corners works... So below won't generically work,
+    # but may work on all aoc input...
+    #
+    #     #
+    #     ####
+    #     #
+    #
+    # just 2 inside corners, our algorith could connect the ends, but the
+    # terminate on two outside corners logic doesn't work...
 
-    # Front to Right
-    assert state.translate(11, 5, '>') == (14, 8, 'v')
-    # Right to Front
-    assert state.translate(14, 8, '^') == (11, 5, '<')
+    inside_corners = []
+    outside_corners = []
+    for pt in grid:
+        if grid.get(pt):
+            cnt = sum(1 for _ in grid.neighbors8(pt) if grid.get(_))
+            if cnt == 7:
+                inside_corners.append(pt)
+            elif cnt == 3:
+                outside_corners.append(pt)
 
-    # Left to Down
-    assert state.translate(6, 7, 'v') == (8, 9, '>')
-    # Down to Left
-    assert state.translate(8, 9, '<') == (6, 7, '^')
+    # length of side - set points // 6 faces, then sqrt
+    size = int(math.sqrt(sum(1 for _ in grid if grid.get(_)) // 6))
+
+    odir = {'<': '>', '>': '<', 'v': '^', '^': 'v'}
+
+    translate = {}
+    for pt in inside_corners:
+        traces = []
+        for npt in grid.neighbors4d(pt):
+            if not grid.get(npt):
+                if npt[0] > pt[0]:
+                    traces.append('>')
+                else:
+                    traces.append('<')
+
+                if npt[1] > pt[1]:
+                    traces.append('v')
+                else:
+                    traces.append('^')
+
+        for i in range(len(traces)):
+            # walk 4 sizes, but discard some later
+            traces[i] = trace(grid, pt, traces[i], size*4)
+
+        for a, b in zip(*traces):
+            pt, dir = a
+            c = grid.getc(b[0])
+            translate[(pt, odir[dir])] = (pt, odir[dir])   # '#' in new pos...
+            if c == '.':
+                translate[(pt, odir[dir])] = b
+
+            pt, dir = b
+            c = grid.getc(a[0])
+            translate[(pt, odir[dir])] = (pt, odir[dir])
+            if c == '.':
+                translate[(pt, odir[dir])] = a
+
+            # both points at outside corner at the same time, can't trace
+            # further...
+            if a[0] in outside_corners and b[0] in outside_corners:
+                break
+
+    part1(grid, directions, translate)
 
 def main():
-    grid, directions = parse_input()
-
+    data = parse_input()
     if '1' in sys.argv:
-        part1(grid, directions)
-
+        part1(*copy.deepcopy(data))
     if '2' in sys.argv:
-        part2(grid, directions)
-
-    if 'test' in sys.argv:
-        # works on test.txt
-        test(grid)
+        part2(*copy.deepcopy(data))
 
 if __name__ == '__main__':
     main()
