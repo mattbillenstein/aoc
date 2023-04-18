@@ -104,6 +104,32 @@ def part(data, part):
         # the result grows super large super quick, but there's no real reason
         # simple mod is taken here vs any other function which cuts the growth
         # down fast...  Not a fan of this part of the problem.
+
+        # This part is the chinese remainder theorem at work
+        #
+        # From https://instantiator.dev/post/8-bit-supercomputer/
+        #
+        # 1. The remainder theorem thing
+        #
+        # Aspect 1 caught me out at first, but once I’d grasped it, I was able to make progress:
+        #
+        #   if you have a very large number and you want to reduce it, but also
+        #   need to preserve the remainder properties when divided by a
+        #   collection of other numbers, get the product of those other
+        #   numbers, divide the original by that, and take the remainder.
+        #
+        # For example:
+        #
+        # You have a large number: 5000
+        # 5000 / 3 = 1666 r 2
+        # 5000 / 5 = 1000 r 0
+        # 5000 / 11 = 454 r 6
+        # You can divide 5000 by (3 x 5 x 11 = 165) to preserve the remainders, ie.
+        # 5000 / 165 = 30 r 50 (take the remainder)
+        # 50 / 3 = 16 r 2 (the remainder is preserved)
+        # 50 / 5 = 10 r 0 (the remainder is preserved)
+        # 50 / 11 = 4 r 6 (the remainder is preserved)
+
         div = math.lcm(*divisors)
         handle_worry = lambda x: x % div
 
