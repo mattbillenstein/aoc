@@ -105,7 +105,8 @@ def part(data, part):
         # simple mod is taken here vs any other function which cuts the growth
         # down fast...  Not a fan of this part of the problem.
 
-        # This part is the chinese remainder theorem at work
+        # This part is the NOT the chinese remainder theorem... Just a property
+        # of mod
         #
         # From https://instantiator.dev/post/8-bit-supercomputer/
         #
