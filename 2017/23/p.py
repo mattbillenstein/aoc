@@ -5,10 +5,6 @@ from collections import defaultdict
 
 DEBUG = sys.argv.count('-v')
 
-def debug(*args):
-    if DEBUG:
-        print(*args)
-
 def parse_input():
     lines = [_.strip('\r\n') for _ in sys.stdin]
     prg = [_.split() for _ in lines]
@@ -24,17 +20,13 @@ def parse_input():
 
 def part1(prg):
     pc = 0
-    regs = defaultdict(int)
-    cnt = 0
-
-    def load(x):
-        if isinstance(x, str):
-            x = regs[x]
-        return x
+    regs = {c: 0 for c in 'abcdefgh'}
+    cmds = defaultdict(int)
 
     while 0 <= pc < len(prg):
         cmd, r, x = prg[pc]
-        x = load(x)
+        cmds[cmd] += 1
+        x = regs.get(x, x)
 
         pc += 1
 
@@ -43,21 +35,19 @@ def part1(prg):
         elif cmd == 'sub':
             regs[r] -= x
         elif cmd == 'jnz':
-            r = load(r)
+            r = regs.get(r, r)
             if r != 0:
-                pc -= 1
-                pc += x
+                pc += x - 1
         elif cmd == 'mod':
             regs[r] %= x
         elif cmd == 'mul':
-            cnt += 1
             regs[r] *= x
         elif cmd == 'add':
             regs[r] += x
         else:
             assert 0, (cmd, rest)
 
-    print(cnt)
+    print(cmds['mul'])
 
 def part2(prg):
     # the program basically counts all numbers [b..c] that are not prime, see
@@ -71,29 +61,26 @@ def part2(prg):
     regs = {c: 0 for c in 'abcdefgh'}
     regs['a'] = 1
 
-    def load(x):
-        if isinstance(x, str):
-            x = regs[x]
-        return x
+    cmds = defaultdict(int)
 
     while 0 <= pc < len(prg):
         if DEBUG:
             print(f'{pc:2d} {str(prg[pc]):22s} {regs}')
+            cmds[cmd] += 1
 
         cmd, r, x = prg[pc]
-        x = load(x)
+        x = regs.get(x, x)
 
         pc += 1
 
-        if cmd == 'set':
-            regs[r] = x
-        elif cmd == 'sub':
+        if cmd == 'sub':
             regs[r] -= x
+        elif cmd == 'set':
+            regs[r] = x
         elif cmd == 'jnz':
-            r = load(r)
+            r = regs.get(r, r)
             if r != 0:
-                pc -= 1
-                pc += x
+                pc += x - 1
         elif cmd == 'mod':
             regs[r] %= x
         elif cmd == 'mul':
@@ -102,6 +89,9 @@ def part2(prg):
             regs[r] += x
         else:
             assert 0, (cmd, rest)
+
+    if DEBUG:
+        print(cmds)
 
     print(regs['h'])
 
