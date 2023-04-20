@@ -56,19 +56,21 @@ class State:
     max_minutes = 30
     enable_elephant = False
 
-    def __init__(self, pos, t, opened, valves, edges, is_elephant=False):
+    def __init__(self, pos, t, opened, valves, edges, is_elephant=False, score=0):
         self.pos = pos
         self.t = t
         self.opened = opened
         self.valves = valves
         self.edges = edges
         self.is_elephant = is_elephant
+        self.score = score
 
-        self.score = 0
-        for n, m in sorted(self.opened.items(), key=lambda x: x[1]):
-            mins = max(self.max_minutes - m - 1, 0)
-            x = mins * self.valves[n]
-            self.score += x
+    def open(self, valve):
+        self.opened = dict(self.opened)
+        self.opened[valve] = self.t
+        mins = max(self.max_minutes - self.t - 1, 0)
+        self.score += mins * self.valves[valve]
+        self.t += 1
 
     @property
     def done(self):
@@ -91,21 +93,30 @@ class State:
 
         return -self.score
 
+    def copy(self):
+        return State(self.pos, self.t, self.opened, self.valves, self.edges, self.is_elephant, self.score)
+
     def next(self):
         # next states
 
         for k, v in self.edges[self.pos]:
             if k not in self.opened and self.t + v <= self.max_minutes:
                 # check opening and not opening this valve in this step
-                yield State(k, self.t + v, dict(self.opened), self.valves, self.edges, self.is_elephant)
+                s = self.copy()
+                s.pos = k
+                s.t += v
+                yield s
 
-                o = dict(self.opened)
-                o[k] = self.t + v
-                yield State(k, self.t + v + 1, o, self.valves, self.edges, self.is_elephant)
+                s.open(k)
+                yield s
 
                 if self.enable_elephant and not self.is_elephant:
                     # start the elephant with our opened valves
-                    yield State('AA', 4, dict(o), self.valves, self.edges, True)
+                    s = s.copy()
+                    s.pos = 'AA'
+                    s.t = 4
+                    s.is_elephant = True
+                    yield s
 
     def __repr__(self):
         return f'State({self.opened}, {self.cost})'
