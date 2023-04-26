@@ -69,13 +69,14 @@ class State:
         self.opened = dict(self.opened)
         self.opened[valve] = self.t
         mins = max(self.max_minutes - self.t - 1, 0)
+        assert mins > 0, self
         self.score += mins * self.valves[valve]
         self.t += 1
 
     @property
     def done(self):
         # if we're done
-        return self.t >= self.max_minutes or len(self.opened) == len(self.edges) or not any(_ for _ in self.next())
+        return self.t >= self.max_minutes or len(self.opened) == len(self.edges) - 1 or not any(_ for _ in self.next())
 
     @property
     def key(self):
@@ -99,7 +100,8 @@ class State:
     def next(self):
         # next states
 
-        for k, v in self.edges[self.pos]:
+        # edges sorted by distance, only consider the closest N...
+        for k, v in self.edges[self.pos][:6]:
             if k not in self.opened and self.t + v <= self.max_minutes:
                 # check opening and not opening this valve in this step
                 s = self.copy()
@@ -107,8 +109,10 @@ class State:
                 s.t += v
                 yield s
 
-                s.open(k)
-                yield s
+                if s.t + 1 < self.max_minutes:
+                    s = s.copy()
+                    s.open(k)
+                    yield s
 
                 if self.enable_elephant and not self.is_elephant:
                     # start the elephant with our opened valves
@@ -119,7 +123,7 @@ class State:
                     yield s
 
     def __repr__(self):
-        return f'State({self.opened}, {self.cost})'
+        return f'State({self.t}, {self.opened}, {self.cost})'
 
 def part1(valves, edges):
     edges = simplify(valves, edges)
