@@ -1,7 +1,10 @@
-#!/usr/bin/env python3
+#!/usr/bin/env pypy3
 
 import sys
-from hashlib import md5
+try:
+    from _md5 import md5
+except ImportError:
+    from hashlib import md5
 
 def parse_input():
     lines = [_.strip('\r\n') for _ in sys.stdin]

@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/env pypy3
 
 
 # https://www.redblobgames.com/grids/hexagons/

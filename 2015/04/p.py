@@ -1,7 +1,10 @@
 #!/usr/bin/env pypy3
 
-import hashlib
 import sys
+try:
+    from _md5 import md5
+except ImportError:
+    from hashlib import md5
 
 DEBUG = sys.argv.count('-v')
 
@@ -19,7 +22,7 @@ def part1(data, num=5):
     while 1:
         s = data + str(i)
         b = s.encode('utf8')
-        x = hashlib.md5(b).hexdigest()
+        x = md5(b).hexdigest()
         if x[:num] == find:
             break
         i += 1

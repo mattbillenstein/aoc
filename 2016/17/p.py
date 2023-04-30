@@ -1,7 +1,10 @@
 #!/usr/bin/env pypy3
 
-import hashlib
 import sys
+try:
+    from _md5 import md5
+except ImportError:
+    from hashlib import md5
 
 DEBUG = sys.argv.count('-v')
 
@@ -15,7 +18,7 @@ def parse_input():
 
 def get_doors(data, path):
     b = (data + ''.join(path)).encode('utf8')
-    s = hashlib.md5(b).hexdigest()[:4]
+    s = md5(b).hexdigest()[:4]
     d = {}
     for dir, c in zip('UDLR', s):
         d[dir] = 'closed'

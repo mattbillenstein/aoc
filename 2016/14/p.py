@@ -1,8 +1,11 @@
-#!/usr/bin/env python3
+#!/usr/bin/env pypy3
 
-import hashlib
 import os
 import sys
+try:
+    from _md5 import md5
+except ImportError:
+    from hashlib import md5
 
 def parse_input():
     lines = [_.strip('\r\n') for _ in sys.stdin]
@@ -15,10 +18,10 @@ def part1(salt, stretch=False):
         with open(fname, 'w') as f:
             for i in range(50_000):
                 s = salt + str(i)
-                h = hashlib.md5(s.encode('utf8')).hexdigest()
+                h = md5(s.encode('utf8')).hexdigest()
                 if stretch:
                     for _ in range(2016):
-                        h = hashlib.md5(h.encode('utf8')).hexdigest()
+                        h = md5(h.encode('utf8')).hexdigest()
                 f.write(h + '\n')
     
     with open(fname) as f:

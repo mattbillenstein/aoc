@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/env pypy3
 
 class Cube:
     def __init__(self, pt1, pt2, value=None):
