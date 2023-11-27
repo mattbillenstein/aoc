@@ -13,7 +13,7 @@ def debug(*args):
 
 def parse_input():
     lines = [_.strip('\r\n') for _ in sys.stdin]
-    g = SparseGrid([], {'.': 0, '#': 1, '|': 2, '~': 3, '+': 4})
+    g = SparseGrid([], {'.': 0, '#': 4, '|': 2, '~': 3, '+': 1})
     for line in lines:
         for c in '=,.':
             line = line.replace(c, ' ')
@@ -108,9 +108,11 @@ def run(grid):
     while 1:
         g = grid.copy()
 
-        if DEBUG > 1:
+        if DEBUG == 2:
             print()
             grid.print()
+        elif DEBUG == 3:
+            grid.draw()
 
         for pt in list(srcs):
             # we modify srcs along the way, make sure pt is still valid
@@ -129,9 +131,11 @@ def run(grid):
         if g.g == grid.g:
             break
 
-    if DEBUG:
+    if DEBUG == 2:
         print()
         grid.print()
+    elif DEBUG == 3:
+        grid.draw()
 
     # count amount of water/sand
     cnts = defaultdict(int)

@@ -1,5 +1,8 @@
 #!/usr/bin/env pypy3
 
+import time
+from types import SimpleNamespace
+
 def neighbors8(pt, dir=None):
     x, y = pt
     if dir:
@@ -137,7 +140,7 @@ class Grid:
 
     def hash(self):
         return hash(tuple([tuple(_) for _ in self.g]))
-        
+
     # props
     @property
     def box(self):
@@ -222,6 +225,13 @@ class Grid:
         size = self.size
         return size[0] * size[1]
 
+    def sparse_iter(self):
+        for y in self.ys:
+            for x in self.xs:
+                v = self.g[y][x]
+                if v:
+                    yield (x, y), v
+
     # transformations
     def flip_x(self):
         self.g.reverse()
@@ -235,6 +245,43 @@ class Grid:
 
     def rotate_ccw(self):
         self.g[:] = [list(_) for _ in zip(*self.g)][::-1]
+
+    def draw(self, ppg=1, colors=None):
+        if not hasattr(self, '_gfx'):
+            self._gfx = SimpleNamespace()
+
+            import pygame
+            pygame.init()
+
+            sx, sy = self.size
+            w, h = ppg * sx, ppg * sy
+
+            self._gfx.display = pygame.display
+            self._gfx.display.set_mode((w, h))
+            self._gfx.pa = pygame.PixelArray(pygame.display.get_surface())
+            self._gfx.ppg = ppg
+
+            if not colors:
+                scale = int(255 / max(self.values))
+                colors = {v: v * scale for v in self.values}
+            self._gfx.colors = {v: (c, c, c) for v, c in colors.items()}
+
+        self._gfx.pa[:, :] = (0, 0, 0)
+
+        ppg = self._gfx.ppg
+
+        size = self.size
+        box = self.box
+
+        ox = box[0][0]
+        oy = box[0][1]
+
+        for pt, v in self.sparse_iter():
+            if v:
+                gx, gy = pt[0] - ox, pt[1] - oy
+                self._gfx.pa[gx*ppg:gx*ppg + ppg, gy*ppg : gy*ppg + ppg] = self._gfx.colors[v]
+
+        self._gfx.display.update()
 
 class SparseGrid(Grid):
     def __init__(self, items, chars={'.': 0, '#': 1}):
@@ -291,9 +338,9 @@ class SparseGrid(Grid):
 
     @property
     def ys(self):
-        minx = min(_[1] for _ in self.g)
-        maxx = max(_[1] for _ in self.g)
-        return range(minx, maxx+1)
+        miny = min(_[1] for _ in self.g)
+        maxy = max(_[1] for _ in self.g)
+        return range(miny, maxy+1)
 
     def get(self, pt):
         return self.g.get(pt, 0)
@@ -346,6 +393,9 @@ class SparseGrid(Grid):
 # entire box is more correct/expected...
 #    def __iter__(self):
 #        return iter(dict(self.g))
+
+    def sparse_iter(self):
+        return self.g.items()
 
     def __contains__(self, k):
         return k in self.g
