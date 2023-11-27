@@ -2,6 +2,8 @@
 
 set -eo pipefail
 
+export PATH="$(pwd)/bin:$PATH"
+
 START=$(date +'%s')
 
 cd $1 > /dev/null

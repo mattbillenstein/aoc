@@ -25,7 +25,7 @@ class Tile(Grid):
         elif side == 'L':
             s = ''.join(str(self.get((0, _))) for _ in self.ys)
         elif side == 'R':
-            s = ''.join(str(self.get((self.box[0][1], _))) for _ in self.ys)
+            s = ''.join(str(self.get((self.box[1][0], _))) for _ in self.ys)
         else:
             assert 0, side
         return s

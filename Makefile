@@ -1,4 +1,4 @@
-.PHONY: all clean install
+.PHONY: all install clean realclean
 
 SHELL=/bin/bash
  
@@ -8,7 +8,9 @@ OUTPUTS := $(DAYS:%=%/output.txt)
 all: $(OUTPUTS) $(OUTPUTS_MOD) check.txt
 install: .venv-pypy3/installed .venv-python3/installed
 clean:
-	rm -fR */*/output.txt check.txt .venv*
+	rm -fR */*/output.txt check.txt
+realclean:
+	rm -fR */*/output.txt check.txt .venv-*
 
 .venv-pypy3/installed: requirements.txt
 	pypy3 -m venv .venv-pypy3
@@ -21,7 +23,7 @@ clean:
 	touch .venv-python3/installed
 
 define DAYRULE
-$D/output.txt: $D/*.py $D/input*.txt .venv-python3/bin/activate .venv-pypy3/bin/activate
+$D/output.txt: $D/*.py $D/input*.txt .venv-python3/installed .venv-pypy3/installed
 	./run.sh $D
 endef
 

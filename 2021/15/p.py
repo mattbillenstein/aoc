@@ -21,7 +21,7 @@ def part1(data):
         for npt in g.neighbors4(pt):
             graph[pt].append((npt, g.get(npt)))
 
-    start, end = zip(*g.box)
+    start, end = g.box
     path = dijkstra(graph, start, end)
 
     if DEBUG:
