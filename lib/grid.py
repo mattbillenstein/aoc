@@ -85,9 +85,10 @@ def step(pt, dir):
     return nx, ny
 
 class Grid:
-    def __init__(self, items, chars={'.': 0, '#': 1}):
+    def __init__(self, items, chars={'.': 0, '#': 1}, gfx=None):
         self.chars = chars
         self.values = {v: k for k, v in chars.items()}
+        self.gfx = gfx
 
         if isinstance(items, list) and isinstance(items[0], str):
             self.g = [[0] * len(items[0]) for _ in items]
@@ -106,7 +107,7 @@ class Grid:
             self.g = [list(_) for _ in items]
 
     def copy(self):
-        return Grid([list(_) for _ in self.g], self.chars)
+        return Grid([list(_) for _ in self.g], self.chars, self.gfx)
 
     def slice(self, pt1, pt2):
         # return subgrid over [pt1 .. pt2] inclusive
@@ -146,7 +147,7 @@ class Grid:
     def box(self):
         if not self.g:
             return (0, 0), (0, 0)
-        return (0, len(self.g[0])-1), (0, len(self.g)-1)
+        return (0, 0), (len(self.g[0])-1, len(self.g)-1)
 
     @property
     def size(self):
@@ -247,8 +248,8 @@ class Grid:
         self.g[:] = [list(_) for _ in zip(*self.g)][::-1]
 
     def draw(self, ppg=1, colors=None):
-        if not hasattr(self, '_gfx'):
-            self._gfx = SimpleNamespace()
+        if not self.gfx:
+            self.gfx = SimpleNamespace()
 
             import pygame
             pygame.init()
@@ -256,19 +257,20 @@ class Grid:
             sx, sy = self.size
             w, h = ppg * sx, ppg * sy
 
-            self._gfx.display = pygame.display
-            self._gfx.display.set_mode((w, h))
-            self._gfx.pa = pygame.PixelArray(pygame.display.get_surface())
-            self._gfx.ppg = ppg
+            self.gfx.display = pygame.display
+            self.gfx.display.set_mode((w, h))
+            self.gfx.pa = pygame.PixelArray(pygame.display.get_surface())
+            self.gfx.ppg = ppg
 
             if not colors:
-                scale = int(255 / max(self.values))
-                colors = {v: v * scale for v in self.values}
-            self._gfx.colors = {v: (c, c, c) for v, c in colors.items()}
+                base = min(self.values)
+                scale = int(255 / (max(self.values) - base))
+                colors = {v: (v - base) * scale for v in self.values}
+            self.gfx.colors = {v: (c, c, c) for v, c in colors.items()}
 
-        self._gfx.pa[:, :] = (0, 0, 0)
+        self.gfx.pa[:] = (0, 0, 0)
 
-        ppg = self._gfx.ppg
+        ppg = self.gfx.ppg
 
         size = self.size
         box = self.box
@@ -278,15 +280,17 @@ class Grid:
 
         for pt, v in self.sparse_iter():
             if v:
-                gx, gy = pt[0] - ox, pt[1] - oy
-                self._gfx.pa[gx*ppg:gx*ppg + ppg, gy*ppg : gy*ppg + ppg] = self._gfx.colors[v]
+                gx = pt[0] - ox
+                gy = pt[1] - oy
+                self.gfx.pa[gx*ppg:gx*ppg + ppg, gy*ppg : gy*ppg + ppg] = self.gfx.colors[v]
 
-        self._gfx.display.update()
+        self.gfx.display.update()
 
 class SparseGrid(Grid):
-    def __init__(self, items, chars={'.': 0, '#': 1}):
+    def __init__(self, items, chars={'.': 0, '#': 1}, gfx=None):
         self.chars = chars
         self.values = {v: k for k, v in chars.items()}
+        self.gfx = gfx
 
         if isinstance(items, set):
             self.g = {_: 1 for _ in items}
@@ -307,7 +311,7 @@ class SparseGrid(Grid):
             self.g = dict(items)
 
     def copy(self):
-        return SparseGrid(dict(self.g), self.chars)
+        return SparseGrid(dict(self.g), self.chars, self.gfx)
 
     # props
     @property
