@@ -1,5 +1,6 @@
 #!/usr/bin/env pypy3
 
+import math
 import sys
 
 def parse_input():
@@ -19,12 +20,6 @@ def parse_input():
 
     return games
 
-def product(it):
-    x = 1
-    for y in it:
-        x *= y
-    return x
-
 def part1(games):
     avail = {'red': 12, 'green': 13, 'blue': 14}
     tot = 0
@@ -37,7 +32,7 @@ def part2(games):
     colors = ('red', 'green', 'blue')
     tot = 0
     for game in games.values():
-        tot += product(max(_.get(color, 0) for _ in game) for color in colors)
+        tot += math.prod(max(_.get(color, 0) for _ in game) for color in colors)
     print(tot)
 
 def main():
