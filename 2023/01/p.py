@@ -2,22 +2,14 @@
 
 import sys
 
-DEBUG = sys.argv.count('-v')
-
-def debug(*args):
-    if DEBUG:
-        print(*args)
-
 def parse_input():
-    lines = [_.strip('\r\n') for _ in sys.stdin]
-    return lines
+    return [_.strip('\r\n') for _ in sys.stdin]
 
 def part1(data):
     tot = 0
     for line in data:
-        a = int([_ for _ in line if _ in '0123456789'][0])
-        b = int([_ for _ in line if _ in '0123456789'][-1])
-        tot += a * 10 + b
+        nums = [_ for _ in line if _ in '0123456789']
+        tot += int(nums[0]) * 10 + int(nums[-1])
     print(tot)
 
 def part2(data):

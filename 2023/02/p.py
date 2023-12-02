@@ -2,58 +2,42 @@
 
 import sys
 
-DEBUG = sys.argv.count('-v')
-
-def debug(*args):
-    if DEBUG:
-        print(*args)
-
 def parse_input():
+    # Game 1: 7 blue, 6 green, 3 red; 3 red, 5 green, 1 blue; 1 red, 5 green, 8 blue; 3 red, 1 green, 5 blue
     lines = [_.strip('\r\n') for _ in sys.stdin]
     games = {}
     for line in lines:
-        game_id, draws = line.split(':', 1)
-        game_id = int(game_id.split()[1])
-        games[game_id] = []
-        draws = draws.strip().split(';')
-        for d in draws:
-            cubes = d.strip().split(';')
-            for x in cubes:
-                draw = {}
-                games[game_id].append(draw)
-                for y in x.strip().split(','):
-                    cnt, color = y.strip().split()
-                    draw[color] = int(cnt)
+        id, draws = line.split(': ')
+        id = int(id.split()[1])
+        games[id] = []
+        for d in draws.split('; '):
+            draw = {}
+            games[id].append(draw)
+            for x in d.split(', '):
+                cnt, color = x.strip().split()
+                draw[color] = int(cnt)
 
     return games
 
-def part1(games):
-    available = {'red': 12, 'green': 13, 'blue': 14}
+def product(it):
+    x = 1
+    for y in it:
+        x *= y
+    return x
 
+def part1(games):
+    avail = {'red': 12, 'green': 13, 'blue': 14}
     tot = 0
     for id, game in games.items():
-        poss = True
-        for draw in game:
-            if any(draw[_] > available[_] for _ in draw):
-                poss = False
-                break
-
-        if poss:
+        if all(all(draw[_] <= avail[_] for _ in draw) for draw in game):
             tot += id
-
     print(tot)
             
 def part2(games):
+    colors = ('red', 'green', 'blue')
     tot = 0
-    for id, game in games.items():
-        mins = {'red': 0, 'green': 0, 'blue': 0}
-        for draw in game:
-            for color, cnt in draw.items():
-                if mins[color] < cnt:
-                    mins[color] = cnt
-
-        tot += mins['red'] * mins['green'] * mins['blue']
-
+    for game in games.values():
+        tot += product(max(_.get(color, 0) for _ in game) for color in colors)
     print(tot)
 
 def main():
