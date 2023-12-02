@@ -1,4 +1,4 @@
-.PHONY: all install clean realclean
+.PHONY: all install clean realclean check
 
 SHELL=/bin/bash
  
@@ -11,6 +11,8 @@ clean:
 	rm -fR */*/output.txt check.txt
 realclean:
 	rm -fR */*/output.txt check.txt .venv-*
+check:
+	make clean && make -s -j$(nproc) all && git status
 
 .venv-pypy3/installed: requirements.txt
 	pypy3 -m venv .venv-pypy3

@@ -21,6 +21,4 @@ jobs:
 
     - name: Run
       run: |
-        make clean
-        make -s -j2
-        git status
+        make check
