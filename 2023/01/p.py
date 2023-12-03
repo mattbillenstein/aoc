@@ -13,26 +13,16 @@ def part1(data):
     print(tot)
 
 def part2(data):
-    nums = ['one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', '1', '2', '3', '4', '5', '6', '7', '8', '9']
+    nums = ['1', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', '2', '3', '4', '5', '6', '7', '8', '9']
     tot = 0
     for line in data:
-        mn, mx = 1000, -1
-        a = b = None
-        for num in nums:
-            idx = line.find(num)
-            if idx >= 0:
-                if idx < mn:
-                    mn = idx
-                    a = num
+        a = [(line.find(_), _) for _ in nums]
+        a = min([_ for _ in a if _[0] != -1])[1]
+        a = int(a) if a.isdigit() else nums.index(a)
 
-            idx = line.rfind(num)
-            if idx >= 0:
-                if idx > mx:
-                    mx = idx
-                    b = num
-
-        a = int(a) if a.isdigit() else nums.index(a) + 1
-        b = int(b) if b.isdigit() else nums.index(b) + 1
+        b = [(line.rfind(_), _) for _ in nums]
+        b = max([_ for _ in b if _[0] != -1])[1]
+        b = int(b) if b.isdigit() else nums.index(b)
 
         tot += a * 10 + b
 
