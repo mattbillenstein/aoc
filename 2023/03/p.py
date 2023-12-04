@@ -7,10 +7,9 @@ def parse_input():
     return [_.strip('\r\n') for _ in sys.stdin]
 
 def get(data, x, y):
-    try:
-        return data[y][x]
-    except IndexError:
-        pass
+    if x < 0 or y < 0 or y > len(data) - 1 or x > len(data[y]) - 1:
+        return None
+    return data[y][x]
 
 def part(data):
     numbers = '0123456789'
