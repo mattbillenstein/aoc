@@ -12,7 +12,7 @@ clean:
 realclean:
 	rm -fR */*/output.txt check.txt .venv-*
 check:
-	make clean && time make -s -j$(nproc) all && git status
+	make clean && time make -s -j$(shell nproc) all && git status
 
 .venv-pypy3/installed: requirements.txt
 	pypy3 -m venv .venv-pypy3
