@@ -3,3 +3,4 @@
 03: Find numbers in a grid that are adjacent to symbols
 04: List of set intersections of cards producing other cards
 05: Mapping ranges of integers many times - massive range overlap ops
+06: Easy - counting boat race wins
