@@ -4,3 +4,4 @@
 04: List of set intersections of cards producing other cards
 05: Mapping ranges of integers many times - massive range overlap ops
 06: Easy - counting boat race wins
+07: Computing best poker hand; part 2 with jokers wild
