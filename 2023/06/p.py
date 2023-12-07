@@ -23,12 +23,34 @@ def part2(times, dists):
     time = int(''.join(str(_) for _ in times))
     dist = int(''.join(str(_) for _ in dists))
 
-    wins = 0
-    for speed in range(time+1):
+    # scan the range looking for min/max hold times where we still win
+    jump = 1000
+    mn = time + 1
+    mx = -1
+    for speed in range(0, time+1, jump):
         traveled = (time - speed) * speed
         if traveled > dist:
-            wins += 1
-    print(wins)
+            if speed < mn:
+                mn = speed
+            if speed > mx:
+                mx = speed
+
+    # find start wher we win
+    for speed in range(mn - jump, time+1, 1):
+        traveled = (time - speed) * speed
+        if traveled > dist:
+            start = speed
+            break
+
+    # find end where we don't win
+    for speed in range(mx, time+1, 1):
+        traveled = (time - speed) * speed
+        if traveled < dist:
+            end = speed
+            break
+
+    # take difference
+    print(end - start)
 
 def main():
     data = parse_input()
