@@ -8,7 +8,9 @@ def parse_input():
     instr = lines[0]
     map = {}
     for line in lines[2:]:
-        a, _, b, c = line.replace('(', '').replace(')', '').replace(',', '').split()
+        for c in '=(,)':
+            line = line.replace(c, '')
+        a, b, c = line.split()
         map[a] = (b, c)
     return instr, map
 
@@ -23,10 +25,10 @@ def part1(instr, map):
 def part2(instr, map):
     pos = [_ for _ in map if _[2] == 'A']
     steps = []
-    for x in pos:
+    for p in pos:
         step = 0
-        while x[2] != 'Z':
-            x = map[x][0 if instr[step % len(instr)] == 'L' else 1]
+        while p[2] != 'Z':
+            p = map[p][0 if instr[step % len(instr)] == 'L' else 1]
             step += 1
         steps.append(step)
     print(math.lcm(*steps))
