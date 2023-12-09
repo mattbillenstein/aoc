@@ -2,6 +2,7 @@
 
 import os
 import os.path
+import re
 import urllib.request
 
 with open(os.path.expanduser('~/src/mattb/dotfiles/aoc')) as f:
@@ -35,6 +36,7 @@ while 1:
     eidx = data.find('</code>', idx)
 
     test = data[idx+len('<code>'):eidx]
+    test = re.sub('<[^<]+>', '', test)
     if test not in tests:
         tests.append(test)
 
