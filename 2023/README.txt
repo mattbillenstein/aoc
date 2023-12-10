@@ -7,3 +7,4 @@
 07: Computing best poker hand; part 2 with jokers wild
 08: math.lcm of several cycle-producing generators...
 09: Simple list of lists manipulation problem
+10: Grid pip tracing problem, with enclosed area
