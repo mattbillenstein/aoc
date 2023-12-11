@@ -12,7 +12,7 @@ def debug(*args):
 
 def parse_input():
     lines = [_.strip('\r\n') for _ in sys.stdin]
-    return Grid(lines, {'I': 1, 'O': 2})
+    return Grid(lines, {'I': 1, 'O': 2, 'X': 3})
 
 def fill(grid, pt):
     q = [pt]
@@ -208,6 +208,8 @@ def parts(grid):
     foundins = set()
     borderins = set()
     for pt in ins:
+        if pt in foundins:
+            continue
         f, b = fill(grid, pt)
         foundins.update(f)
         borderins.update(b)
@@ -215,6 +217,8 @@ def parts(grid):
     foundouts = set()
     borderouts = set()
     for pt in outs:
+        if pt in foundouts:
+            continue
         f, b = fill(grid, pt)
         foundouts.update(f)
         borderouts.update(b)
@@ -225,10 +229,9 @@ def parts(grid):
 
     if DEBUG:
         for pt in foundins:
-            grid.setc(pt, 'I')
-        for pt in foundouts:
-            grid.setc(pt, 'O')
+            grid.setc(pt, 'X')
 
+        print()
         grid.print()
 
         print(None in borderouts)
