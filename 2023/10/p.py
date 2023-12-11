@@ -4,6 +4,12 @@ import sys
 
 from grid import Grid
 
+DEBUG = sys.argv.count('-v')
+
+def debug(*args):
+    if DEBUG:
+        print(*args)
+
 def parse_input():
     lines = [_.strip('\r\n') for _ in sys.stdin]
     return Grid(lines, {'I': 1, 'O': 2})
@@ -43,6 +49,7 @@ def parts(grid):
                     break
             break
 
+    # trace to find the path
     path = set()
 
     # sets of empty spaces inside or outside the path, may swap later...
@@ -122,10 +129,81 @@ def parts(grid):
         if pt not in path:
             grid.setc(pt, '.')
 
-    grid.print()
+    if DEBUG:
+        grid.print()
 
-    print(fill(grid, (4, 10)))
-    duh
+    # trace again to collect fill points
+    path = set()
+
+    # sets of empty spaces inside or outside the path, may swap later...
+    ins = set()
+    outs = set()
+
+    dist = 0
+    pt = start
+    dir = sdir
+    while 1:
+        path.add(pt)
+        dist += 1
+
+        pt = grid.step(pt, dir)
+        c = grid.getc(pt)
+        if c == 'S':
+            break
+
+        inc, outc = '', ''
+        if c  == '-':
+            inc, outc = '^', 'v'
+            if dir == '<':
+                inc, outc = outc, inc
+        elif c == '|':
+            inc, outc = '>', '<'
+            if dir == '^':
+                inc, outc = outc, inc
+        elif c == 'J':
+            if dir == '>':
+                dir = '^'
+                outc = 'v>'
+            else:
+                assert dir == 'v'
+                dir = '<'
+                inc = 'v>'
+        elif c == 'F':
+            if dir == '^':
+                dir = '>'
+                inc = '<^'
+            else:
+                assert dir == '<'
+                dir = 'v'
+                outc = '<^'
+        elif c == 'L':
+            if dir == '<':
+                dir = '^'
+                inc = 'v<'
+            else:
+                assert dir == 'v'
+                dir = '>'
+                outc = 'v<'
+        elif c == '7':
+            if dir == '>':
+                dir = 'v'
+                inc = '^>'
+            else:
+                assert dir == '^'
+                dir = '<'
+                outc = '^>'
+
+        for x in (inc, outc):
+            for ndir in x:
+                npt = grid.step(pt, ndir)
+                if not npt:
+                    continue
+                nc = grid.getc(npt)
+                if nc == '.':
+                    if ndir in inc:
+                        ins.add(npt)
+                    else:
+                        outs.add(npt)
 
     foundins = set()
     borderins = set()
@@ -145,19 +223,18 @@ def parts(grid):
         borderins, borderouts = borderouts, borderins
         foundins, foundouts = foundouts, foundins
 
-    
-    for pt in foundins:
-        grid.setc(pt, 'I')
-    for pt in foundouts:
-        grid.setc(pt, 'O')
-    grid.print()
-        
-    print(None in borderouts)
-    print(None in borderins)
+    if DEBUG:
+        for pt in foundins:
+            grid.setc(pt, 'I')
+        for pt in foundouts:
+            grid.setc(pt, 'O')
+
+        grid.print()
+
+        print(None in borderouts)
+        print(None in borderins)
+        print(len(foundouts))
     print(len(foundins))
-    print(len(foundouts))
-
-
 
 def main():
     data = parse_input()
