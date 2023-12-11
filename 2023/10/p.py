@@ -6,7 +6,7 @@ from grid import Grid
 
 def parse_input():
     lines = [_.strip('\r\n') for _ in sys.stdin]
-    return Grid(lines)
+    return Grid(lines, {'I': 1, 'O': 2})
 
 def fill(grid, pt):
     q = [pt]
@@ -18,12 +18,11 @@ def fill(grid, pt):
         for npt in [grid.step(pt, _) for _ in '<>v^']:
             # found the edge, can just abort
             if npt is None:
-                return None
+                border.add(npt)
+                continue
 
             if npt in found:
                 continue
-
-            found.add(npt)
 
             c = grid.getc(npt)
             if c == '.':
@@ -31,47 +30,134 @@ def fill(grid, pt):
             else:
                 border.add(npt)
 
-    return border
+    return found, border
 
 def parts(grid):
     for pt in grid:
         if grid.getc(pt) == 'S':
-            pos = pt
+            start = pt
+            for dir in '<>^v':
+                npt = grid.step(pt, dir)
+                if npt and grid.getc(npt) in ('|', '-'):
+                    sdir = dir
+                    break
             break
 
-    visited = set()
+    path = set()
 
-    dir = '>'
+    # sets of empty spaces inside or outside the path, may swap later...
+    ins = set()
+    outs = set()
+
     dist = 0
+    pt = start
+    dir = sdir
     while 1:
-        visited.add(pt)
+        path.add(pt)
         dist += 1
+
         pt = grid.step(pt, dir)
         c = grid.getc(pt)
-        if c == 'J':
+        if c == 'S':
+            break
+
+        inc, outc = '', ''
+        if c  == '-':
+            inc, outc = '^', 'v'
+            if dir == '<':
+                inc, outc = outc, inc
+        elif c == '|':
+            inc, outc = '>', '<'
+            if dir == '^':
+                inc, outc = outc, inc
+        elif c == 'J':
             if dir == '>':
                 dir = '^'
+                outc = 'v>'
             else:
+                assert dir == 'v'
                 dir = '<'
+                inc = 'v>'
         elif c == 'F':
             if dir == '^':
                 dir = '>'
+                inc = '<^'
             else:
+                assert dir == '<'
                 dir = 'v'
+                outc = '<^'
         elif c == 'L':
             if dir == '<':
                 dir = '^'
+                inc = 'v<'
             else:
+                assert dir == 'v'
                 dir = '>'
+                outc = 'v<'
         elif c == '7':
             if dir == '>':
                 dir = 'v'
+                inc = '^>'
             else:
+                assert dir == '^'
                 dir = '<'
-        elif c == 'S':
-            break
+                outc = '^>'
 
+        for x in (inc, outc):
+            for ndir in x:
+                npt = grid.step(pt, ndir)
+                if not npt:
+                    continue
+                nc = grid.getc(npt)
+                if nc == '.':
+                    if ndir in inc:
+                        ins.add(npt)
+                    else:
+                        outs.add(npt)
+
+    # part1, half of distance is the furthest away from start we can get...
     print(dist // 2)
+
+    for pt in grid:
+        if pt not in path:
+            grid.setc(pt, '.')
+
+    grid.print()
+
+    print(fill(grid, (4, 10)))
+    duh
+
+    foundins = set()
+    borderins = set()
+    for pt in ins:
+        f, b = fill(grid, pt)
+        foundins.update(f)
+        borderins.update(b)
+
+    foundouts = set()
+    borderouts = set()
+    for pt in outs:
+        f, b = fill(grid, pt)
+        foundouts.update(f)
+        borderouts.update(b)
+
+    if None in borderins:
+        borderins, borderouts = borderouts, borderins
+        foundins, foundouts = foundouts, foundins
+
+    
+    for pt in foundins:
+        grid.setc(pt, 'I')
+    for pt in foundouts:
+        grid.setc(pt, 'O')
+    grid.print()
+        
+    print(None in borderouts)
+    print(None in borderins)
+    print(len(foundins))
+    print(len(foundouts))
+
+
 
 def main():
     data = parse_input()
