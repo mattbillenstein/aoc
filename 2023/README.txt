@@ -8,3 +8,4 @@
 08: math.lcm of several cycle-producing generators...
 09: Simple list of lists manipulation problem
 10: Grid pip tracing problem, with enclosed area
+11: Grid expansion problem
