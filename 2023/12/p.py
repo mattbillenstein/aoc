@@ -1,13 +1,6 @@
 #!/usr/bin/env pypy3
 
-import copy
-import itertools
-import math
-import re
 import sys
-import time
-from collections import defaultdict
-from pprint import pprint
 
 DEBUG = sys.argv.count('-v')
 
@@ -25,10 +18,12 @@ def parse_input():
     return L
 
 def search(x, y, in_run=False, lvl='', current=''):
-    debug(lvl + 'search', x, y, in_run, repr(current))
+    if DEBUG > 1:
+        print(lvl + 'search', x, y, in_run, repr(current))
     if len(y) == 1 and y[0] == 0:
         if '#' not in x:
-            debug(lvl + 'score')
+            if DEBUG > 1:
+                print(lvl + 'score')
             return 1
         else:
             return 0
@@ -71,7 +66,7 @@ def part1(data):
     for x, y in data:
         c = search(x, y)
         tot += c
-        print(x, y, c)
+        debug(x, y, c)
     print(tot)
 
 def part2(data):
@@ -87,14 +82,13 @@ def part2(data):
         ndata.append((X, Y))
 
     part1(ndata)
-        
 
 def main():
     data = parse_input()
     if '1' in sys.argv:
-        part1(copy.deepcopy(data))
+        part1(data)
     if '2' in sys.argv:
-        part2(copy.deepcopy(data))
+        part2(data)
 
 if __name__ == '__main__':
     main()
