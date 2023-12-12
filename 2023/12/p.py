@@ -4,8 +4,8 @@ import sys
 
 DEBUG = sys.argv.count('-v')
 
-def debug(*args):
-    if DEBUG:
+def debug(*args, level=0):
+    if DEBUG > level:
         print(*args)
 
 def parse_input():
@@ -18,26 +18,15 @@ def parse_input():
     return L
 
 def search(x, y, cache, in_run=False, lvl='', current=''):
-    key = (x, tuple(y))
+    key = (x, tuple(y), in_run)
     if key in cache:
         return cache[key]
 
-    if DEBUG > 1:
-        print(lvl + 'search', x, y, in_run, repr(current))
-
-#    if current.endswith('..........'):
-#        if DEBUG > 1:
-#            print('abort')
-#        return 0
-#
-#    if x.count('#') > sum(y):
-#        print('ABORT')
-#        return 0
+    debug(lvl + 'search', x, y, in_run, repr(current), level=1)
 
     if len(y) == 1 and y[0] == 0:
         if '#' not in x:
-            if DEBUG > 1:
-                print(lvl + 'score')
+            debug(lvl + 'score', level=1)
             return 1
         else:
             return 0
@@ -79,7 +68,8 @@ def search(x, y, cache, in_run=False, lvl='', current=''):
 def part1(data):
     tot = 0
     for x, y in data:
-        c = search(x, y, {})
+        cache = {}
+        c = search(x, y, cache)
         tot += c
         debug(x, y, c)
     print(tot)
@@ -93,6 +83,9 @@ def part2(data):
             X += x + '?'
             Y.extend(y)
         X = X[:-1]
+
+        debug(x, y, level=1)
+        debug(X, Y, level=1)
 
         ndata.append((X, Y))
 
