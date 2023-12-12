@@ -1,0 +1,100 @@
+#!/usr/bin/env pypy3
+
+import copy
+import itertools
+import math
+import re
+import sys
+import time
+from collections import defaultdict
+from pprint import pprint
+
+DEBUG = sys.argv.count('-v')
+
+def debug(*args):
+    if DEBUG:
+        print(*args)
+
+def parse_input():
+    lines = [_.strip('\r\n') for _ in sys.stdin]
+    L = []
+    for line in lines:
+        x, y = line.split()
+        Y = [int(_) for _ in y.split(',')]
+        L.append((x, Y))
+    return L
+
+def search(x, y, in_run=False, lvl='', current=''):
+    debug(lvl + 'search', x, y, in_run, repr(current))
+    if len(y) == 1 and y[0] == 0:
+        if '#' not in x:
+            debug(lvl + 'score')
+            return 1
+        else:
+            return 0
+    if not x:
+        return 0
+
+    tot = 0
+
+    if x[0] == '?':
+        # place #, decrement counter
+        if y[0] > 0:
+            y[0] -= 1
+            tot += search(x[1:], y, True, lvl + '  ', current + '#')
+            y[0] += 1
+
+        if y[0] == 0:
+            # place ., skip to next counter
+            tot += search(x[1:], y[1:], False, lvl + '  ', current + '.')
+        elif not in_run:
+            # place ., repeat on current gap
+            tot += search(x[1:], y, False, lvl + '  ', current + '.')
+    elif x[0] == '.':
+        if y[0] == 0:
+            # found ., skip to next counter
+            tot += search(x[1:], y[1:], False, lvl + '  ', current + x[0])
+        elif not in_run:
+            # found ., repeat on current gap
+            tot += search(x[1:], y, False, lvl + '  ', current + x[0])
+    elif x[0] == '#':
+        if y[0] > 0:
+            # place #, dec counter
+            y[0] -= 1
+            tot += search(x[1:], y, True, lvl + '  ', current + x[0])
+            y[0] += 1
+
+    return tot
+
+def part1(data):
+    tot = 0
+    for x, y in data:
+        c = search(x, y)
+        tot += c
+        print(x, y, c)
+    print(tot)
+
+def part2(data):
+    ndata = []
+    for x, y in data:
+        X = ''
+        Y = []
+        for i in range(5):
+            X += x + '?'
+        Y.extend(y)
+        X = X[:-1]
+
+        ndata.append((X, Y))
+
+    part1(ndata)
+        
+
+def main():
+    data = parse_input()
+    if '1' in sys.argv:
+        part1(copy.deepcopy(data))
+    if '2' in sys.argv:
+        part2(copy.deepcopy(data))
+
+if __name__ == '__main__':
+    main()
