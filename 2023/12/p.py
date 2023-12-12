@@ -81,7 +81,7 @@ def part2(data):
         Y = []
         for i in range(5):
             X += x + '?'
-        Y.extend(y)
+            Y.extend(y)
         X = X[:-1]
 
         ndata.append((X, Y))
