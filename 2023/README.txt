@@ -10,3 +10,4 @@
 10: Grid pip tracing problem, with enclosed area
 11: Grid expansion problem
 12: String grammar matching type problem
+13: Finding reflections in grids
