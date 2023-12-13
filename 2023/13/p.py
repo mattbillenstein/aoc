@@ -29,14 +29,15 @@ def parse_input():
     L.append(Grid(x))
     return L
 
-def reflect_rows(L):
+def reflect_rows(L, diff=0):
+    reflections = []
     if DEBUG > 0:
         for item in L:
             print(item)
         print()
     N = len(L)
     for i in range(N-1):
-        if L[i] == L[i+1]:
+        if sum(a != b for a, b in zip(L[i], L[i+1])) <= diff:
             up = i+1
             down = N - up
 
@@ -52,10 +53,16 @@ def reflect_rows(L):
                 assert len(L1) == len(L2)
 
             L2.reverse()
-            if L1 == L2:
-                return up
 
-    return 0
+            d = 0
+            for x, y in zip(L1, L2):
+                for a, b in zip(x, y):
+                    d += a != b
+
+            if d == diff:
+                reflections.append(up)
+
+    return reflections
 
 def part1(grids):
     totrows = 0
@@ -66,20 +73,45 @@ def part1(grids):
         g.rotate_cw()
         cols = reflect_rows(g.g)
 
+        if rows:
+            totrows += rows[0]
+        if cols:
+            totcols += cols[0]
+
+    print(totrows*100 + totcols)
+
+def part2(grids):
+    totrows = 0
+    totcols = 0
+    for g in grids:
+        if DEBUG > 1:
+            g = g.copy()
+            g.print()
+
+        rows = reflect_rows(g.g)
+        newrows = reflect_rows(g.g, 1)
+
+        debug(rows, newrows)
+
+        rows = list(set(newrows) - set(rows))
+        rows = rows[0] if rows else 0
+
+        g.rotate_cw()
+        cols = reflect_rows(g.g, 1)
+        debug(cols)
+        cols = cols[0] if cols else 0
+
         totrows += rows
         totcols += cols
 
     print(totrows*100 + totcols)
 
-def part2(data):
-    pass
-
 def main():
     data = parse_input()
     if '1' in sys.argv:
-        part1(copy.deepcopy(data))
+        part1(data)
     if '2' in sys.argv:
-        part2(copy.deepcopy(data))
+        part2(data)
 
 if __name__ == '__main__':
     main()
