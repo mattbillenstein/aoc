@@ -29,10 +29,12 @@ def part1(data):
         for pt in g:
             if g.getc(pt) == 'O':
                 npt = g.step(pt, '^')
-                if npt and g.getc(npt) == '.':
+                while npt and g.getc(npt) == '.':
+                    changed = True
                     g.setc(npt, 'O')
                     g.setc(pt, '.')
-                    changed = True
+                    pt = npt
+                    npt = g.step(pt, '^')
 
     score = g.size[1]
     tot = 0
@@ -59,10 +61,12 @@ def part2(data):
                 for pt in g:
                     if g.getc(pt) == 'O':
                         npt = g.step(pt, dir)
-                        if npt and g.getc(npt) == '.':
+                        while npt and g.getc(npt) == '.':
+                            changed = True
                             g.setc(npt, 'O')
                             g.setc(pt, '.')
-                            changed = True
+                            pt = npt
+                            npt = g.step(pt, dir)
 
         state = tuple(sorted([_ for _ in g if g.getc(_) == 'O']))
         if state in seen:
