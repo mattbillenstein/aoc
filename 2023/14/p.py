@@ -68,7 +68,7 @@ def part2(data):
                             pt = npt
                             npt = g.step(pt, dir)
 
-        state = tuple(sorted([_ for _ in g if g.getc(_) == 'O']))
+        state = g.hash()
         if state in seen:
             if not period:
                 period = i - seen[state]
