@@ -67,9 +67,9 @@ def part2(data):
         state = tuple(sorted([_ for _ in g if g.getc(_) == 'O']))
         if state in seen:
             if not period:
-                period = seen[state] - i
+                period = i - seen[state]
             else:
-                assert period == seen[state] - i
+                assert period == i - seen[state]
 
         seen[state] = i
 
