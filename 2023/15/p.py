@@ -1,6 +1,7 @@
 #!/usr/bin/env pypy3
 
 import sys
+from collections import OrderedDict
 
 def parse_input():
     lines = [_.strip('\r\n') for _ in sys.stdin]
@@ -21,29 +22,22 @@ def part1(items):
     print(tot)
 
 def part2(items):
-    boxes = [[] for _ in range(256)]
+    boxes = [OrderedDict() for _ in range(256)]
     for item in items:
         if item[-1] == '-':
             label = item[:-1]
             box = boxes[h(label)]
-            boxes[h(label)] = [_ for _ in box if _[0] != label]
+            if label in box:
+                del box[label]
         else:
             label, power = item.split('=')
             power = int(power)
-            box = boxes[h(label)]
-            found = False
-            for i, lens in enumerate(box):
-                if lens[0] == label:
-                    found = True
-                    box[i] = (label, power)
-                    break
-            if not found:
-                box.append((label, power))
-                
+            boxes[h(label)][label] = power
+
     tot = 0
     for i, box in enumerate(boxes):
-        for j, lens in enumerate(box):
-            tot += (i+1) * (j+1) * lens[1]
+        for j, power in enumerate(box.values()):
+            tot += (i+1) * (j+1) * power
     print(tot)
 
 def main():
