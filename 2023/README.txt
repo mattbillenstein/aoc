@@ -12,3 +12,4 @@
 12: String grammar matching type problem
 13: Finding reflections in grids
 14: Tipped grid rolling boulder problem
+15: Simple string hash and grouping operation
