@@ -2,31 +2,22 @@
 
 import sys
 
-DEBUG = sys.argv.count('-v')
-
-def debug(*args, level=0):
-    if DEBUG > level:
-        print(*args)
-
 def parse_input():
     lines = [_.strip('\r\n') for _ in sys.stdin]
     L = []
     for line in lines:
         x, y = line.split()
-        Y = [int(_) for _ in y.split(',')]
+        Y = tuple([int(_) for _ in y.split(',')])
         L.append((x, Y))
     return L
 
-def search(x, y, cache, in_run=False, lvl='', current=''):
-    key = (x, tuple(y), in_run)
+def search(x, y, cache, in_run=False):
+    key = (x, y, in_run)
     if key in cache:
         return cache[key]
 
-    debug(lvl + 'search', x, y, in_run, repr(current), level=1)
-
     if len(y) == 1 and y[0] == 0:
         if '#' not in x:
-            debug(lvl + 'score', level=1)
             return 1
         else:
             return 0
@@ -38,29 +29,25 @@ def search(x, y, cache, in_run=False, lvl='', current=''):
     if x[0] == '?':
         # place #, decrement counter
         if y[0] > 0:
-            y[0] -= 1
-            tot += search(x[1:], y, cache, True, lvl + '  ', current + '#')
-            y[0] += 1
+            tot += search(x[1:], (y[0]-1,) + y[1:], cache, True)
 
         if y[0] == 0:
             # place ., skip to next counter
-            tot += search(x[1:], y[1:], cache, False, lvl + '  ', current + '.')
+            tot += search(x[1:], y[1:], cache, False)
         elif not in_run:
             # place ., repeat on current gap
-            tot += search(x[1:], y, cache, False, lvl + '  ', current + '.')
+            tot += search(x[1:], y, cache, False)
     elif x[0] == '.':
         if y[0] == 0:
             # found ., skip to next counter
-            tot += search(x[1:], y[1:], cache, False, lvl + '  ', current + x[0])
+            tot += search(x[1:], y[1:], cache, False)
         elif not in_run:
             # found ., repeat on current gap
-            tot += search(x[1:], y, cache, False, lvl + '  ', current + x[0])
+            tot += search(x[1:], y, cache, False)
     elif x[0] == '#':
         if y[0] > 0:
             # place #, dec counter
-            y[0] -= 1
-            tot += search(x[1:], y, cache, True, lvl + '  ', current + x[0])
-            y[0] += 1
+            tot += search(x[1:], (y[0]-1,) + y[1:], cache, True)
 
     cache[key] = tot
     return tot
@@ -71,21 +58,17 @@ def part1(data):
         cache = {}
         c = search(x, y, cache)
         tot += c
-        debug(x, y, c)
     print(tot)
 
 def part2(data):
     ndata = []
     for x, y in data:
         X = ''
-        Y = []
+        Y = tuple()
         for i in range(5):
             X += x + '?'
-            Y.extend(y)
+            Y += y
         X = X[:-1]
-
-        debug(x, y, level=1)
-        debug(X, Y, level=1)
 
         ndata.append((X, Y))
 
