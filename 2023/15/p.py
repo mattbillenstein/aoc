@@ -1,18 +1,6 @@
 #!/usr/bin/env pypy3
 
-import copy
-import itertools
-import math
 import sys
-import time
-from collections import defaultdict
-from pprint import pprint
-
-DEBUG = sys.argv.count('-v')
-
-def debug(*args):
-    if DEBUG:
-        print(*args)
 
 def parse_input():
     lines = [_.strip('\r\n') for _ in sys.stdin]
@@ -23,7 +11,7 @@ def h(s):
     for c in s:
         v += ord(c)
         v *= 17
-        v = v % 256
+        v %= 256
     return v
 
 def part1(items):
@@ -49,7 +37,6 @@ def part2(items):
                     found = True
                     box[i] = (label, power)
                     break
-
             if not found:
                 box.append((label, power))
                 
@@ -62,9 +49,9 @@ def part2(items):
 def main():
     data = parse_input()
     if '1' in sys.argv:
-        part1(copy.deepcopy(data))
+        part1(data)
     if '2' in sys.argv:
-        part2(copy.deepcopy(data))
+        part2(data)
 
 if __name__ == '__main__':
     main()
