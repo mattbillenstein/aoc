@@ -60,13 +60,13 @@ def neighbors4d(pt, dir=None):
 
 def step(pt, dir):
     nx, ny = pt
-    if dir in ('N', 'U', '^'):
+    if dir in ('^', 'N', 'U'):
         ny -= 1
-    elif dir in ('S', 'D', 'v'):
+    elif dir in ('v', 'S', 'D'):
         ny += 1
-    elif dir in ('W', 'L', '<'):
+    elif dir in ('<', 'W', 'L'):
         nx -= 1
-    elif dir in ('E', 'R', '>'):
+    elif dir in ('>', 'E', 'R'):
         nx += 1
     elif dir in ('NW', 'UL'):
         nx -= 1

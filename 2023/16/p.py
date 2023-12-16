@@ -47,11 +47,8 @@ def part1(grid):
     print(energized(grid))
 
 def part2(grid):
-    ul, lr = grid.box
-    x1, x2 = ul[0], lr[0]
-    y1, y2 = ul[1], lr[1]
-
     mx = 0
+    (x1, y1), (x2, y2) = grid.box
 
     for y in grid.ys:
         mx = max(energized(grid, (x1, y), '>'), mx)
