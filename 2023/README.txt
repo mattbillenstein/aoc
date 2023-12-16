@@ -13,3 +13,4 @@
 13: Finding reflections in grids
 14: Tipped grid rolling boulder problem
 15: Simple string hash and grouping operation
+16: Grid tracing problem - light reflected by mirrors
