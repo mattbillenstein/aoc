@@ -30,7 +30,7 @@ for id, d in data['members'].items():
         start = int(datetime.datetime(today.year, 12, day, 0, 0, 0).timestamp()) - 3*3600
         k = str(day)
         if k not in x:
-            break
+            continue
         ts = {}
         for star in (1, 2):
             ts[star] = x[k].get(str(star), {}).get('get_star_ts', '')
