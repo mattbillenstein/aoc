@@ -13,10 +13,13 @@ def trace(grid, pt, dir, visited):
         visited.add((pt, dir))
         c = grid.getc(pt)
         if c == '\\':
+            # mirror, change dir
             dir = {'v': '>', '>': 'v', '<': '^', '^': '<'}[dir]
         elif c == '/':
             dir = {'v': '<', '>': '^', '<': 'v', '^': '>'}[dir]
         elif c == '|':
+            # splitter, trace two other dirs and stop, if we've traced in the
+            # new pt/dir already, no need to do it again...
             if dir in '<>':
                 for ndir in '^v':
                     npt = grid.step(pt, ndir)
@@ -43,25 +46,19 @@ def part1(grid):
     print(energized(grid))
 
 def part2(grid):
-    mx = 0
-    box = grid.box
-    x1, x2 = grid.box[0][0], grid.box[1][0]
-    for y in grid.ys:
-        n = energized(grid, (x1, y), '>')
-        if n > mx:
-            mx = n
-        n = energized(grid, (x2, y), '<')
-        if n > mx:
-            mx = n
+    ul, lr = grid.box
+    x1, x2 = ul[0], lr[0]
+    y1, y2 = ul[1], lr[1]
 
-    y1, y2 = grid.box[0][1], grid.box[1][1]
+    mx = 0
+
+    for y in grid.ys:
+        mx = max(energized(grid, (x1, y), '>'), mx)
+        mx = max(energized(grid, (x2, y), '<'), mx)
+
     for x in grid.xs:
-        n = energized(grid, (x, y1), 'v')
-        if n > mx:
-            mx = n
-        n = energized(grid, (x, y2), '^')
-        if n > mx:
-            mx = n
+        mx = max(energized(grid, (x, y1), 'v'), mx)
+        mx = max(energized(grid, (x, y2), '^'), mx)
 
     print(mx)
 
