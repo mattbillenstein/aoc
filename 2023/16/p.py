@@ -40,6 +40,7 @@ def trace(grid, pt, dir, visited):
 def energized(grid, pt=(0, 0), dir='>'):
     visited = set()
     trace(grid, pt, dir, visited)
+    # energized is # of unique points we visited regardless of direction
     return len(set(_[0] for _ in visited))
 
 def part1(grid):
