@@ -34,6 +34,7 @@ class State:
         self.done = self.pos == self.end and self.steps >= self.min
 
     def next(self):
+        # potential speedup, on a turn, jump self.min spaces immediately...
         if self.steps < self.min:
             npos = self.grid.step(self.pos, self.dir)
             if npos:
