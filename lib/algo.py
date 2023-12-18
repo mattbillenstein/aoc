@@ -35,3 +35,42 @@ def find_repeating(seq, brk=1000000):
                 break
 
     return run_pos, max_run
+
+def shoelace(pts):
+    # shoelace formula - area of polygon given perimeter points
+    assert pts[0] == pts[-1]
+    return sum((a[0]*b[1]-b[0]*a[1]) for a,b in zip(pts, pts[1:])) // 2
+
+def rect_perimeter(pts):
+    assert pts[0] == pts[-1]
+    return sum(abs(a[0] - b[0]) + abs(a[1] - b[1]) for a, b in zip(pts, pts[1:]))
+
+def picks_shoelace_area(pts):
+    '''
+    Calculating i + b from the Pick's theorem, using the Shoelace formula to
+    calculate the area
+
+    i + b = A + b/2 + 1
+
+    b (the number of integer points on the shape's boundary) is just our
+    shape's perimeter, which we can easily calculate.
+
+    We can use the Shoelace formula to calculate A, but that's not the area we
+    are looking for, as it is only the area inside the shape, not counting the
+    boundaries.
+
+    The actual area we are looking for is i + b, which is the number of integer
+    points within and on the shape's boundary. As we already know A and b, we
+    only have to find i, which is, after transforming the Pick's to look for
+    it, i = A - b/2 + 1. We add b to both sides of the equation, and what we
+    get is i + b = A + b/2 + 1, which is our answer.
+    '''
+
+    # pts should close a loop
+    assert pts[0] == pts[-1]
+
+    # with zero width border, this is effectively the interior + half the border
+    i = shoelace(pts)
+    b = rect_perimeter(pts)
+
+    return i + b//2 + 1

@@ -4,6 +4,7 @@ import sys
 
 from graph import bfs
 from grid import SparseGrid
+from algo import picks_shoelace_area
 
 DEBUG = sys.argv.count('-v')
 
@@ -25,6 +26,9 @@ def part1(directions):
         for i in range(dist):
             g.set(pt, 1)
             pt = g.step(pt, dir)
+
+    if DEBUG > 1:
+        g.print()
 
     for y in g.ys:
         for x in g.xs:
@@ -112,7 +116,8 @@ class Edge:
         yield self.pt1
         yield self.pt2
 
-def part2(data):
+def part2a(data):
+    # alternate slow scanline fill implementation
     pt = (0, 0)
     edges = []
     for dir, dist, color in data:
@@ -147,14 +152,50 @@ def part2(data):
         edges.append(edge)
 
         pt = npt
+
     print(fill(edges))
-        
+
+def part2(data):
+    # picks formula:
+    # i = number of interior points
+    # b = number of boundary points
+    # Area = i + b/2 - 1
+
+    pt = (0, 0)
+    vertices = [pt]
+    for dir, dist, color in data:
+        # if debug, don't unpack the actual thing... Use the given input.
+        if DEBUG == 0:
+            dir = {'0': 'R', '1': 'D', '2': 'L', '3': 'U'}[color[-1]]
+            dist = int(color[:-1], 16)
+
+        if dir == 'U':
+            npt = (pt[0], pt[1] - dist)
+        elif dir == 'D':
+            npt = (pt[0], pt[1] + dist)
+        elif dir == 'R':
+            npt = (pt[0] + dist, pt[1])
+        elif dir == 'L':
+            npt = (pt[0] - dist, pt[1])
+        else:
+            assert 0
+
+        vertices.append(npt)
+
+        pt = npt
+
+    area = picks_shoelace_area(vertices)
+    print(area)
+
+
 def main():
     data = parse_input()
     if '1' in sys.argv:
         part1(data)
     if '2' in sys.argv:
         part2(data)
+    if '2a' in sys.argv:
+        part2a(data)
 
 if __name__ == '__main__':
     main()
