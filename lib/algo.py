@@ -45,8 +45,21 @@ def rect_perimeter(pts):
     assert pts[0] == pts[-1]
     return sum(abs(a[0] - b[0]) + abs(a[1] - b[1]) for a, b in zip(pts, pts[1:]))
 
-def picks_shoelace_area(pts):
+def picks_shoelace_area(pts, include_border=True):
     '''
+    Couple explanations:
+
+    Picks Theorem: A = i + b/2 - 1
+        This is the interior (zero-width border) area
+
+        For area with a border, basic algebra lets us solve: i = A - b/2 + 1,
+        which then implies: i + b = A + b/2 + 1
+
+        Geometrically, Picks will include half the border - 1, so we add back
+        half the border + 1 to get the full area
+
+    ------
+
     Calculating i + b from the Pick's theorem, using the Shoelace formula to
     calculate the area
 
@@ -70,7 +83,12 @@ def picks_shoelace_area(pts):
     assert pts[0] == pts[-1]
 
     # with zero width border, this is effectively the interior + half the border
-    i = shoelace(pts)
-    b = rect_perimeter(pts)
+    i = shoelace(pts)           # includes half the boundary
+    b = rect_perimeter(pts)     # compute boundary, add half back plus 1/4 in each corner?
 
-    return i + b//2 + 1
+    if include_border:
+        area = i + b//2 + 1
+    else:
+        area = i - b//2 + 1
+
+    return area

@@ -187,7 +187,6 @@ def part2(data):
     area = picks_shoelace_area(vertices)
     print(area)
 
-
 def main():
     data = parse_input()
     if '1' in sys.argv:
