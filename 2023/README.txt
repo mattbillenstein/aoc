@@ -14,3 +14,6 @@
 14: Tipped grid rolling boulder problem
 15: Simple string hash and grouping operation
 16: Grid tracing problem - light reflected by mirrors
+17: DFS grid path optimization
+18: Large rectilinear area calculation - picks theorem, shoelace formula
+19: Recursive rule evaluation and counting accepted outcomes
