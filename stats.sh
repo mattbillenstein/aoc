@@ -7,6 +7,8 @@ if [ "$YEAR" == "" ]; then
   YEAR="$(date +'%Y')"
 fi
 
+date
+
 COOKIE="$(cat ~/src/mattb/dotfiles/aoc)"
 UA="github.com/mattbillenstein/aoc/get-input.sh v0 by matt@vazor.com"
 curl -s --header "Cookie: $COOKIE" --header "User-Agent: $UA" https://adventofcode.com/$YEAR/stats \
