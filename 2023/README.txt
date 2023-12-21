@@ -18,3 +18,4 @@
 18: Large rectilinear area calculation - picks theorem, shoelace formula
 19: Recursive rule evaluation and counting accepted outcomes
 20: Circuit evaluation - math.lcm peeking periods from earlier inputs...
+21: Infinite grid fill - bfs, grid
