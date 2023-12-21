@@ -91,26 +91,36 @@ def part2a(grid):
         print(n, len(x))
 
 def part2(grid):
+    # paste our input onto a 5x5 grid, fill it, and extract fill counts for
+    # tiles that would be in the actual input - we need to checkerboard - noted
+    # here as parity since the fill alternates on even/odd coordinates given
+    # the tile size is odd...
+
+    # allowed distance in part2
     N = 26501365
 
-
+    # find the start
     for pt in grid:
         c = grid.getc(pt)
         if c == 'S':
             start = pt
             break
 
+    # grid is square, shorthand
     size = grid.size[0]
     assert size == grid.size[1]
 
+    # repeat the grid
     repeat = 5
     ngrid, nstart = repeat_grid(grid, repeat)
 
-    # we reach the edge of the very last tile... In the 5-grid, do the same...
+    # In our input, we reach the edge of the very last tile, considering the
+    # rightmost point... In the 5-grid, do the same...
+
     # offset in the last tile
     o = (start[0] + N) % size
 
-    # total offset
+    # total offset from left edge
     to = (repeat-1) * size + o
 
     # new distance in the 5-grid
@@ -122,9 +132,10 @@ def part2(grid):
     # offset in the last tile in our input - double checking...
     assert (nstart[0] + ndist) % size == (start[0] + N) % size == 130
 
+    # Fill from start in both parities
     pts = [fill(ngrid.copy(), nstart, ndist, _) for _ in range(2)]
 
-    # now, extract tiles for each parity and calculate expanded grid...
+    # Extract tiles for each position and parity...
     tiles = {}
     for y in range(5):
         for x in range(5):
@@ -134,9 +145,74 @@ def part2(grid):
                 tiles[(x, y, p)] = sum(1 for _ in pts[p] if x0 <= _[0] < x1 and y0 <= _[1]  < y1)
 
     pprint(tiles)
-    duh
 
+    partial_small_ul = tiles[(1, 0, 1)]
+    top_center = tiles[(2, 0, 0)]
+    partial_small_ur = tiles[(3, 0, 1)]
+
+    partial_big_ul = tiles[(1, 1, 0)]
+    partial_big_ur = tiles[(3, 1, 0)]
+
+    full_odd = tiles[(2, 1, 1)]
+    full_even = tiles[(2, 2, 0)]
+
+    partial_big_ll = tiles[(1, 3, 0)]
+    partial_big_lr = tiles[(3, 3, 0)]
+
+    partial_small_ll = tiles[(1, 4, 1)]
+    bottom_center = tiles[(2, 4, 0)]
+    partial_small_lr = tiles[(3, 4, 1)]
+
+    left_center = tiles[(0, 2, 0)]
+    right_center = tiles[(4, 2, 0)]
+
+    # add them up
     cnt = 0
+    rows = 0
+
+    # top row
+    cnt += partial_small_ul + top_center + partial_small_ur
+    rows += 1
+
+    rows_half = (N - start[0]) // size
+    odd = 1
+    even = 0
+    for i in range(1, rows_half):
+        rows += 1
+        parity = i % 2
+
+        cnt += partial_small_ul + partial_big_ul + partial_big_ur + partial_small_ur
+        cnt += odd * full_odd
+        cnt += even * full_even
+        print(i, odd, even, (odd + even) * size, N*2)
+
+        even += 2
+        odd, even = even, odd
+
+    # center row
+    cnt += left_center + odd * full_odd + even * full_even + right_center
+    rows += 1
+
+    assert size + odd * size + even * size + size - 1 == N*2
+
+    for i in range(1, rows_half):
+        rows += 1
+        parity = i % 2
+
+        odd, even = even, odd
+        even -= 2
+
+        cnt += partial_small_ul + partial_big_ul + partial_big_ur + partial_small_ur
+        cnt += odd * full_odd
+        cnt += even * full_even
+        print(i, odd, even, (odd + even) * size, N*2)
+
+
+    # bottom row
+    cnt += partial_small_ul + top_center + partial_small_ur
+    rows += 1
+
+    print(cnt, rows, rows * size, N*2)
 
     assert cnt < 609789877775394 # too high
     assert cnt < 609786863497944
