@@ -88,14 +88,10 @@ def part2a(grid):
 
 def part2(grid):
     # paste our input onto a 5x5 grid, fill it, and extract fill counts for
-    # tiles that would be in the actual input - we need to checkerboard - noted
-    # here as parity since the fill alternates on even/odd coordinates given
-    # the tile size is odd...
+    # tiles that would be in the actual input - no need to checkerboard, just
+    # interested in parity in N since we're generating all the odd/even tiles..
 
-    # FIXME - so figured out finally that N is odd, so we're only interested in
-    # parity = 1 with this copy/paste strategy...
-
-    # allowed distance in part2
+    # required distance in part2
     N = 26501365
 
     # find the start
@@ -129,70 +125,61 @@ def part2(grid):
     assert to == ngrid.box[1][0]
 
     # offset in the last tile in our input - double checking...
-    assert (nstart[0] + ndist) % size == (start[0] + N) % size == 130
+    assert (nstart[0] + ndist) % size == (start[0] + N) % size == grid.box[1][0]
 
-    # Fill from start in both parities
-    pts = [fill(ngrid.copy(), nstart, ndist, _) for _ in (0, 1)]
+    # Fill from nstart - in the parity of N
+    pts = fill(ngrid.copy(), nstart, ndist, N % 2)
 
-    # Extract tiles for each position and parity...
+    # Extract tiles for each position
     tiles = {}
     for y in range(5):
         for x in range(5):
-            for p in (0, 1):
-                x0, x1 = x * size, x * size + size
-                y0, y1 = y * size, y * size + size
-                tiles[(x, y, p)] = sum(1 for _ in pts[p] if x0 <= _[0] < x1 and y0 <= _[1]  < y1)
+            x0, x1 = x * size, x * size + size
+            y0, y1 = y * size, y * size + size
+            tiles[(x, y)] = sum(1 for _ in pts if x0 <= _[0] < x1 and y0 <= _[1]  < y1)
 
     if DEBUG:
         pprint(tiles)
 
     # small ul
-    assert tiles[(1, 0, 0)] == tiles[(0, 1, 0)]
+    assert tiles[(1, 0)] == tiles[(0, 1)]
     # small ur
-    assert tiles[(3, 0, 0)] == tiles[(4, 1, 0)]
+    assert tiles[(3, 0)] == tiles[(4, 1)]
     # small ll
-    assert tiles[(0, 3, 0)] == tiles[(1, 4, 0)]
+    assert tiles[(0, 3)] == tiles[(1, 4)]
     # small lr
-    assert tiles[(3, 4, 0)] == tiles[(4, 3, 0)]
+    assert tiles[(3, 4)] == tiles[(4, 3)]
 
-    partial_small_ul = tiles[(1, 0, 1)]
-    top_center = tiles[(2, 0, 1)]
-    partial_small_ur = tiles[(3, 0, 1)]
+    partial_small_ul = tiles[(1, 0)]
+    top_center = tiles[(2, 0)]
+    partial_small_ur = tiles[(3, 0)]
 
-    partial_big_ul = tiles[(1, 1, 1)]
-    partial_big_ur = tiles[(3, 1, 1)]
+    partial_big_ul = tiles[(1, 1)]
+    partial_big_ur = tiles[(3, 1)]
 
-    full_even = tiles[(2, 2, 1)]
-    full_odd = tiles[(2, 1, 1)]   # 2, 1, 1 is double parity...
+    full_even = tiles[(2, 2)]
+    full_odd = tiles[(2, 1)]
 
-    partial_big_ll = tiles[(1, 3, 1)]
-    partial_big_lr = tiles[(3, 3, 1)]
+    partial_big_ll = tiles[(1, 3)]
+    partial_big_lr = tiles[(3, 3)]
 
-    partial_small_ll = tiles[(1, 4, 1)]
-    bottom_center = tiles[(2, 4, 1)]
-    partial_small_lr = tiles[(3, 4, 1)]
+    partial_small_ll = tiles[(1, 4)]
+    bottom_center = tiles[(2, 4)]
+    partial_small_lr = tiles[(3, 4)]
 
-    left_center = tiles[(0, 2, 1)]
-    right_center = tiles[(4, 2, 1)]
-
-    assert partial_small_ll < partial_big_ll
-    assert partial_small_lr < partial_big_lr
-    assert partial_small_ul < partial_big_ul
-    assert partial_small_ur < partial_big_ur
+    left_center = tiles[(0, 2)]
+    right_center = tiles[(4, 2)]
 
     # add them up
     cnt = 0
-    rows = 0
 
     # top row
     cnt += partial_small_ul + top_center + partial_small_ur
-    rows += 1
 
     rows_half = (N - start[0]) // size
     odd = 1
     even = 0
     for i in range(1, rows_half):
-        rows += 1
         parity = i % 2
 
         cnt += partial_small_ul + partial_big_ul + partial_big_ur + partial_small_ur
@@ -206,12 +193,10 @@ def part2(grid):
     # center row
     cnt += left_center + odd * full_odd + even * full_even + right_center
     debug('center', odd, even, (odd + even) * size, N*2)
-    rows += 1
 
     assert size + odd * size + even * size + size - 1 == N*2
 
     for i in range(1, rows_half):
-        rows += 1
         parity = i % 2
 
         odd, even = even, odd
@@ -224,9 +209,6 @@ def part2(grid):
 
     # bottom row
     cnt += partial_small_ll + bottom_center + partial_small_lr
-    rows += 1
-
-    debug(cnt, rows, rows * size - 1, N*2)
 
     assert cnt > 600786863497944 # too low
     assert cnt < 609786863497944 # too high
