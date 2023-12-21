@@ -91,41 +91,50 @@ def part2a(grid):
         print(n, len(x))
 
 def part2(grid):
-    size = grid.size[0]
-    assert size == grid.size[1]
-
-    ngrid, nstart = repeat_grid(grid, 5)
-
-    x = fill(ngrid.copy(), nstart, ngrid.box[1][0] - nstart[0], 0)
-    print(len(x))
-
-    x = fill(ngrid.copy(), nstart, ngrid.box[1][0] - nstart[0], 1)
-    print(len(x))
-
-    # now, extract tiles for each parity and calculate expanded grid...
-
-    duh
-
     N = 26501365
+
 
     for pt in grid:
         c = grid.getc(pt)
         if c == 'S':
             start = pt
-            grid.setc(pt, '.')
             break
 
     size = grid.size[0]
     assert size == grid.size[1]
 
-    tiles = N // size
+    repeat = 5
+    ngrid, nstart = repeat_grid(grid, repeat)
 
-    t = 0
-    for y in range(start[1] - tiles * size, start[1] + tiles * size + 1, size):
-        for x in range(start[0] - tiles * size, start[0] + tiles * size + 1, size):
-            t += 1
+    # we reach the edge of the very last tile... In the 5-grid, do the same...
+    # offset in the last tile
+    o = (start[0] + N) % size
 
-    print(t)
+    # total offset
+    to = (repeat-1) * size + o
+
+    # new distance in the 5-grid
+    ndist = to - nstart[0]
+
+    # should reach last column in our input
+    assert to == ngrid.box[1][0]
+
+    # offset in the last tile in our input - double checking...
+    assert (nstart[0] + ndist) % size == (start[0] + N) % size == 130
+
+    pts = [fill(ngrid.copy(), nstart, ndist, _) for _ in range(2)]
+
+    # now, extract tiles for each parity and calculate expanded grid...
+    tiles = {}
+    for y in range(5):
+        for x in range(5):
+            for p in (0, 1):
+                x0, x1 = x * size, x * size + size
+                y0, y1 = y * size, y * size + size
+                tiles[(x, y, p)] = sum(1 for _ in pts[p] if x0 <= _[0] < x1 and y0 <= _[1]  < y1)
+
+    pprint(tiles)
+    duh
 
     cnt = 0
 
