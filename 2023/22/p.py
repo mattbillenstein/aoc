@@ -1,18 +1,8 @@
 #!/usr/bin/env pypy3
 
 import copy
-import itertools
-import math
 import sys
-import time
 from collections import defaultdict
-from pprint import pprint
-
-DEBUG = sys.argv.count('-v')
-
-def debug(*args):
-    if DEBUG:
-        print(*args)
 
 class Point3D:
     def __init__(self, x, y, z):
@@ -64,6 +54,9 @@ class Brick:
             pt.x += dx
             pt.y += dy
             pt.z += dz
+
+    def __hash__(self):
+        return hash(self.id)
 
     def __repr__(self):
         return f'Brick({self.id:04d}, {self.a}, {self.b})'
@@ -134,11 +127,39 @@ def part1(bricks):
             if not needed:
                 disintegrated.append(b)
 
-    assert len(disintegrated) < 412, f'{len(disintegrated)} too high'
     print(len(disintegrated))
 
-def part2(data):
-    pass
+def part2(bricks):
+    bricks_by_maxz, bricks_by_minz = pack(bricks)
+
+    tot = 0
+
+    # for each brick compute set supporting and set supported by
+    brick_supporting = {}
+    brick_supported_by = {}
+    for b in bricks:
+        brick_supporting[b] = set([_ for _ in bricks_by_minz[b.maxz+1] if b.overlaps_xy(_)])
+        brick_supported_by[b] = set([_ for _ in bricks_by_maxz[b.minz-1] if b.overlaps_xy(_)])
+
+    for b in bricks:
+        q = [b]
+        fall = set([b]) # what would fall
+
+        while q:
+            x = q.pop()
+            for b2 in brick_supporting[x]:
+                s = brick_supported_by[b2]
+
+                # if everything supporting this brick is in the fall set, it
+                # would fall as well
+                if s.issubset(fall):
+                    fall.add(b2)
+                    q.append(b2)
+
+        fall.remove(b)  # doesn't actually fall, is disintegrated...
+        tot += len(fall)
+
+    print(tot)
 
 def main():
     data = parse_input()
