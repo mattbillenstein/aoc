@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+import html
 import os
 import os.path
 import re
@@ -37,6 +38,7 @@ while 1:
 
     test = data[idx+len('<code>'):eidx]
     test = re.sub('<[^<]+>', '', test)
+    test = html.unescape(test)
     if test not in tests:
         tests.append(test)
 
