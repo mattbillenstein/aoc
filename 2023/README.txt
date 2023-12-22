@@ -19,3 +19,4 @@
 19: Recursive rule evaluation and counting accepted outcomes
 20: Circuit evaluation - math.lcm peeking periods from earlier inputs...
 21: Infinite grid fill - bfs, grid
+22: 3D brick packing problem - what supports what and can be removed
