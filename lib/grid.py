@@ -131,6 +131,20 @@ class Grid:
             v = grid.get(npt)
             self.set((npt[0] + pt[0], npt[1] + pt[1]), v)
 
+    def repeat(self, x=1, y=1, sizex=0, sizey=0):
+        if not sizex or not sizey:
+            sizex, sizey = self.size
+
+        assert sizex and sizey, 'Specify sizex, sizey for SparseGrid?'
+
+        ng = self.__class__([[0] * sizex * x for _ in range(sizey * y)], chars=self.chars)
+
+        for gy in range(0, sizey * y, sizey):
+            for gx in range(0, sizex * x, sizex):
+                ng.place((gx, gy), self)
+
+        return ng
+
     def print(self):
         for y in self.ys:
             s = ''
@@ -295,6 +309,7 @@ class SparseGrid(Grid):
         if isinstance(items, set):
             self.g = {_: 1 for _ in items}
         elif items and isinstance(items, list) and isinstance(items[0], str):
+            # rows are strings
             self.g = {}
             for y in range(len(items)):
                 for x in range(len(items[y])):
@@ -307,8 +322,22 @@ class SparseGrid(Grid):
 
                     if v:
                         self.g[(x, y)] = v
-        else:
+        elif items and isinstance(items, list) and isinstance(items[0], list):
+            # rows are list of int values
+            self.g = {}
+            for y in range(len(items)):
+                for x in range(len(items[y])):
+                    v = items[y][x]
+                    assert v in self.values
+                    if v:
+                        self.g[(x, y)] = v
+        elif isinstance(items, dict):
             self.g = dict(items)
+        elif not items:
+            # falsy thing like empty list...
+            self.g = {}
+        else:
+            assert 0, type(items)
 
     def copy(self):
         return SparseGrid(dict(self.g), self.chars, self.gfx)

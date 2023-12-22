@@ -69,11 +69,7 @@ def repeat_grid(grid, repeat):
     size = grid.size[0]
     assert size == grid.size[1]
 
-    ngrid = Grid([[0] * size * repeat for _ in range(size * repeat)], chars=grid.chars)
-
-    for y in range(0, size * repeat, size):
-        for x in range(0, size * repeat, size):
-            ngrid.place((x, y), grid)
+    ngrid = grid.repeat(repeat, repeat)
 
     nstart = (repeat // 2 * size + start[0], repeat // 2 * size + start[1])
 
