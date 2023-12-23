@@ -46,20 +46,25 @@ def trace(grid, pt, dir, vertices, visited):
     assert 0
 
 class State:
-    def __init__(self, pos, end, steps, vertices, visited=None):
-        self.vertices = vertices
-        self.pos = pos
+    def __init__(self, path, end, steps, vertices):
+        self.path = path
         self.end = end
         self.steps = steps
-        self.visited = (visited or []) + [pos]
+        self.vertices = vertices
 
-        self.cost = -steps
-        self.done = self.pos == end
+    @property
+    def cost(self):
+        return -self.steps
+
+    @property
+    def done(self):
+        return self.path[-1] == self.end
+
+    def step(self, v, dist):
+        return State(self.path + (v,), self.end, self.steps + dist, self.vertices)
 
     def next(self):
-        for v, dist, _ in self.vertices[self.pos]:
-            if v not in self.visited:
-                yield State(v, self.end, self.steps+dist, self.vertices, self.visited)
+        return [self.step(v, d) for v, d, _ in self.vertices[self.path[-1]] if v not in self.path]
 
     def __repr__(self):
         return f'State({self.pos}, {self.steps})'
@@ -88,7 +93,7 @@ def part1(grid):
                 if x:
                     L.append(x)
 
-    s = dfs_longest(State(start, end, 0, vertices))
+    s = dfs_longest(State((start,), end, 0, vertices))
 
     if DEBUG:
         g = grid.copy()
