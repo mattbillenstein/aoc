@@ -280,9 +280,11 @@ class Grid:
                 base = min(self.values)
                 scale = int(255 / (max(self.values) - base))
                 colors = {v: (v - base) * scale for v in self.values}
-            self.gfx.colors = {v: (c, c, c) for v, c in colors.items()}
+            else:
+                colors = {self.chars[ch]: c for ch, c in colors.items()}
+            self.gfx.colors = {v: (c, c, c) if isinstance(c, int) else c for v, c in colors.items()}
 
-        self.gfx.pa[:] = (0, 0, 0)
+        self.gfx.pa[:] = self.gfx.colors[0]
 
         ppg = self.gfx.ppg
 

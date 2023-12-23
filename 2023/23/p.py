@@ -13,6 +13,7 @@ def parse_input():
 
 def trace(grid, pt, dir, vertices, visited):
     # trace to next junction, return junction and distance
+    visited.append(pt)
     dist = 1
     while 1:
         npt = grid.step(pt, dir)
@@ -20,7 +21,7 @@ def trace(grid, pt, dir, vertices, visited):
         if c in ('.', dir):
             pt = npt
             dist += 1
-            visited.add(pt)
+            visited.append(pt)
         elif c == '#':
             found = False
             for ndir in {'^': '<>', 'v': '<>', '<': '^v', '>': '^v'}[dir]:
@@ -29,7 +30,7 @@ def trace(grid, pt, dir, vertices, visited):
                     pt = npt
                     dir = ndir
                     dist += 1
-                    visited.add(pt)
+                    visited.append(pt)
                     found = True
                     break
 
@@ -83,7 +84,7 @@ def part1(grid):
         for dir in '<>v^':
             npt = grid.step(pt, dir)
             if npt and grid.getc(npt) in ('.', dir):
-                x = trace(grid, npt, dir, vertices, set([pt]))
+                x = trace(grid, npt, dir, vertices, [pt])
                 if x:
                     L.append(x)
 
