@@ -7,10 +7,6 @@ from grid import Grid
 
 DEBUG = sys.argv.count('-v')
 
-def debug(*args):
-    if DEBUG:
-        print(*args)
-
 def parse_input():
     lines = [_.strip('\r\n') for _ in sys.stdin]
     return Grid(lines, {'.': 0, '#': 1, 'o': 2})
@@ -44,27 +40,25 @@ def trace(grid, pt, dir, vertices, visited):
             return None
 
         if pt in vertices:
-            return (pt, dist)
+            return (pt, dist, visited)
 
     assert 0
 
 class State:
-    def __init__(self, pos, end, steps, vertices, visited):
+    def __init__(self, pos, end, steps, vertices, visited=None):
         self.vertices = vertices
         self.pos = pos
         self.end = end
         self.steps = steps
-        self.visited = visited
+        self.visited = (visited or []) + [pos]
 
         self.cost = -steps
         self.done = self.pos == end
 
     def next(self):
-        for v, dist in self.vertices[self.pos]:
+        for v, dist, _ in self.vertices[self.pos]:
             if v not in self.visited:
-                visited = set(self.visited)
-                visited.add(v)
-                yield State(v, self.end, self.steps+dist, self.vertices, visited)
+                yield State(v, self.end, self.steps+dist, self.vertices, self.visited)
 
     def __repr__(self):
         return f'State({self.pos}, {self.steps})'
@@ -93,7 +87,19 @@ def part1(grid):
                 if x:
                     L.append(x)
 
-    s = dfs_longest(State(start, end, 0, vertices, set()))
+    s = dfs_longest(State(start, end, 0, vertices))
+
+    if DEBUG:
+        g = grid.copy()
+        for i in range(len(s.visited)-1):
+            v1 = s.visited[i]
+            v2 = s.visited[i+1]
+            for pt, dist, L in vertices[v1]:
+                if pt == v2:
+                    for x in L:
+                        g.setc(x, 'o')
+        g.print()
+
     print(s.steps)
 
 def part2(grid):
