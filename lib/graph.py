@@ -110,25 +110,19 @@ def dfs(state):
     return best
 
 def dfs_longest(state):
-    # dfs, to use this you need to implement a state class, see 2016/24 for an
-    # example
-    global _last
-
     visited = {}
     best = None
 
     q = PriorityQueue()
-    q.add_task(state, -state.cost)
+    q.add_task(state, state.cost)
 
     while q:
         assert len(q) < 10_000_000, 'Too much fanout?'
         state = q.pop_task()
 
         if state.done:
-            if not best or state.cost > best.cost:
+            if not best or state.cost < best.cost:
                 best = state
-                state.print()
-                print('Found best:', best)
             continue
 
         for s in state.next():
