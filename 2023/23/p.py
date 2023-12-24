@@ -97,9 +97,9 @@ def part1(grid):
 
     if DEBUG:
         g = grid.copy()
-        for i in range(len(s.visited)-1):
-            v1 = s.visited[i]
-            v2 = s.visited[i+1]
+        for i in range(len(s.path)-1):
+            v1 = s.path[i]
+            v2 = s.path[i+1]
             for pt, dist, L in vertices[v1]:
                 if pt == v2:
                     for x in L:
