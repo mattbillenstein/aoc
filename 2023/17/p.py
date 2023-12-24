@@ -16,7 +16,7 @@ def parse_input():
     return Grid(lines, {'.': 1})
 
 class State:
-    min = 0
+    min = 1
     max = 3
 
     def __init__(self, path, dir, end, steps, cost, grid):
