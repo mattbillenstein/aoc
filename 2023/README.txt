@@ -20,3 +20,5 @@
 20: Circuit evaluation - math.lcm peeking periods from earlier inputs...
 21: Infinite grid fill - bfs, grid
 22: 3D brick packing problem - what supports what and can be removed
+23: Grid longest path dfs
+24: 3D vector intersections across time
