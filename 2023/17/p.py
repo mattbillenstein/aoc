@@ -19,38 +19,39 @@ class State:
     min = 0
     max = 3
 
-    def __init__(self, grid, pos, dir, end, steps, visited, cost):
-        self.grid = grid
-        self.pos = pos
+    def __init__(self, path, dir, end, steps, cost, grid):
+        self.path = path
         self.dir = dir
         self.end = end
         self.steps = steps
-        self.visited = set(visited)
-        self.visited.add(pos)
         self.cost = cost
+        self.grid = grid
 
-        self.key = (pos, dir, steps)
+    @property
+    def key(self):
+        return (self.path[-1], self.dir, self.steps)
 
-        self.done = self.pos == self.end and self.steps >= self.min
+    @property
+    def done(self):
+        return self.path[-1] == self.end and self.steps >= self.min
 
     def next(self):
         # potential speedup, on a turn, jump self.min spaces immediately...
         if self.steps < self.min:
-            npos = self.grid.step(self.pos, self.dir)
-            if npos:
-                steps = self.steps + 1
+            npos = self.grid.step(self.path[-1], self.dir)
+            if npos and npos not in self.path:
                 cost = self.cost + int(self.grid.getc(npos))
-                yield self.__class__(self.grid, npos, self.dir, self.end, steps, self.visited, cost)
+                yield self.__class__(self.path + (npos,), self.dir, self.end, self.steps + 1, cost, self.grid)
         else:
             for dir in '<>v^':
-                npos = self.grid.step(self.pos, dir)
-                if npos and not npos in self.visited:
+                npos = self.grid.step(self.path[-1], dir)
+                if npos and not npos in self.path:
                     steps = 1
                     if dir == self.dir:
                         steps = self.steps + 1
                     if dir != self.dir or steps <= self.max:
                         cost = self.cost + int(self.grid.getc(npos))
-                        yield self.__class__(self.grid, npos, dir, self.end, steps, self.visited, cost)
+                        yield self.__class__(self.path + (npos,), dir, self.end, steps, cost, self.grid)
 
 class State2(State):
     min = 4
@@ -60,7 +61,7 @@ def part1(grid, state_class=State):
     start, end = grid.box
     best = None
     for dir in '>v':
-        state = state_class(grid, start, dir, end, 0, set(), 0)
+        state = state_class((start,), dir, end, 0, 0, grid)
         state = dfs(state)
         if not best or state.cost < best.cost:
             best = state
