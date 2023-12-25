@@ -26,8 +26,11 @@ def parse_input():
 
 def line_intersection(line1, line2, coords=(0, 1)):
     i, j = coords
-    xdiff = (line1[0][i] - line1[1][i], line2[0][i] - line2[1][i])
-    ydiff = (line1[0][j] - line1[1][j], line2[0][j] - line2[1][j])
+    line1 = ((line1[0][i], line1[0][j]), (line1[1][i], line1[1][j]))
+    line2 = ((line2[0][i], line2[0][j]), (line2[1][i], line2[1][j]))
+
+    xdiff = (line1[0][0] - line1[1][0], line2[0][0] - line2[1][0])
+    ydiff = (line1[0][1] - line1[1][1], line2[0][1] - line2[1][1])
 
     def det(a, b):
         return a[0] * b[1] - a[1] * b[0]
@@ -41,10 +44,12 @@ def line_intersection(line1, line2, coords=(0, 1)):
     y = det(d, ydiff) / div
     return x, y
 
-def time_intersect(pt, line, coord=0):
+def time_intersect(pt, line):
+    assert len(line[0]) == len(line[1]) == 2, line
     pa, va = line
-    if abs(va[coord]) > 1e-6:
-        return (pt[coord] - pa[coord]) / va[coord]
+    for i in (0, 1):
+        if abs(va[i]) > 1e-6:
+            return (pt[i] - pa[i]) / va[i]
     return -1
 
 def add_pts(a, b):
@@ -56,14 +61,9 @@ def sub_pts(a, b):
 def feq(fa, fb):
     return abs(fa - fb) < 1e-6
 
-def part1(vecs):
-    rangex = (7, 27)
-    rangey = (7, 27)
-    if len(vecs) > 100:
-        rangex = (200000000000000, 400000000000000)
-        rangey = (200000000000000, 400000000000000)
-
-    cnt = 0
+def line_intersections(vecs, coords=(0, 1)):
+    i, j = coords
+    intersections = []
     for a, b in itertools.combinations(vecs, 2):
         pa, va = a
         pb, vb = b
@@ -71,74 +71,60 @@ def part1(vecs):
         it = line_intersection(
             (pa, add_pts(pa, va)),
             (pb, add_pts(pb, vb)),
-            (0, 1),
+            coords,
         )
         if it:
-            ta = time_intersect(it, a)
-            tb = time_intersect(it, b)
-            if rangex[0] <= it[0] <= rangex[1] and rangey[0] <= it[1] <= rangey[1] and ta > 0 and tb > 0:
-                cnt += 1
+            ta = time_intersect(it, ((pa[i], pa[j]), (va[i], va[j])))
+            tb = time_intersect(it, ((pb[i], pb[j]), (vb[i], vb[j])))
+            if ta >= 0 and tb >= 0:
+                intersections.append(it)
 
-    print(cnt)
+    return intersections
+
+def part1(vecs):
+    mn, mx = 7, 27
+    if len(vecs) > 9:
+        mn, mx = 200000000000000, 400000000000000
+
+    ints = line_intersections(vecs)
+    print(sum(1 for x, y in ints if mn <= x <= mx and mn <= y <= mx))
 
 def part2(vecs):
-    # I'm not math smart, so took an idea from Reddit here - brute force dx,
-    # dy, dz looking for a velocity vector that intersects some number of the
-    # lines in each xy, xz, yz and t. Then find an integer starting point for
-    # this vector...
+    # Following a writeup on Reddit, this is hard problem for me cold, but
+    # basically if you brute-force some integer velocity (dx, dy, dz) by
+    # subtracting it from the given hailstones velocity (putting them in the
+    # frame of reference of the rock) then they should all intersect at some
+    # common point - the throwing point.
+    #
+    # We can speed up the search by looking at X/Y first, then searching Z.
 
     rng = range(-10, 10)
     if len(vecs) > 100:
-        rng = range(-500, 500)
+        rng = range(-400, 400)  # this is a guess
 
-    start = time.time()
+    candidates = []
     for dx in rng:
-#        print(time.time() - start, dx)
         for dy in rng:
-            for dz in rng:
-                # just compare first 10 lines
-                cnt = 0
-                vv = (dx, dy, dz)
-                for i in range(5):
-                    for j in range(i+1, 5):
-                        pa, va = vecs[i]
-                        pb, vb = vecs[j]
+            vv = (dx, dy, 0)
+            L = [(pt, sub_pts(v, vv)) for pt, v in vecs[:10]]
+            ints = line_intersections(L)
+            if len(ints) > 1 and all(feq(ints[0][0], _[0]) and feq(ints[0][1], _[1]) for _ in ints):
+                x, y = int(ints[0][0]), int(ints[0][1])
 
-                        # subtract velocity from each line then see if they intersect
-                        vap = sub_pts(va, vv)
-                        vbp = sub_pts(vb, vv)
+                # find Z
+                for dz in rng:
+                    vv = (dx, dy, dz)
+                    L = [(pt, sub_pts(v, vv)) for pt, v in vecs[:10]]
+                    xints = line_intersections(L, (0, 2))
+                    yints = line_intersections(L, (1, 2))
 
-                        # compute intersections in each plane
-                        line1 = (pa, add_pts(pa, vap))
-                        line2 = (pb, add_pts(pb, vbp))
-
-                        ixy = line_intersection(line1, line2, (0, 1))
-                        ixz = line_intersection(line1, line2, (0, 2))
-                        iyz = line_intersection(line1, line2, (1, 2))
-
-                        if any(_ is None for _ in (ixy, ixz, iyz)):
-                            continue
-
-                        # convert back to 3-tuple
-                        ixy = ixy + (0,)
-                        ixz = (ixz[0], 0, ixz[1])
-                        iyz = (0,) + iyz
-
-                        # compare intersection times on opposite axes...
-                        matches = 0
-                        for it, coords in [(ixy, (0, 1)), (ixz, (0, 2)), (iyz, (1, 2))]:
-                            for line in [(pa, vap), (pb, vbp)]:
-                                t1 = time_intersect(it, line, coords[0])
-                                t2 = time_intersect(it, line, coords[1])
-                                if t1 >= 0 and t2 >= 0 and feq(t1, t2):
-                                    print(vv, t1, t2)
-                                    matches += 1
-
-                        if matches >= 2:
-                            cnt += 1
-
-                if 1: #cnt > 18:
-                    print(cnt, vv)
+                    if len(xints) > 1 and all(feq(xints[0][0], _[0]) and feq(xints[0][1], _[1]) for _ in xints) and \
+                       len(yints) > 1 and all(feq(yints[0][0], _[0]) and feq(yints[0][1], _[1]) for _ in yints):
+                        assert feq(xints[0][1], yints[0][1]), (xints[0], yints[0])
+                        z = int(xints[0][1])
+                        debug((x, y, z), (dx, dy, dz))
+                        print(x + y + z)
+                        return
 
 def main():
     data = parse_input()
