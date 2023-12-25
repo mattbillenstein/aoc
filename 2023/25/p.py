@@ -47,25 +47,21 @@ def part1(comps):
         # Greedy algorithm - find the item that reduces the cut the most
         mx = [0, None]
         for k in s:
-            in_t = sum(1 for _ in comps[k] if _ in t)
-            in_s = len(comps[k]) - in_t
-            diff = in_t - in_s
+            diff = len(comps[k]) - 2 * sum(1 for _ in comps[k] if _ in s)
             if diff > mx[0]:
                 mx[0] = diff
                 mx[1] = k
 
         # but if we didn't find one, pick a random one - this will actually
         # increase teh cut
-        diff, n = mx
-        if not n:
-            n = random.choice(tuple(s))
-            in_t = sum(1 for _ in comps[n] if _ in t)
-            in_s = len(comps[n]) - in_t
-            diff = in_t - in_s
+        diff, k = mx
+        if not k:
+            k = random.choice(tuple(s))
+            diff = len(comps[k]) - 2 * sum(1 for _ in comps[k] if _ in s)
 
         # update
-        t.add(n)
-        s.remove(n)
+        t.add(k)
+        s.remove(k)
         cut -= diff
 
         if DEBUG:
