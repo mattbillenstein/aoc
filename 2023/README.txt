@@ -22,3 +22,4 @@
 22: 3D brick packing problem - what supports what and can be removed
 23: Grid longest path dfs
 24: 3D vector intersections across time
+25: Min-cut algorithm in graph
