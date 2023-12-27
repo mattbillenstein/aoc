@@ -40,27 +40,6 @@ def check(floors):
             return False
     return True
 
-def canon(floors):
-    map = {}
-    found = []
-    c = 'A'
-    for i in (1, 2, 3, 4):
-        for item in floors[i]:
-            assert len(item) == 2
-            if item not in found:
-                oitem = other(item)
-                found.append(item)
-                found.append(oitem)
-
-                x = c + item[1]
-                y = c + oitem[1]
-                c = chr(ord(c) + 1)
-
-                map[item] = x
-                map[oitem] = y
-
-    return {k: set(map[_] for _ in v) for k, v in floors.items()}
-
 def move(floors, E, steps, best, visited):
     if not check(floors):
         return
@@ -68,21 +47,10 @@ def move(floors, E, steps, best, visited):
     if steps > best[0]:
         return
 
-    poss = steps
-    for i in (1, 2, 3):
-        # leaving out a factor of 2 twice here, we carry two and need to go up
-        # and down... Seems very approximately correct and speeds this all up,
-        # but not tested thoroughly...
-        poss += len(floors[i]) * (4-i)
-
-    if poss > best[0]:
-        return
-
-    # any pair is interchangable, so we can remove a lot of intermediate states
-    # by canonicalizing here...
-    floors = canon(floors)
-
-    state = hash((E, tuple([(k, frozenset(v)) for k, v in floors.items()])))
+    # use elevator position and the count of each type of item on each floor as
+    # visited key
+    types = [[_[1] for _ in s] for s in floors.values()]
+    state = (E, tuple([(_.count('M'), _.count('G')) for _ in types]))
     if visited.get(state, sys.maxsize) <= steps:
         return
 
@@ -126,10 +94,6 @@ def move(floors, E, steps, best, visited):
 
         # and pairs
         for tup in itertools.combinations(floors[E], 2):
-            # skip G/G, may not work on all inputs?
-            if tup[0][1] == tup[1][1] == 'G':
-                continue
-
             for x in tup:
                 floors[E-1].add(x)
                 floors[E].remove(x)
