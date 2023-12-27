@@ -68,18 +68,11 @@ def dfs(state):
     q = PriorityQueue()
     q.add_task(state, state.cost)
 
-#    maxl = 0
     while q:
-#        if len(q) > maxl:
-#            maxl = len(q)
-#            print(maxl)
-
         assert len(q) < 10_000_000, 'Too much fanout?'
         state = q.pop_task()
 
-# what about maximizing a score on an incomplete solution?
         if best and state.cost > best.cost:
-#            print('done best', state, best)
             continue
 
         if DEBUG > 1:
@@ -109,24 +102,39 @@ def dfs(state):
 
     return best
 
-def dfs_longest(state):
-    visited = {}
-    best = None
+def dfs_longest(start, end, graph):
+    best = [None, 0]
+    visited = set()
 
-    q = PriorityQueue()
-    q.add_task(state, state.cost)
+    def _dfs_longest(pos, dist):
+        visited.add(pos)
+        if pos == end and dist > best[1]:
+            best[0] = list(visited)
+            best[1] = dist
+        else:
+            for v, d in graph[pos]:
+                if v not in visited:
+                    _dfs_longest(v, dist + d)
+        visited.remove(pos)
+    _dfs_longest(start, 0)
 
-    while q:
-        assert len(q) < 10_000_000, 'Too much fanout?'
-        state = q.pop_task()
+    return best
 
-        if state.done:
-            if not best or state.cost < best.cost:
-                best = state
-            continue
+def dfs_shortest(start, end, graph):
+    best = [None, sys.maxsize]
+    visited = set()
 
-        for s in state.next():
-            q.add_task(s, s.cost)
+    def _dfs_longest(pos, dist):
+        visited.add(pos)
+        if pos == end and dist < best[1]:
+            best[0] = list(visited)
+            best[1] = dist
+        else:
+            for v, d in graph[pos]:
+                if v not in visited:
+                    _dfs_longest(v, dist + d)
+        visited.remove(pos)
+    _dfs_longest(start, 0)
 
     return best
 

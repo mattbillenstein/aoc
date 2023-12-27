@@ -45,30 +45,6 @@ def trace(grid, pt, dir, vertices, visited):
 
     assert 0
 
-class State:
-    def __init__(self, path, end, steps, vertices):
-        self.path = path
-        self.end = end
-        self.steps = steps
-        self.vertices = vertices
-
-    @property
-    def cost(self):
-        return -self.steps
-
-    @property
-    def done(self):
-        return self.path[-1] == self.end
-
-    def step(self, v, dist):
-        return State(self.path + (v,), self.end, self.steps + dist, self.vertices)
-
-    def next(self):
-        return [self.step(v, d) for v, d, _ in self.vertices[self.path[-1]] if v not in self.path]
-
-    def __repr__(self):
-        return f'State({self.pos}, {self.steps})'
-
 def part1(grid):
     # find start / end
     for y in (0, grid.box[1][1]):
@@ -93,20 +69,22 @@ def part1(grid):
                 if x:
                     L.append(x)
 
-    s = dfs_longest(State((start,), end, 0, vertices))
+    graph = {k: [_[:2] for _ in L] for k, L in vertices.items()}
+    path, dist = dfs_longest(start, end, graph)
 
     if DEBUG:
         g = grid.copy()
-        for i in range(len(s.path)-1):
-            v1 = s.path[i]
-            v2 = s.path[i+1]
-            for pt, dist, L in vertices[v1]:
+        for i in range(len(path)-1):
+            v1 = path[i]
+            v2 = path[i+1]
+            for pt, d, L in vertices[v1]:
                 if pt == v2:
                     for x in L:
                         g.setc(x, 'o')
         g.print()
+        print(path)
 
-    print(s.steps)
+    print(dist)
 
 def part2(grid):
     # part2, clear directions and search again...
