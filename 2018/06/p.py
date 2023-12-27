@@ -4,6 +4,8 @@ import sys
 from collections import defaultdict
 from pprint import pprint
 
+from grid import manhattan_distance
+
 DEBUG = sys.argv.count('-v')
 
 def debug(*args):
@@ -17,9 +19,6 @@ def parse_input():
         x, y = line.replace(',', '').split()
         points.append((int(x), int(y)))
     return points
-
-def manhattan(pt1, pt2):
-    return abs(pt1[0] - pt2[0]) + abs(pt1[1] - pt2[1])
 
 def part(points):
     minx = min(_[0] for _ in points) - 5
@@ -39,7 +38,7 @@ def part(points):
 
             dists = []
             for pt2 in points:
-                dist = manhattan(pt1, pt2)
+                dist = manhattan_distance(pt1, pt2)
                 dists.append((dist, pt2))
 
             dists.sort()

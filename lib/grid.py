@@ -1,23 +1,29 @@
 #!/usr/bin/env pypy3
 
 import time
+from collections import namedtuple
 from types import SimpleNamespace
+
+Point = namedtuple('Point', ['x', 'y'])
+
+def manhattan_distance(a, b):
+    return sum(abs(x-y) for x, y in zip(a, b))
 
 def neighbors8(pt, dir=None):
     x, y = pt
     if dir:
         if dir in ('N', 'U', '^'):
-            L = [(_, y-1) for _ in range(x-1, x+1+1)]
+            L = [Point(_, y-1) for _ in range(x-1, x+1+1)]
         elif dir in ('S', 'D', 'v'):
-            L = [(_, y+1) for _ in range(x-1, x+1+1)]
+            L = [Point(_, y+1) for _ in range(x-1, x+1+1)]
         elif dir in ('W', 'L', '<'):
-            L = [(x-1, _) for _ in range(y-1, y+1+1)]
+            L = [Point(x-1, _) for _ in range(y-1, y+1+1)]
         elif dir in ('E', 'R', '>'):
-            L = [(x+1, _) for _ in range(y-1, y+1+1)]
+            L = [Point(x+1, _) for _ in range(y-1, y+1+1)]
         else:
             assert 0, dir
     else:
-        L = [(nx, ny) for nx in range(x-1, x+1+1) for ny in range(y-1, y+1+1) if (nx, ny) != (x, y)]
+        L = [Point(nx, ny) for nx in range(x-1, x+1+1) for ny in range(y-1, y+1+1) if (nx, ny) != (x, y)]
 
     return L
 
@@ -25,17 +31,17 @@ def neighbors4(pt, dir=None):
     x, y = pt
     if dir:
         if dir in ('N', 'U', '^'):
-            L = [(x, y-1)]
+            L = [Point(x, y-1)]
         elif dir in ('S', 'D', 'v'):
-            L = [(x, y+1)]
+            L = [Point(x, y+1)]
         elif dir in ('W', 'L', '<'):
-            L = [(x-1, y)]
+            L = [Point(x-1, y)]
         elif dir in ('E', 'R', '>'):
-            L = [(x+1, y)]
+            L = [Point(x+1, y)]
         else:
             assert 0, dir
     else:
-        L = [(x-1, y), (x+1, y), (x, y-1), (x, y+1)]
+        L = [Point(x-1, y), Point(x+1, y), Point(x, y-1), Point(x, y+1)]
 
     return L
 
@@ -44,17 +50,17 @@ def neighbors4d(pt, dir=None):
     x, y = pt
     if dir:
         if dir in ('NW', 'UL'):
-            L = [(x-1, y-1)]
+            L = [Point(x-1, y-1)]
         elif dir in ('NE', 'UR'):
-            L = [(x+1, y-1)]
+            L = [Point(x+1, y-1)]
         elif dir in ('SW', 'DL'):
-            L = [(x-1, y+1)]
+            L = [Point(x-1, y+1)]
         elif dir in ('SE', 'DR'):
-            L = [(x+1, y+1)]
+            L = [Point(x+1, y+1)]
         else:
             assert 0, dir
     else:
-        L = [(x-1, y-1), (x+1, y-1), (x-1, y+1), (x+1, y+1)]
+        L = [Point(x-1, y-1), Point(x+1, y-1), Point(x-1, y+1), Point(x+1, y+1)]
 
     return L
 
@@ -82,7 +88,7 @@ def step(pt, dir):
         ny += 1
     else:
         assert 0, dir
-    return nx, ny
+    return Point(nx, ny)
 
 class Grid:
     def __init__(self, items, chars={'.': 0, '#': 1}, gfx=None):
@@ -160,12 +166,12 @@ class Grid:
     @property
     def box(self):
         if not self.g:
-            return (0, 0), (0, 0)
-        return (0, 0), (len(self.g[0])-1, len(self.g)-1)
+            return Point(0, 0), Point(0, 0)
+        return Point(0, 0), Point(len(self.g[0])-1, len(self.g)-1)
 
     @property
     def size(self):
-        return (len(self.g[0]), len(self.g))
+        return Point(len(self.g[0]), len(self.g))
 
     @property
     def xs(self):
@@ -230,7 +236,7 @@ class Grid:
     def __iter__(self):
         for y in self.ys:
             for x in self.xs:
-                yield (x, y)
+                yield Point(x, y)
 
     def __contains__(self, pt):
         size = self.size
@@ -309,7 +315,7 @@ class SparseGrid(Grid):
         self.gfx = gfx
 
         if isinstance(items, set):
-            self.g = {_: 1 for _ in items}
+            self.g = {Point(_[0], _[1]): 1 for _ in items}
         elif items and isinstance(items, list) and isinstance(items[0], str):
             # rows are strings
             self.g = {}
@@ -323,7 +329,7 @@ class SparseGrid(Grid):
                         self.values[v] = c
 
                     if v:
-                        self.g[(x, y)] = v
+                        self.g[Point(x, y)] = v
         elif items and isinstance(items, list) and isinstance(items[0], list):
             # rows are list of int values
             self.g = {}
@@ -332,9 +338,9 @@ class SparseGrid(Grid):
                     v = items[y][x]
                     assert v in self.values
                     if v:
-                        self.g[(x, y)] = v
+                        self.g[Point(x, y)] = v
         elif isinstance(items, dict):
-            self.g = dict(items)
+            self.g = {Point(p[0], p[1]): v for p, v in items.items()}
         elif not items:
             # falsy thing like empty list...
             self.g = {}
@@ -348,19 +354,19 @@ class SparseGrid(Grid):
     @property
     def box(self):
         if not self.g:
-            return (0, 0), (0, 0)
+            return Point(0, 0), Point(0, 0)
         minx = min(_[0] for _ in self.g)
         maxx = max(_[0] for _ in self.g)
         miny = min(_[1] for _ in self.g)
         maxy = max(_[1] for _ in self.g)
-        return (minx, miny), (maxx, maxy)
+        return Point(minx, miny), Point(maxx, maxy)
 
     @property
     def size(self):
         if not self.g:
-            return (0, 0)
+            return Point(0, 0)
         box = self.box
-        return (
+        return Point(
             box[1][0] - box[0][0] + 1,
             box[1][1] - box[0][1] + 1,
         )
@@ -441,26 +447,26 @@ class SparseGrid(Grid):
     # transformations
     def flip_x(self):
         _, sizey = self.size
-        self.g = {(pt[0], sizey-1-pt[1]): v for pt, v in self.g.items()}
+        self.g = {Point(pt[0], sizey-1-pt[1]): v for pt, v in self.g.items()}
 
     def flip_y(self):
         sizex, _ = self.size
-        self.g = {(sizex-1-pt[0], pt[1]): v for pt, v in self.g.items()}
+        self.g = {Point(sizex-1-pt[0], pt[1]): v for pt, v in self.g.items()}
 
     def rotate_cw(self):
         _, sizey = self.size
-        self.g = {(sizey-1-pt[1], pt[0]): v for pt, v in self.g.items()}
+        self.g = {Point(sizey-1-pt[1], pt[0]): v for pt, v in self.g.items()}
 
     def rotate_ccw(self):
         sizex, _ = self.size
-        self.g = {(pt[1], sizex-1-pt[0]): v for pt, v in self.g.items()}
+        self.g = {Point(pt[1], sizex-1-pt[0]): v for pt, v in self.g.items()}
 
 if __name__ == '__main__':
     g1 = Grid([[0, 1, 2], [3, 4, 5], [6, 7, 8]])
     g2 = SparseGrid({
-        (0, 0): 0, (1, 0): 1, (2, 0): 2,
-        (0, 1): 3, (1, 1): 4, (2, 1): 5,
-        (0, 2): 6, (1, 2): 7, (2, 2): 8,
+        Point(0, 0): 0, Point(1, 0): 1, Point(2, 0): 2,
+        Point(0, 1): 3, Point(1, 1): 4, Point(2, 1): 5,
+        Point(0, 2): 6, Point(1, 2): 7, Point(2, 2): 8,
     })
 
 #    g1.print()
@@ -472,31 +478,31 @@ if __name__ == '__main__':
     assert g1.ys == g2.ys
 
     # neighbors including diagonals
-    assert g1.neighbors8((0, 0)) == [(0, 1), (1, 0), (1, 1)], g1.neighbors8((0, 0))
-    assert g1.neighbors8((1, 0)) == [(0, 0), (0, 1), (1, 1), (2, 0), (2, 1)], g1.neighbors8((1, 0))
-    assert g1.neighbors8((1, 1)) == [(0, 0), (0, 1), (0, 2), (1, 0), (1, 2), (2, 0), (2, 1), (2, 2)], g1.neighbors8((1, 1))
-    assert g1.neighbors8((1, 0), 'N') == [], g1.neighbors8((1, 1))
-    assert g1.neighbors8((1, 0), 'S') == [(0, 1), (1, 1), (2, 1)], g1.neighbors8((1, 0), 'S')
+    assert g1.neighbors8(Point(0, 0)) == [Point(0, 1), Point(1, 0), Point(1, 1)], g1.neighbors8Point(Point(0, 0))
+    assert g1.neighbors8(Point(1, 0)) == [Point(0, 0), Point(0, 1), Point(1, 1), Point(2, 0), Point(2, 1)], g1.neighbors8Point(Point(1, 0))
+    assert g1.neighbors8(Point(1, 1)) == [Point(0, 0), Point(0, 1), Point(0, 2), Point(1, 0), Point(1, 2), Point(2, 0), Point(2, 1), Point(2, 2)], g1.neighbors8Point(Point(1, 1))
+    assert g1.neighbors8(Point(1, 0), 'N') == [], g1.neighbors8Point(Point(1, 1))
+    assert g1.neighbors8(Point(1, 0), 'S') == [Point(0, 1), Point(1, 1), Point(2, 1)], g1.neighbors8Point(Point(1, 0), 'S')
 
-    assert g1.neighbors4((0, 0)) == [(1, 0), (0, 1)], g1.neighbors4((0, 0))
-    assert g1.neighbors4((1, 0)) == [(0, 0), (2, 0), (1, 1)], g1.neighbors4((1, 0))
-    assert g1.neighbors4((1, 1)) == [(0, 1), (2, 1), (1, 0), (1, 2)], g1.neighbors4((1, 1))
+    assert g1.neighbors4(Point(0, 0)) == [Point(1, 0), Point(0, 1)], g1.neighbors4(Point(0, 0))
+    assert g1.neighbors4(Point(1, 0)) == [Point(0, 0), Point(2, 0), Point(1, 1)], g1.neighbors4(Point(1, 0))
+    assert g1.neighbors4(Point(1, 1)) == [Point(0, 1), Point(2, 1), Point(1, 0), Point(1, 2)], g1.neighbors4(Point(1, 1))
 
     # sparsegrid has no borders...
-    assert g2.neighbors8((0, 0)) == [(-1, -1), (-1, 0), (-1, 1), (0, -1), (0, 1), (1, -1), (1, 0), (1, 1)], g2.neighbors8((0, 0))
-    assert g2.neighbors8((1, 0), 'N') == [(0, -1), (1, -1), (2, -1)], g2.neighbors8((1, 0), 'N')
-    assert g2.neighbors8((1, 0), 'S') == [(0, 1), (1, 1), (2, 1)], g2.neighbors8((1, 0), 'S')
+    assert g2.neighbors8(Point(0, 0)) == [Point(-1, -1), Point(-1, 0), Point(-1, 1), Point(0, -1), Point(0, 1), Point(1, -1), Point(1, 0), Point(1, 1)], g2.neighbors8Point(Point(0, 0))
+    assert g2.neighbors8(Point(1, 0), 'N') == [Point(0, -1), Point(1, -1), Point(2, -1)], g2.neighbors8Point(Point(1, 0), 'N')
+    assert g2.neighbors8(Point(1, 0), 'S') == [Point(0, 1), Point(1, 1), Point(2, 1)], g2.neighbors8Point(Point(1, 0), 'S')
 
-    assert g2.neighbors4((0, 0)) == [(-1, 0), (1, 0), (0, -1), (0, 1)], g2.neighbors4((0, 0))
-    assert g2.neighbors4((1, 0)) == [(0, 0), (2, 0), (1, -1), (1, 1)], g2.neighbors4((1, 0))
-    assert g2.neighbors4((1, 0), 'N') == [(1, -1)], g2.neighbors4((1, 0), 'N')
-    assert g2.neighbors4((1, 0), 'S') == [(1, 1)], g2.neighbors4((1, 0), 'S')
-    assert g2.neighbors4((1, 1)) == [(0, 1), (2, 1), (1, 0), (1, 2)], g2.neighbors4((1, 1))
+    assert g2.neighbors4(Point(0, 0)) == [Point(-1, 0), Point(1, 0), Point(0, -1), Point(0, 1)], g2.neighbors4(Point(0, 0))
+    assert g2.neighbors4(Point(1, 0)) == [Point(0, 0), Point(2, 0), Point(1, -1), Point(1, 1)], g2.neighbors4(Point(1, 0))
+    assert g2.neighbors4(Point(1, 0), 'N') == [Point(1, -1)], g2.neighbors4(Point(1, 0), 'N')
+    assert g2.neighbors4(Point(1, 0), 'S') == [Point(1, 1)], g2.neighbors4(Point(1, 0), 'S')
+    assert g2.neighbors4(Point(1, 1)) == [Point(0, 1), Point(2, 1), Point(1, 0), Point(1, 2)], g2.neighbors4(Point(1, 1))
 
     assert list(g1) == list(g2)
-    assert (1, 1) in g1
-    assert (1, 1) in g2
-    assert (10, 10) not in g1
-    assert (10, 10) not in g2
+    assert Point(1, 1) in g1
+    assert Point(1, 1) in g2
+    assert Point(10, 10) not in g1
+    assert Point(10, 10) not in g2
 
     assert len(g1) == len(g2)

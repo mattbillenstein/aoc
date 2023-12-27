@@ -3,38 +3,37 @@
 import itertools
 import sys
 
+from grid import Point, manhattan_distance
+
 def parse_input():
     lines = [_.strip('\r\n') for _ in sys.stdin]
     pts = set()
     for y, line in enumerate(lines):
         for x, c in enumerate(line):
             if c == '#':
-                pts.add((x, y))
+                pts.add(Point(x, y))
     return pts
 
-def manhattan(a, b):
-    return abs(a[0]-b[0]) + abs(a[1]-b[1])
-
 def part1(pts, N=2):
-    for y in range(max(_[1] for _ in pts), -1, -1):
-        row = [_ for _ in pts if _[1] == y]
+    for y in range(max(_.y for _ in pts), -1, -1):
+        row = [_ for _ in pts if _.y == y]
         if not row:
-            L = [_ for _ in pts if _[1] > y]
-            L.sort(key=lambda pt: (pt[1], pt[0]), reverse=True)
+            L = [_ for _ in pts if _.y > y]
+            L.sort(key=lambda pt: (pt.y, pt.x), reverse=True)
             for pt in L:
-                pts.add((pt[0], pt[1] + (N-1)))
+                pts.add(Point(pt.x, pt.y + (N-1)))
                 pts.remove(pt)
 
-    for x in range(max(_[0] for _ in pts), -1, -1):
-        col = [_ for _ in pts if _[0] == x]
+    for x in range(max(_.x for _ in pts), -1, -1):
+        col = [_ for _ in pts if _.x == x]
         if not col:
-            L = [_ for _ in pts if _[0] > x]
+            L = [_ for _ in pts if _.x > x]
             L.sort(reverse=True)
             for pt in L:
-                pts.add((pt[0] + (N-1), pt[1]))
+                pts.add(Point(pt.x + (N-1), pt.y))
                 pts.remove(pt)
 
-    tot = sum(manhattan(a, b) for a, b in itertools.combinations(pts, 2))
+    tot = sum(manhattan_distance(a, b) for a, b in itertools.combinations(pts, 2))
     print(tot)
 
 def part2(pts):

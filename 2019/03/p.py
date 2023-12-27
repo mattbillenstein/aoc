@@ -3,15 +3,12 @@
 import sys
 from collections import defaultdict
 
-from grid import SparseGrid
+from grid import SparseGrid, manhattan_distance
 
 def parse_input():
     lines = [_.strip('\r\n') for _ in sys.stdin]
     lines = [[(_[0], int(_[1:])) for _ in x.split(',')] for x in lines]
     return lines
-
-def manhattan(a, b):
-    return abs(b[0] - a[0]) + abs(b[1] - a[1])
 
 def run(data):
     g = SparseGrid([], {'.': 0, '*': 1, 'X': 2})
@@ -31,7 +28,7 @@ def run(data):
                     crosses.add(pt)
 
 #    print(crosses)
-    print(min(manhattan((0, 0), pt) for pt in crosses))
+    print(min(manhattan_distance((0, 0), pt) for pt in crosses))
 
     # Retrace recording crosses with how many steps it took to get there...
     steps = defaultdict(dict)

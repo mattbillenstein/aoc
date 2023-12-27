@@ -4,7 +4,7 @@ import sys
 from pprint import pprint
 
 from graph import bfs
-from grid import Grid
+from grid import Grid, Point, manhattan_distance
 
 DEBUG = sys.argv.count('-v')
 
@@ -15,9 +15,6 @@ def debug(*args):
 def parse_input():
     lines = [_.strip('\r\n') for _ in sys.stdin]
     return Grid(lines, {'.': 0, '#': 1, 'S': 2, 'O': 3})
-
-def manhattan(a, b):
-    return abs(b[0] - a[0]) + abs(b[1] - a[1])
 
 def fill(grid, start, mdist=64, parity=0):
     end = set(_ for _ in grid if grid.get(_) == 0)
@@ -34,7 +31,7 @@ def fill(grid, start, mdist=64, parity=0):
     pts = [_[0] for _ in found if _[1] <= mdist]
 
     # and matching parity
-    pts = [_ for _ in pts if manhattan(start, _) % 2 == parity]
+    pts = [_ for _ in pts if manhattan_distance(start, _) % 2 == parity]
 
     if DEBUG:
         for pt in pts:
@@ -66,12 +63,12 @@ def repeat_grid(grid, repeat):
             grid.setc(pt, '.')
             break
 
-    size = grid.size[0]
-    assert size == grid.size[1]
+    size = grid.size.x
+    assert size == grid.size.y
 
     ngrid = grid.repeat(repeat, repeat)
 
-    nstart = (repeat // 2 * size + start[0], repeat // 2 * size + start[1])
+    nstart = Point(repeat // 2 * size + start.x, repeat // 2 * size + start.y)
 
     return ngrid, nstart
 
@@ -98,8 +95,8 @@ def part2(grid):
             break
 
     # grid is square, shorthand
-    size = grid.size[0]
-    assert size == grid.size[1]
+    size = grid.size.x
+    assert size == grid.size.y
 
     # repeat the grid
     repeat = 5
@@ -109,19 +106,19 @@ def part2(grid):
     # rightmost point... In the 5-grid, do the same...
 
     # offset in the last tile
-    o = (start[0] + N) % size
+    o = (start.x + N) % size
 
     # total offset from left edge
     to = (repeat-1) * size + o
 
     # new distance in the 5-grid
-    ndist = to - nstart[0]
+    ndist = to - nstart.x
 
     # should reach last column in our input
-    assert to == ngrid.box[1][0]
+    assert to == ngrid.box[1].x
 
     # offset in the last tile in our input - double checking...
-    assert (nstart[0] + ndist) % size == (start[0] + N) % size == grid.box[1][0]
+    assert (nstart.x + ndist) % size == (start.x + N) % size == grid.box[1].x
 
     # Fill from nstart - in the parity of N
     pts = fill(ngrid.copy(), nstart, ndist, N % 2)
@@ -132,7 +129,7 @@ def part2(grid):
         for x in range(5):
             x0, x1 = x * size, x * size + size
             y0, y1 = y * size, y * size + size
-            tiles[(x, y)] = sum(1 for _ in pts if x0 <= _[0] < x1 and y0 <= _[1]  < y1)
+            tiles[(x, y)] = sum(1 for _ in pts if x0 <= _.x < x1 and y0 <= _.y  < y1)
 
     if DEBUG:
         pprint(tiles)
@@ -172,7 +169,7 @@ def part2(grid):
     # top row
     cnt += partial_small_ul + top_center + partial_small_ur
 
-    rows_half = (N - start[0]) // size
+    rows_half = (N - start.x) // size
     odd = 1
     even = 0
     for i in range(1, rows_half):
