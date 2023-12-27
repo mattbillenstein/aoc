@@ -4,7 +4,7 @@ import math
 import sys
 from collections import defaultdict
 
-from grid import Grid
+from grid import Grid, manhattan_distance
 
 DEBUG = sys.argv.count('-v')
 
@@ -38,9 +38,6 @@ def can_see(pt1, pt2, rocks):
             break
 
     return pt == pt2
-
-def manhattan(a, b):
-    return abs(a[0]-b[0]) + abs(a[1]-b[1])
 
 def compute_angle(src, dst):
     # 0 is up, 90 right, 180 down, 270 left...
@@ -107,7 +104,7 @@ def part(grid):
         # the first rock we can see at that angle so we need to compare angles
         # of different rocks...
         angle = int(compute_angle(mxpt, pt) * 1e6)
-        dist = manhattan(mxpt, pt)
+        dist = manhattan_distance(mxpt, pt)
         rocks_sorted.append((angle, dist, pt))
 
     rocks_sorted.sort()

@@ -3,6 +3,8 @@
 import itertools
 import sys
 
+from grid import manhattan_distance
+
 def parse_input():
     lines = [_.strip('\r\n') for _ in sys.stdin]
     pts = set()
@@ -11,9 +13,6 @@ def parse_input():
             if c == '#':
                 pts.add((x, y))
     return pts
-
-def manhattan(a, b):
-    return abs(a[0]-b[0]) + abs(a[1]-b[1])
 
 def part1(pts, N=2):
     for y in range(max(_[1] for _ in pts), -1, -1):
@@ -34,7 +33,7 @@ def part1(pts, N=2):
                 pts.add((pt[0] + (N-1), pt[1]))
                 pts.remove(pt)
 
-    tot = sum(manhattan(a, b) for a, b in itertools.combinations(pts, 2))
+    tot = sum(manhattan_distance(a, b) for a, b in itertools.combinations(pts, 2))
     print(tot)
 
 def part2(pts):

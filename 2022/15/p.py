@@ -3,14 +3,13 @@
 import re
 import sys
 
+from grid import manhattan_distance
+
 DEBUG = sys.argv.count('-v')
 
 def debug(*args):
     if DEBUG:
         print(*args)
-
-def manhattan(a, b):
-    return abs(b[0] - a[0]) + abs(b[1] - a[1])
 
 def parse_input():
     lines = [_.strip('\r\n') for _ in sys.stdin]
@@ -21,7 +20,7 @@ def parse_input():
         mobj = re.match('Sensor at x=([-0-9]+), y=([-0-9]+): closest beacon is at x=([-0-9]+), y=([-0-9]+)', line)
         sx, sy, bx, by = [int(_) for _ in mobj.groups()]
 
-        sensors[(sx, sy)] = manhattan((sx, sy), (bx, by))
+        sensors[(sx, sy)] = manhattan_distance((sx, sy), (bx, by))
         beacons.add((bx, by))
 
     return sensors, beacons
@@ -44,7 +43,7 @@ def part1(sensors, beacons, y):
             continue
 
         for sensor, dist in sensors.items():
-            newdist = manhattan((x, y), sensor)
+            newdist = manhattan_distance((x, y), sensor)
             if newdist <= dist:
                 cnt += 1
                 break
@@ -75,7 +74,7 @@ def merge_intervals(intervals):
 def part2(sensors, beacons, area):
     num_sensors = len(sensors)
 
-    num_covered = lambda pt: sum(manhattan(pt, s) <= d for s, d in sensors.items())
+    num_covered = lambda pt: sum(manhattan_distance(pt, s) <= d for s, d in sensors.items())
 
     pt = None
     for y in range(0, area + 1):

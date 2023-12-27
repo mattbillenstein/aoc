@@ -4,7 +4,7 @@ import sys
 from pprint import pprint
 
 from graph import bfs
-from grid import Grid
+from grid import Grid, manhattan_distance
 
 DEBUG = sys.argv.count('-v')
 
@@ -15,9 +15,6 @@ def debug(*args):
 def parse_input():
     lines = [_.strip('\r\n') for _ in sys.stdin]
     return Grid(lines, {'.': 0, '#': 1, 'S': 2, 'O': 3})
-
-def manhattan(a, b):
-    return abs(b[0] - a[0]) + abs(b[1] - a[1])
 
 def fill(grid, start, mdist=64, parity=0):
     end = set(_ for _ in grid if grid.get(_) == 0)
@@ -34,7 +31,7 @@ def fill(grid, start, mdist=64, parity=0):
     pts = [_[0] for _ in found if _[1] <= mdist]
 
     # and matching parity
-    pts = [_ for _ in pts if manhattan(start, _) % 2 == parity]
+    pts = [_ for _ in pts if manhattan_distance(start, _) % 2 == parity]
 
     if DEBUG:
         for pt in pts:

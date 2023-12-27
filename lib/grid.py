@@ -3,6 +3,9 @@
 import time
 from types import SimpleNamespace
 
+def manhattan_distance(a, b):
+    return sum(abs(x-y) for x, y in zip(a, b))
+
 def neighbors8(pt, dir=None):
     x, y = pt
     if dir:
