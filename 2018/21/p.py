@@ -28,38 +28,51 @@ def parse_input():
 def execute(inst, regs):
     op, a, b, c = inst
 
-    if op == 'addi':
-        regs[c] = regs[a] + b
-    elif op == 'addr':
-        regs[c] = regs[a] + regs[b]
-    elif op == 'seti':
-        regs[c] = a
-    elif op == 'muli':
-        regs[c] = regs[a] * b
-    elif op == 'gtrr':
-        regs[c] = int(regs[a] > regs[b])
-    elif op == 'bani':
-        regs[c] = regs[a] & b
-    elif op == 'gtir':
-        regs[c] = int(a > regs[b])
-    elif op == 'setr':
-        regs[c] = regs[a]
-    elif op == 'bori':
-        regs[c] = regs[a] | b
-    elif op == 'eqrr':
-        regs[c] = int(regs[a] == regs[b])
-    elif op == 'mulr':
-        regs[c] = regs[a] * regs[b]
-    elif op == 'banr':
-        regs[c] = regs[a] & regs[b]
-    elif op == 'borr':
-        regs[c] = regs[a] | regs[b]
-    elif op == 'gtri':
-        regs[c] = int(regs[a] > b)
-    elif op == 'eqir':
-        regs[c] = int(a == regs[b])
-    elif op == 'eqri':
-        regs[c] = int(regs[a] == b)
+    if op[0] == 'a':
+        if op == 'addi':
+            regs[c] = regs[a] + b
+        #elif op == 'addr':
+        else:
+            regs[c] = regs[a] + regs[b]
+    elif op[0] == 'b':
+        if op == 'bani':
+            regs[c] = regs[a] & b
+        elif op == 'banr':
+            regs[c] = regs[a] & regs[b]
+        elif op == 'borr':
+            regs[c] = regs[a] | regs[b]
+        #elif op == 'bori':
+        else:
+            regs[c] = regs[a] | b
+    elif op[0] == 's':
+        if op == 'seti':
+            regs[c] = a
+        #elif op == 'setr':
+        else:
+            regs[c] = regs[a]
+    elif op[0] == 'm':
+        if op == 'muli':
+            regs[c] = regs[a] * b
+        #elif op == 'mulr':
+        else:
+            regs[c] = regs[a] * regs[b]
+    elif op[0] == 'g':
+        if op == 'gtrr':
+            regs[c] = int(regs[a] > regs[b])
+        elif op == 'gtir':
+            regs[c] = int(a > regs[b])
+        #elif op == 'gtri':
+        else:
+            regs[c] = int(regs[a] > b)
+
+    elif op[0] == 'e':
+        if op == 'eqrr':
+            regs[c] = int(regs[a] == regs[b])
+        elif op == 'eqir':
+            regs[c] = int(a == regs[b])
+        #elif op == 'eqri':
+        else:
+            regs[c] = int(regs[a] == b)
     else:
         assert 0
 
