@@ -2,11 +2,14 @@
 
 import sys
 
-from grid import SparseGrid, manhattan_distance
+from grid import SparseGrid
 
 def parse_input():
     lines = [_.strip('\r\n') for _ in sys.stdin]
     return int(lines[0])
+
+def manhattan(a, b):
+    return sum(abs(x-y) for x, y in zip(a, b))
 
 def spiral():
     pt = [0, 0]
@@ -43,7 +46,7 @@ def part1(num):
         if i == num:
             break
 #    print(pt)
-    print(manhattan_distance((0, 0), pt))
+    print(manhattan((0, 0), pt))
 
 def part2(num):
     g = SparseGrid([])

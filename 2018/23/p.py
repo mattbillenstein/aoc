@@ -3,8 +3,6 @@
 import sys
 from collections import defaultdict
 
-from grid import manhattan_distance
-
 DEBUG = sys.argv.count('-v')
 
 def debug(*args):
@@ -22,6 +20,9 @@ def parse_input():
         r = int(L[-1])
         bots.append(((x, y, z), r))
     return bots
+
+def manhattan_distance(a, b):
+    return sum(abs(x-y) for x, y in zip(a, b))
 
 def part1(bots):
     bots.sort(key=lambda x: x[1])

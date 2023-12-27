@@ -3,7 +3,7 @@
 import sys
 
 from graph import bfs
-from grid import SparseGrid, Point
+from grid import SparseGrid
 from algo import picks_shoelace_area
 
 DEBUG = sys.argv.count('-v')
@@ -21,7 +21,7 @@ def parse_input():
 def part1(directions):
     # build grid and bfs; count set cells
     g = SparseGrid({})
-    pt = Point(0, 0)
+    pt = (0, 0)
     for dir, dist, _ in directions:
         for i in range(dist):
             g.set(pt, 1)
@@ -64,8 +64,8 @@ def fill(edges):
     # This reduction could be repeated in X as well, repeating computed area as
     # long as the vertical edges are the same.
 
-    vedges = [_ for _ in edges if _.pt1.x == _.pt2.x]
-    hedges = [_ for _ in edges if _.pt1.y == _.pt2.y]
+    vedges = [_ for _ in edges if _.pt1[0] == _.pt2[0]]
+    hedges = [_ for _ in edges if _.pt1[1] == _.pt2[1]]
 
     connectors = set([(_.pt1, _.pt2) for _ in hedges])
 
@@ -73,25 +73,25 @@ def fill(edges):
     mn, mx = sys.maxsize, 0
     for edge in vedges:
         for pt in edge:
-            if pt.y < mn:
-                mn = pt.y
-            if pt.y > mx:
-                mx = pt.y
+            if pt[1] < mn:
+                mn = pt[1]
+            if pt[1] > mx:
+                mx = pt[1]
 
     for y in range(mn, mx+1):
         # find edges that overlap
-        L = [_ for _ in vedges if _.pt1.y <= y <= _.pt2.y]
+        L = [_ for _ in vedges if _.pt1[1] <= y <= _.pt2[1]]
 
         # sort by x
-        L.sort(key=lambda e: e.pt1.x)
+        L.sort(key=lambda e: e.pt1[0])
 
         counted = -10
         for i in range(len(L)-1):
             edge1 = L[i]
             edge2 = L[i+1]
 
-            x1 = edge1.pt1.x
-            x2 = edge2.pt1.x
+            x1 = edge1.pt1[0]
+            x2 = edge2.pt1[0]
 
             if edge1.dir == 'U' and edge2.dir == 'D':
                 # normal area fill
@@ -110,7 +110,7 @@ class Edge:
         self.dir = dir
 
     def __repr__(self):
-        return f"Edge({self.pt1.x}, {self.pt1.y}-{self.pt2.y}, {self.dir})"
+        return f"Edge({self.pt1[0]}, {self.pt1[1]}-{self.pt2[1]}, {self.dir})"
 
     def __iter__(self):
         yield self.pt1
@@ -118,7 +118,7 @@ class Edge:
 
 def part2a(data):
     # alternate slow scanline fill implementation
-    pt = Point(0, 0)
+    pt = (0, 0)
     edges = []
     for dir, dist, color in data:
         # if debug, don't unpack the actual thing... Use the given input.
@@ -127,24 +127,24 @@ def part2a(data):
             dist = int(color[:-1], 16)
 
         if dir == 'U':
-            npt = (pt.x, pt.y - dist)
+            npt = (pt[0], pt[1] - dist)
         elif dir == 'D':
-            npt = (pt.x, pt.y + dist)
+            npt = (pt[0], pt[1] + dist)
         elif dir == 'R':
-            npt = (pt.x + dist, pt.y)
+            npt = (pt[0] + dist, pt[1])
         elif dir == 'L':
-            npt = (pt.x - dist, pt.y)
+            npt = (pt[0] - dist, pt[1])
         else:
             assert 0
 
         if dir in 'UD':
             # order so lesser y coordinate is pt1
-            if pt.x <= npt.y:
+            if pt[1] <= npt[1]:
                 edge = Edge(pt, npt, dir)
             else:
                 edge = Edge(npt, pt, dir)
         else:
-            if pt.x <= npt.x:
+            if pt[0] <= npt[0]:
                 edge = Edge(pt, npt, dir)
             else:
                 edge = Edge(npt, pt, dir)
@@ -161,7 +161,7 @@ def part2(data):
     # b = number of boundary points
     # Area = i + b/2 - 1
 
-    pt = Point(0, 0)
+    pt = (0, 0)
     vertices = [pt]
     for dir, dist, color in data:
         # if debug, don't unpack the actual thing... Use the given input.
@@ -170,13 +170,13 @@ def part2(data):
             dist = int(color[:-1], 16)
 
         if dir == 'U':
-            npt = Point(pt.x, pt.y - dist)
+            npt = (pt[0], pt[1] - dist)
         elif dir == 'D':
-            npt = Point(pt.x, pt.y + dist)
+            npt = (pt[0], pt[1] + dist)
         elif dir == 'R':
-            npt = Point(pt.x + dist, pt.y)
+            npt = (pt[0] + dist, pt[1])
         elif dir == 'L':
-            npt = Point(pt.x - dist, pt.y)
+            npt = (pt[0] - dist, pt[1])
         else:
             assert 0
 
