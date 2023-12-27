@@ -13,20 +13,20 @@ def debug(*args):
 
 def parse_input():
     lines = [_.strip('\r\n') for _ in sys.stdin]
-    floors = {_+1: set() for _ in range(4)}
+    floors = [set() for _ in range(4)]
     elems = set()
     for i, line in enumerate(lines):
         line = line.replace('-compatible', '')
         for s in re.findall('[a-z]+ (?:generator|microchip)', line):
             s = s.replace('microchip', 'M')
             s = s.replace('generator', 'G')
-            floors[i+1].add(tuple(s.split()))
+            floors[i].add(tuple(s.split()))
             elems.add(s.split()[0])
 
     elems = sorted(elems)
     d = dict(zip(elems, 'ABCDEFGHIJKLMNOP'))
-    for k in list(floors):
-        floors[k] = set([d[_[0]] + _[1] for _ in floors[k]])
+    for i in range(4):
+        floors[i] = set([d[_[0]] + _[1] for _ in floors[i]])
     return floors
 
 def other(s):
@@ -34,7 +34,7 @@ def other(s):
 
 def check(floors):
     # return True if we're good...
-    for f, s in floors.items():
+    for s in floors:
         gens = [_ for _ in s if _[1] == 'G']
         if gens and any(other(_) not in gens for _ in s if _[1] == 'M'):
             return False
@@ -49,7 +49,7 @@ def move(floors, E, steps, best, visited):
 
     # use elevator position and the count of each type of item on each floor as
     # visited key
-    types = [[_[1] for _ in s] for s in floors.values()]
+    types = [[_[1] for _ in s] for s in floors]
     state = (E, tuple([(_.count('M'), _.count('G')) for _ in types]))
     if visited.get(state, sys.maxsize) <= steps:
         return
@@ -62,14 +62,15 @@ def move(floors, E, steps, best, visited):
             print(k, v)
         print()
 
-    if all(not floors[_] for _ in (1, 2, 3)):
+    if not any(floors[_] for _ in range(3)):
         if steps < best[0]:
             if DEBUG:
                 print(steps)
             best[0] = steps
         return
 
-    if E < 4:
+    if E < 3:
+        # move pairs up
         for tup in itertools.combinations(floors[E], 2):
             for x in tup:
                 floors[E+1].add(x)
@@ -81,7 +82,7 @@ def move(floors, E, steps, best, visited):
                 floors[E+1].remove(x)
                 floors[E].add(x)
 
-    if E > 1:
+    if E > 0:
         # try moving every single item down
         for item in floors[E]:
             floors[E].remove(item)
@@ -106,15 +107,15 @@ def move(floors, E, steps, best, visited):
 
 def part1(floors):
     best = [sys.maxsize]
-    move(floors, 1, 0, best, {})
+    move(floors, 0, 0, best, {})
     print(best[0])
 
 def part2(floors):
     # two new pairs added to floor 1
-    floors[1].update(['FM', 'FG', 'GM', 'GG'])
+    floors[0].update(['FM', 'FG', 'GM', 'GG'])
 
     best = [sys.maxsize]
-    move(floors, 1, 0, best, {})
+    move(floors, 0, 0, best, {})
     print(best[0])
 
 def main():
