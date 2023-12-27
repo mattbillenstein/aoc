@@ -106,7 +106,7 @@ def dfs_longest(start, end, graph):
     best = [None, 0]
     visited = set()
 
-    def _dfs_longest(pos, dist):
+    def _dfs(pos, dist):
         visited.add(pos)
         if pos == end and dist > best[1]:
             best[0] = list(visited)
@@ -114,9 +114,9 @@ def dfs_longest(start, end, graph):
         else:
             for v, d in graph[pos]:
                 if v not in visited:
-                    _dfs_longest(v, dist + d)
+                    _dfs(v, dist + d)
         visited.remove(pos)
-    _dfs_longest(start, 0)
+    _dfs(start, 0)
 
     return best
 
@@ -124,7 +124,7 @@ def dfs_shortest(start, end, graph):
     best = [None, sys.maxsize]
     visited = set()
 
-    def _dfs_longest(pos, dist):
+    def _dfs(pos, dist):
         visited.add(pos)
         if pos == end and dist < best[1]:
             best[0] = list(visited)
@@ -132,9 +132,9 @@ def dfs_shortest(start, end, graph):
         else:
             for v, d in graph[pos]:
                 if v not in visited:
-                    _dfs_longest(v, dist + d)
+                    _dfs(v, dist + d)
         visited.remove(pos)
-    _dfs_longest(start, 0)
+    _dfs(start, 0)
 
     return best
 
