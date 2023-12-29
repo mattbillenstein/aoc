@@ -91,13 +91,16 @@ def dfs(state):
                 debug('Found best:', best)
             continue
 
-        if state.key:
-            if state.key in visited and visited[state.key] <= state.cost:
+        k = state.key
+        if k:
+            if k in visited and visited[k] <= state.cost:
                 continue
-
-            visited[state.key] = state.cost
+            visited[k] = state.cost
 
         for s in state.next():
+            k = s.key
+            if k in visited and visited[k] <= s.cost:
+                continue
             q.add_task(s, s.cost)
 
     return best
@@ -196,7 +199,6 @@ def dijkstra(graph, start, end=None):
         return path
 
     return dist, prev
-
 
 class PriorityQueue:
     '''https://docs.python.org/3/library/heapq.html#priority-queue-implementation-notes'''
