@@ -1,6 +1,7 @@
 #!/usr/bin/env pypy3
 
 import sys
+from collections import defaultdict
 
 from grid import Grid
 from graph import dfs
@@ -13,19 +14,27 @@ def debug(*args):
 
 def parse_input():
     lines = [_.strip('\r\n') for _ in sys.stdin]
-    return Grid(lines, {'.': 1})
+    grid = Grid(lines, {'.': 1})
+
+    neighbors = defaultdict(list)
+    for pt in grid:
+        for dir in '<>v^':
+            npos = grid.step(pt, dir)
+            if npos:
+                neighbors[pt].append((npos, dir, int(grid.getc(npos))))
+    return neighbors
 
 class State:
     min = 1
     max = 3
 
-    def __init__(self, path, dir, end, steps, cost, grid):
+    def __init__(self, path, dir, end, steps, cost, neighbors):
         self.path = path
         self.dir = dir
         self.end = end
         self.steps = steps
         self.cost = cost
-        self.grid = grid
+        self.neighbors = neighbors
 
     @property
     def key(self):
@@ -38,30 +47,26 @@ class State:
     def next(self):
         # potential speedup, on a turn, jump self.min spaces immediately...
         if self.steps < self.min:
-            npos = self.grid.step(self.path[-1], self.dir)
-            if npos and npos not in self.path:
-                cost = self.cost + int(self.grid.getc(npos))
-                yield self.__class__(self.path + (npos,), self.dir, self.end, self.steps + 1, cost, self.grid)
+            for npos, ndir, ncost in self.neighbors[self.path[-1]]:
+                if npos not in self.path and ndir == self.dir:
+                    yield self.__class__(self.path + (npos,), ndir, self.end, self.steps + 1, self.cost + ncost, self.neighbors)
         else:
-            for dir in '<>v^':
-                npos = self.grid.step(self.path[-1], dir)
-                if npos and not npos in self.path:
-                    steps = 1
-                    if dir == self.dir:
-                        steps = self.steps + 1
-                    if dir != self.dir or steps <= self.max:
-                        cost = self.cost + int(self.grid.getc(npos))
-                        yield self.__class__(self.path + (npos,), dir, self.end, steps, cost, self.grid)
+            for npos, ndir, ncost in self.neighbors[self.path[-1]]:
+                if npos not in self.path:
+                    if ndir != self.dir or self.steps < self.max:
+                        steps = 1 if ndir != self.dir else self.steps + 1
+                        yield self.__class__(self.path + (npos,), ndir, self.end, steps, self.cost + ncost, self.neighbors)
 
 class State2(State):
     min = 4
     max = 10
 
-def part1(grid, state_class=State):
-    start, end = grid.box
+def part1(neighbors, state_class=State):
+    start = min(neighbors)
+    end = max(neighbors)
     best = None
     for dir in '>v':
-        state = state_class((start,), dir, end, 0, 0, grid)
+        state = state_class((start,), dir, end, 0, 0, neighbors)
         state = dfs(state)
         if not best or state.cost < best.cost:
             best = state
@@ -79,15 +84,15 @@ def part1(grid, state_class=State):
 
     print(best.cost)
 
-def part2(grid):
-    part1(grid, State2)
+def part2(neighbors):
+    part1(neighbors, State2)
 
 def main():
-    grid = parse_input()
+    data = parse_input()
     if '1' in sys.argv:
-        part1(grid.copy())
+        part1(data)
     if '2' in sys.argv:
-        part2(grid.copy())
+        part2(data)
 
 if __name__ == '__main__':
     main()
