@@ -11,10 +11,14 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
       with:
-        ssh-key: ${{ secrets.PRIVATE_SSH_KEY }}
+        ssh-private-key: ${{ secrets.PRIVATE_SSH_KEY }}
         repository: mattbillenstein/aoc-input
+        path: aoc-input
+
+    - uses: actions/checkout@v4
+      path: aoc
 
     - name: Install dependencies
       run: |
