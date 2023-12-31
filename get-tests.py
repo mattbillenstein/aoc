@@ -37,7 +37,7 @@ while 1:
     eidx = data.find('</code>', idx)
 
     test = data[idx+len('<code>'):eidx]
-    test = re.sub('<[^<]+>', '', test)
+    test = re.sub('<[/a-z]+>', '', test)
     test = html.unescape(test)
     if test not in tests:
         tests.append(test)
