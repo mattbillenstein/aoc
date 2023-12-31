@@ -18,7 +18,8 @@ jobs:
         path: aoc-input
 
     - uses: actions/checkout@v4
-      path: aoc
+      with:
+        path: aoc
 
     - name: Install dependencies
       run: |
