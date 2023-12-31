@@ -1,2 +1,1 @@
-Generator A starts with 634
-Generator B starts with 301
+../../../aoc-input/2017/15/input.txt

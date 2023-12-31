@@ -1,2 +1,1 @@
-Time:        55     99     97     93
-Distance:   401   1485   2274   1405
+../../../aoc-input/2023/06/input.txt

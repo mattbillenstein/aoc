@@ -1,1 +1,1 @@
-reyedfim
+../../../aoc-input/2016/05/input.txt

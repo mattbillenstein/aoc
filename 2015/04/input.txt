@@ -1,1 +1,1 @@
-bgvyzdsv
+../../../aoc-input/2015/04/input.txt

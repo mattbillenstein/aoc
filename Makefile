@@ -5,8 +5,8 @@ SHELL=/bin/bash
 DAYS := $(shell ls */[0-9][0-9]/input.txt | sed -e 's:/input.txt::')
 OUTPUTS := $(DAYS:%=%/output.txt)
 
-all: $(OUTPUTS) $(OUTPUTS_MOD) check.txt
-install: .venv-pypy3/installed .venv-python3/installed
+all: ../aoc-input $(OUTPUTS) $(OUTPUTS_MOD) check.txt
+install: .venv-pypy3/installed .venv-python3/installed ../aoc-input
 clean:
 	rm -fR */*/output.txt check.txt
 realclean:
@@ -23,6 +23,9 @@ check:
 	python3 -m venv .venv-python3
 	.venv-python3/bin/pip install -r requirements.txt
 	touch .venv-python3/installed
+
+../aoc-input:
+	git clone git@github.com:mattbillenstein/aoc-input.git ../aoc-input
 
 define DAYRULE
 $D/output.txt: $D/*.py $D/input*.txt .venv-python3/installed .venv-pypy3/installed

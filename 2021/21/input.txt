@@ -1,2 +1,1 @@
-Player 1 starting position: 6
-Player 2 starting position: 1
+../../../aoc-input/2021/21/input.txt

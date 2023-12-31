@@ -1,1 +1,1 @@
-edjrjqaa
+../../../aoc-input/2016/17/input.txt

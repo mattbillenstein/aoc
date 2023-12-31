@@ -1,3 +1,1 @@
-Hit Points: 104
-Damage: 8
-Armor: 1
+../../../aoc-input/2015/21/input.txt

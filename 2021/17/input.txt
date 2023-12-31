@@ -1,1 +1,1 @@
-target area: x=257..286, y=-101..-57
+../../../aoc-input/2021/17/input.txt

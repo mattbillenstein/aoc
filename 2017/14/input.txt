@@ -1,1 +1,1 @@
-nbysizxe
+../../../aoc-input/2017/14/input.txt

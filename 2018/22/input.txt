@@ -1,2 +1,1 @@
-depth: 7740
-target: 12,763
+../../../aoc-input/2018/22/input.txt
