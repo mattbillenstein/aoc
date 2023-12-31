@@ -22,7 +22,7 @@ def parse_input():
             npos = grid.step(pt, dir)
             if npos:
                 neighbors[pt].append((npos, dir, int(grid.getc(npos))))
-    return neighbors
+    return neighbors, grid
 
 class State:
     min = 1
@@ -61,7 +61,7 @@ class State2(State):
     min = 4
     max = 10
 
-def part1(neighbors, state_class=State):
+def part1(neighbors, grid, state_class=State):
     start = min(neighbors)
     end = max(neighbors)
     best = None
@@ -72,11 +72,11 @@ def part1(neighbors, state_class=State):
             best = state
 
     if DEBUG:
-        check = sum(int(grid.getc(_)) for _ in best.visited if _ != start)
+        check = sum(int(grid.getc(_)) for _ in best.path if _ != start)
         grid.print()
         print()
 
-        for pt in best.visited:
+        for pt in best.path:
             grid.setc(pt, '.')
 
         grid.print()
@@ -84,15 +84,15 @@ def part1(neighbors, state_class=State):
 
     print(best.cost)
 
-def part2(neighbors):
-    part1(neighbors, State2)
+def part2(neighbors, grid):
+    part1(neighbors, grid, State2)
 
 def main():
     data = parse_input()
     if '1' in sys.argv:
-        part1(data)
+        part1(*data)
     if '2' in sys.argv:
-        part2(data)
+        part2(*data)
 
 if __name__ == '__main__':
     main()
