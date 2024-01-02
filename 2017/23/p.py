@@ -24,6 +24,9 @@ def part1(prg):
     cmds = defaultdict(int)
 
     while 0 <= pc < len(prg):
+        if DEBUG > 0:
+            print(pc, prg[pc], regs)
+
         cmd, r, x = prg[pc]
         cmds[cmd] += 1
         x = regs.get(x, x)
