@@ -38,16 +38,23 @@ def part1(sensors, beacons, y):
     debug('Search x:', minx, maxx)
 
     cnt = 0
-    for x in range(minx, maxx+1):
-        if (x, y) in beacons:
-            continue
+    x = minx
+    while x <= maxx:
+        mdist = max(d - manhattan_distance((x, y), s) for s, d in sensors.items())
+        if mdist == 0:
+            # right on the boundary, step over 1 and count it
+            x += 1
+            cnt += 1
+        elif mdist > 0:
+            # step over many and all these count
+            cnt += mdist
+            x += mdist
+        elif mdist < 0:
+            # step up the the boundary, don't count
+            x += -mdist
 
-        for sensor, dist in sensors.items():
-            newdist = manhattan_distance((x, y), sensor)
-            if newdist <= dist:
-                cnt += 1
-                break
-
+    # take away beacons right on the row
+    cnt -= sum(1 for _ in beacons if _[1] == y and minx <= _[0] <= maxx)
     print(cnt)
 
 def intersection(r1, r2):
