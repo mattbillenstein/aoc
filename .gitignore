@@ -131,4 +131,9 @@ dmypy.json
 *.swp
 *.swo
 
+# venv
 .venv-*
+
+# nim
+.nim
+p.exe

@@ -8,11 +8,17 @@ START=$(date +'%s')
 
 cd $1 > /dev/null
 
+EXE="$AOCPY ./p.py"
+if [ -e p.nim ] && [ "$(which nim)" != "" ]; then
+  nim compile -d:release -o:p.exe p.nim 2> /dev/null
+  EXE="./p.exe"
+fi
+
 if [ -e input-mod.txt ]; then
-  $AOCPY ./p.py 1 < input.txt > output.txt
-  $AOCPY ./p.py 2 < input-mod.txt >> output.txt
+  $EXE 1 < input.txt > output.txt
+  $EXE 2 < input-mod.txt >> output.txt
 else
-  $AOCPY ./p.py 1 2 < input.txt > output.txt
+  $EXE 1 2 < input.txt > output.txt
 fi
 
 END=$(date +'%s')
