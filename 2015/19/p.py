@@ -60,7 +60,7 @@ class State:
     @property
     def cost(self):
         # cost, lower is better
-        return (len(self.molecule), self.steps)
+        return len(self.molecule) * 1000000 + self.steps
 
     def next(self):
         # next states
