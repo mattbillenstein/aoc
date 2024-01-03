@@ -57,6 +57,8 @@ def part1(grid):
 
     vertices = {start: [], end: []}
     for pt in grid:
+        if grid.getc(pt) != '.':
+            continue
         N = sum(1 for _ in grid.neighbors4(pt) if grid.getc(_) != '#')
         if N > 2:
             vertices[pt] = []
