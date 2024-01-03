@@ -14,6 +14,7 @@
 import itertools
 import sys
 import time
+from collections import defaultdict, deque
 from heapq import heappop, heappush
 
 DEBUG = sys.argv.count('-v')
@@ -22,6 +23,74 @@ def debug(*args):
     if DEBUG:
         print(*args)
 
+class PriorityQueue:
+    '''https://docs.python.org/3/library/heapq.html#priority-queue-implementation-notes'''
+
+    def __init__(self):
+        self.pq = []                         # list of entries arranged in a heap
+        self.entry_finder = {}               # mapping of tasks to entries
+        self.REMOVED = '<removed-task>'      # placeholder for a removed task
+        self.counter = itertools.count()     # unique sequence count
+
+    def add_task(self, task, priority=sys.maxsize):
+        'Add a new task or update the priority of an existing task'
+        if task in self.entry_finder:
+            self.remove_task(task)
+        count = next(self.counter)
+        entry = [priority, count, task]
+        self.entry_finder[task] = entry
+        heappush(self.pq, entry)
+
+    def remove_task(self, task):
+        'Mark an existing task as REMOVED.  Raise KeyError if not found.'
+        entry = self.entry_finder.pop(task)
+        entry[-1] = self.REMOVED
+
+    def pop_task(self):
+        'Remove and return the lowest priority task. Raise KeyError if empty.'
+        while self.pq:
+            priority, count, task = heappop(self.pq)
+            if task is not self.REMOVED:
+                del self.entry_finder[task]
+                return task
+        return None
+
+    def __contains__(self, task):
+        return task in self.entry_finder
+
+    def __bool__(self):
+        return bool(self.entry_finder)
+
+    def __len__(self):
+        return len(self.entry_finder)
+
+class BucketHeap:
+    def __init__(self):
+        self.heap = defaultdict(deque)
+        self.min_bucket = sys.maxsize
+        self.count = 0
+
+    def add_task(self, element, cost):
+        self.heap[cost].append(element)
+        if cost < self.min_bucket:
+            self.min_bucket = cost
+        self.count += 1
+
+    def pop_task(self):
+        min_element = self.heap[self.min_bucket].popleft()
+        if not self.heap[self.min_bucket]:
+            del self.heap[self.min_bucket]
+            self.min_bucket = sys.maxsize
+            if self.heap:
+                self.min_bucket = min(self.heap)
+        self.count -= 1
+        return min_element
+
+    def __bool__(self):
+        return bool(self.count)
+
+    def __len__(self):
+        return self.count
 def bfs(frontier, neighbors, end=None):
     # neighbors is a function that takes a vertex and yields neighboring
     # vertices...
@@ -57,7 +126,7 @@ def bfs(frontier, neighbors, end=None):
         distance += 1
 
 _last = 0.0
-def dfs(state):
+def dfs(state, queue_class=BucketHeap):
     # dfs, to use this you need to implement a state class, see 2016/24 for an
     # example
     global _last
@@ -65,7 +134,7 @@ def dfs(state):
     visited = {}
     best = None
 
-    q = PriorityQueue()
+    q = queue_class()
     q.add_task(state, state.cost)
 
     while q:
@@ -199,44 +268,3 @@ def dijkstra(graph, start, end=None):
         return path
 
     return dist, prev
-
-class PriorityQueue:
-    '''https://docs.python.org/3/library/heapq.html#priority-queue-implementation-notes'''
-
-    def __init__(self):
-        self.pq = []                         # list of entries arranged in a heap
-        self.entry_finder = {}               # mapping of tasks to entries
-        self.REMOVED = '<removed-task>'      # placeholder for a removed task
-        self.counter = itertools.count()     # unique sequence count
-
-    def add_task(self, task, priority=sys.maxsize):
-        'Add a new task or update the priority of an existing task'
-        if task in self.entry_finder:
-            self.remove_task(task)
-        count = next(self.counter)
-        entry = [priority, count, task]
-        self.entry_finder[task] = entry
-        heappush(self.pq, entry)
-
-    def remove_task(self, task):
-        'Mark an existing task as REMOVED.  Raise KeyError if not found.'
-        entry = self.entry_finder.pop(task)
-        entry[-1] = self.REMOVED
-
-    def pop_task(self):
-        'Remove and return the lowest priority task. Raise KeyError if empty.'
-        while self.pq:
-            priority, count, task = heappop(self.pq)
-            if task is not self.REMOVED:
-                del self.entry_finder[task]
-                return task
-        return None
-
-    def __contains__(self, task):
-        return task in self.entry_finder
-
-    def __bool__(self):
-        return bool(self.entry_finder)
-
-    def __len__(self):
-        return len(self.entry_finder)
