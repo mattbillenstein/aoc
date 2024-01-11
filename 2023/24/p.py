@@ -102,11 +102,15 @@ def part2(vecs):
     if len(vecs) > 100:
         rng = range(-400, 400)  # this is a guess
 
+    # problem is very over-specified, we can figure this out using just a few
+    # of the vectors.
+    vecs = vecs[:3]
+
     candidates = []
     for dx in rng:
         for dy in rng:
             vv = (dx, dy, 0)
-            L = [(pt, sub_pts(v, vv)) for pt, v in vecs[:10]]
+            L = [(pt, sub_pts(v, vv)) for pt, v in vecs]
             ints = line_intersections(L)
             if len(ints) > 1 and all(feq(ints[0][0], _[0]) and feq(ints[0][1], _[1]) for _ in ints):
                 x, y = int(ints[0][0]), int(ints[0][1])
@@ -114,7 +118,7 @@ def part2(vecs):
                 # find Z
                 for dz in rng:
                     vv = (dx, dy, dz)
-                    L = [(pt, sub_pts(v, vv)) for pt, v in vecs[:10]]
+                    L = [(pt, sub_pts(v, vv)) for pt, v in vecs]
                     xints = line_intersections(L, (0, 2))
                     yints = line_intersections(L, (1, 2))
 
