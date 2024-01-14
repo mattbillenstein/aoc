@@ -25,7 +25,7 @@ jobs:
       run: |
         cd aoc
         sudo apt update
-        sudo apt install pypy3 python3
+        sudo apt install pypy3 python3 rustc
         make install
 
     - name: Run

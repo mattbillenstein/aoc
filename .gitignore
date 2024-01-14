@@ -137,3 +137,6 @@ dmypy.json
 # nim
 .nim
 p.exe
+
+# rust
+p
