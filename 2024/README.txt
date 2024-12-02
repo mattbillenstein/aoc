@@ -1,5 +1,5 @@
 01: Simple sums over two lists of numbers
-02:
+02: Simple adjacency rules over list of list of ints...
 03:
 04:
 05:
