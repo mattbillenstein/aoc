@@ -2,12 +2,6 @@
 
 import sys
 
-DEBUG = sys.argv.count('-v')
-
-def debug(*args):
-    if DEBUG:
-        print(*args)
-
 def parse_input():
     lines = [_.strip('\r\n') for _ in sys.stdin]
     L = [[int(x) for x in _.split()] for _ in lines]
