@@ -24,8 +24,8 @@ jobs:
     - name: Install dependencies
       run: |
         cd aoc
-        sudo apt update
-        sudo apt install pypy3 python3 rustc
+        sudo apt-get update
+        sudo apt-get install pypy3 python3 rustc libsdl1.2-dev
         make install
 
     - name: Run
