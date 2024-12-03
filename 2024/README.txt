@@ -1,6 +1,6 @@
 01: Simple sums over two lists of numbers
 02: Simple adjacency rules over list of list of ints...
-03:
+03: String regex removing segments between tokens
 04:
 05:
 06:
