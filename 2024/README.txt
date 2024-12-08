@@ -5,7 +5,7 @@
 05: Ordering in lists based on dependencies
 06: Grid tracing problem
 07:
-08:
+08: Grid unique repeating points from pairs using dx/dy 
 09:
 10:
 11:
