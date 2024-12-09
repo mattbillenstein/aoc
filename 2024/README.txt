@@ -4,9 +4,9 @@
 04: String find in a grid of characters
 05: Ordering in lists based on dependencies
 06: Grid tracing problem
-07:
+07: itertools.product of operators over list of numbers satisfying equations
 08: Grid unique repeating points from pairs using dx/dy 
-09:
+09: Disk defrag - block ids in lists with free space
 10:
 11:
 12:
