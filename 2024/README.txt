@@ -7,7 +7,7 @@
 07: itertools.product of operators over list of numbers satisfying equations
 08: Grid unique repeating points from pairs using dx/dy 
 09: Disk defrag - block ids in lists with free space
-10:
+10: Simple grid/graph path finding bfs/dfs
 11:
 12:
 13:
