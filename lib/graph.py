@@ -91,6 +91,7 @@ class BucketHeap:
 
     def __len__(self):
         return self.count
+
 def bfs(frontier, neighbors, end=None):
     # neighbors is a function that takes a vertex and yields neighboring
     # vertices...
