@@ -8,7 +8,7 @@
 08: Grid unique repeating points from pairs using dx/dy 
 09: Disk defrag - block ids in lists with free space
 10: Simple grid/graph path finding bfs/dfs
-11:
+11: Repeated production counting - @cache speeds this up incredibly
 12:
 13:
 14:
