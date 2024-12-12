@@ -20,7 +20,13 @@ year = datetime.datetime.today().year
 if len(sys.argv) > 1:
     year = int(sys.argv[1])
 
-url = f'https://adventofcode.com/{year}/leaderboard/private/view/2731085.json'
+board = '2731085'
+if len(sys.argv) > 2:
+    board = sys.argv[2]
+    if board == 'other':
+        board = '1808026'
+
+url = f'https://adventofcode.com/{year}/leaderboard/private/view/{board}.json'
 req = urllib.request.Request(url, headers=headers)
 res = urllib.request.urlopen(req)
 assert res.status == 200, res.status
