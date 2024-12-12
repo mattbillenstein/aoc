@@ -9,7 +9,7 @@
 09: Disk defrag - block ids in lists with free space
 10: Simple grid/graph path finding bfs/dfs
 11: Repeated production counting - @cache speeds this up incredibly
-12:
+12: Find regions in grid computing area, perimeter, and number of sides - flood fill
 13:
 14:
 15:
