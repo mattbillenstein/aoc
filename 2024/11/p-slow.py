@@ -34,10 +34,13 @@ def part1(stones):
 
 def part2(stones):
     tot = 0
+    # interesting, 25/25/25 - about 5.5m
+    #              15/30/30 - about 1.1m
+    #              30/30/15 - hours
     for stone in stones:
-        for stone1 in expand(stone, 25):
-            for stone2 in expand(stone1, 25):
-                tot += len(expand(stone2, 25))
+        for stone1 in expand(stone, 15):
+            for stone2 in expand(stone1, 30):
+                tot += len(expand(stone2, 30))
     print(tot)
                     
 def main():
