@@ -2,8 +2,13 @@
 
 import sys
 
-# the hotness...
-from z3 import *
+try:
+    # the hotness...
+    from z3 import *
+except ImportError:
+    pass
+
+from algo import cramers_rule
 
 DEBUG = sys.argv.count('-v')
 
@@ -85,6 +90,30 @@ def z3_optimize_cost(game):
 
     return cost
 
+def cramers_rule_cost(game):
+    a = game['a']
+    b = game['b']
+    prize = game['prize']
+
+    # AX = B
+    A = [[a[0], b[0]], [a[1], b[1]]]
+    B = [prize[0], prize[1]]
+    X = cramers_rule(A, B)
+
+    # to int
+    X = [int(round(_)) for _ in X]
+
+    pa, pb = X
+
+    cost = 0
+    if pa * a[0] + pb * b[0] == prize[0] and pa * a[1] + pb * b[1] == prize[1]:
+        cost = pa * COST_A + pb * COST_B
+        debug(game, pa, pb, cost)
+    else:
+        debug(game, 'no solution')
+
+    return cost
+
 def part2(games):
     # Add 10000000000000 to x, y of each prize
     delta = 10000000000000
@@ -94,7 +123,8 @@ def part2(games):
 
     tot = 0
     for game in games:
-        tot += z3_optimize_cost(game)
+        #tot += z3_optimize_cost(game)
+        tot += cramers_rule_cost(game)
     print(tot)
 
 def main():
