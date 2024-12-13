@@ -17,6 +17,12 @@ elif [ -e p.nim ] && [ "$(which nim)" != "" ]; then
   EXE="./p.exe"
 fi
 
+if [[ "$AOCPY ./p.py" =~ .*pypy3\ ./p\.py$ ]] || grep -q pypy3 ./p.py; then
+  source ../../.venv-pypy3/bin/activate
+else
+  source ../../.venv-python3/bin/activate
+fi
+
 if [ -e input-mod.txt ]; then
   $EXE 1 < input.txt > output.txt
   $EXE 2 < input-mod.txt >> output.txt
