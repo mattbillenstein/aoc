@@ -1,1 +1,3 @@
 pygame
+z3
+z3-solver
