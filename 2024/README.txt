@@ -11,7 +11,7 @@
 11: Repeated production counting - @cache speeds this up incredibly
 12: Find regions in grid computing area, perimeter, and number of sides - flood fill
 13: Search/optimization problem in 2 variables - Z3 solver for large part2
-14:
+14: Robots moving across 2d grid with given velocity, model their movement, and part 2, find an xmas tree in the grid
 15:
 16:
 17:
