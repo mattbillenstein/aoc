@@ -41,7 +41,7 @@ def find_boxes(pt, move, g):
 
     # <> skip over second half of box
     npt2 = g.step(npt, move)
-    L, can_move = find_boxes(g.step(npt, move), move, g)
+    L, can_move = find_boxes(npt2, move, g)
     return [npt if c == '[' else npt2] + L, can_move
 
     assert 0, c
