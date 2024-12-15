@@ -25,64 +25,70 @@ def find_boxes_in_line(pt, move, g):
             return boxes, None
         elif c == '.':
             return boxes, npt
-        elif c == 'O':
-            boxes.append((npt, c))
-        elif c == '[':
-            boxes.append((npt, c))
+        elif c in 'O[':
+            boxes.append(npt)
         pt = npt
 
 def find_boxes_not_in_line(pt, move, g):
-    # this handles up/down for 2-wide boxes, recurse for each case of what we
-    # see above and below... A box can move if it's clear and all the other
-    # boxes in its' way can move...
+    # this handles up/down for 2-wide boxes, recursing for neighbor boxes above
+    # and below...
     #
-    # passed in pt is always [, a box
-    ptc = g.getc(pt)
-    assert ptc == '['
-    box = (pt, ptc)
+    # A box can move if it's clear or all the other boxes in its' way can
+    # move...
+    #
+    # passed in pt is always [, left edge of a box
 
-    boxes = []
+    assert g.getc(pt) == '['
+
+    boxes = [pt]
 
     npt = g.step(pt, move)
     cc = g.getc(npt) + g.getc(g.step(npt, '>'))
 
+    L = []
+
     if cc[0] == '#' or cc[1] == '#':
         # directly blocked
-        boxes.append((box, False))
+        can_move = False
     elif cc == '..':
         # directly clear
-        boxes.append((box, True))
+        can_move = True
     elif cc == '].':
         # recurse on left box
-        boxes.extend(find_boxes_not_in_line(g.step(npt, '<'), move, g))
-        boxes.append((box, all(_[1] for _ in boxes)))
+        L, can_move = find_boxes_not_in_line(g.step(npt, '<'), move, g)
     elif cc == '[]':
         # recurse on single in-line box
-        boxes.extend(find_boxes_not_in_line(npt, move, g))
-        boxes.append((box, all(_[1] for _ in boxes)))
+        L, can_move = find_boxes_not_in_line(npt, move, g)
     elif cc == '.[':
         # recurse on right box
-        boxes.extend(find_boxes_not_in_line(g.step(npt, '>'), move, g))
-        boxes.append((box, all(_[1] for _ in boxes)))
+        L, can_move = find_boxes_not_in_line(g.step(npt, '>'), move, g)
     elif cc == '][':
         # recurse on both left/right box
-        boxes.extend(find_boxes_not_in_line(g.step(npt, '<'), move, g))
-        boxes.extend(find_boxes_not_in_line(g.step(npt, '>'), move, g))
-        boxes.append((box, all(_[1] for _ in boxes)))
+        L1, can_move_left = find_boxes_not_in_line(g.step(npt, '<'), move, g)
+        L2, can_move_right = find_boxes_not_in_line(g.step(npt, '>'), move, g)
+        L = L1 + L2
+        can_move = can_move_left and can_move_right
     else:
         assert 0, cc
 
-    return boxes
+    boxes.extend(L)
+
+    return boxes, can_move
 
 def move_boxes(boxes, move, g):
+    if not boxes:
+        return
+
+    c = g.getc(boxes[0])
+
     # clear existing locations
-    for box, c in boxes:
+    for box in boxes:
         g.setc(box, '.')
         if c == '[':
             g.setc((box[0]+1, box[1]), '.')
 
     # set new locations
-    for box, c in boxes:
+    for box in boxes:
         npt = g.step(box, move)
         g.setc(npt, c)
         if c == '[':
@@ -166,12 +172,8 @@ def part2(g, moves):
                 if c == ']':
                     spt = (npt[0]-1, npt[1])
 
-                boxes = find_boxes_not_in_line(spt, move, g)
-
-                # [(pt, bool can move), ...]
-                if all(_[1] for _ in boxes):
-                    # remove flag
-                    boxes = [_[0] for _ in boxes]
+                boxes, can_move = find_boxes_not_in_line(spt, move, g)
+                if can_move:
                     move_boxes(boxes, move, g)
                     pt = npt
             else:
