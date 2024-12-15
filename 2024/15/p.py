@@ -44,8 +44,6 @@ def find_boxes(pt, move, g):
     L, can_move = find_boxes(npt2, move, g)
     return [npt if c == '[' else npt2] + L, can_move
 
-    assert 0, c
-
 def move_boxes(boxes, move, g):
     c = g.getc(boxes[0])
 
