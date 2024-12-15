@@ -9,76 +9,44 @@ DEBUG = sys.argv.count('-v')
 def parse_input():
     lines = [_.strip('\r\n') for _ in sys.stdin]
     idx = lines.index('')
-    g = Grid(lines[:idx], {'.': 0, '#': 1, "O": 2, "<": 3, "^": 4, ">": 5, "v": 6, '[': 7, ']': 8})
+    g = Grid(lines[:idx], {c: i for i, c in enumerate('.#O@<^>v[]')})
     moves = ''.join(lines[idx+1:])
     return g, moves
 
-def find_boxes_in_line(pt, move, g):
-    # this handles all moves for single boxes and left/right for double boxes
-    # we can just scan the line to find a hole collecting boxes along the
-    # way... If we hit a wall before a hole, return None - nothing can move
-    boxes = []
-    while 1:
-        npt = g.step(pt, move)
-        c = g.getc(npt)
-        if c == '#':
-            return boxes, None
-        elif c == '.':
-            return boxes, npt
-        elif c in 'O[':
-            boxes.append(npt)
-        pt = npt
-
-def find_boxes_not_in_line(pt, move, g):
-    # this handles up/down for 2-wide boxes, recursing for neighbor boxes above
-    # and below...
-    #
-    # A box can move if it's clear or all the other boxes in its' way can
-    # move...
-    #
-    # passed in pt is always [, left edge of a box
-
-    assert g.getc(pt) == '['
-
-    boxes = [pt]
-
+def find_boxes(pt, move, g):
+    # Return boxes and if we can move when moving from pt, recurse on relevant
+    # points in the same direction until we hit a hole or wall...
     npt = g.step(pt, move)
-    cc = g.getc(npt) + g.getc(g.step(npt, '>'))
+    c = g.getc(npt)
 
-    L = []
+    assert c in '.#O[]', c
 
-    if cc[0] == '#' or cc[1] == '#':
-        # directly blocked
-        can_move = False
-    elif cc == '..':
-        # directly clear
-        can_move = True
-    elif cc == '].':
-        # recurse on left box
-        L, can_move = find_boxes_not_in_line(g.step(npt, '<'), move, g)
-    elif cc == '[]':
-        # recurse on single in-line box
-        L, can_move = find_boxes_not_in_line(npt, move, g)
-    elif cc == '.[':
-        # recurse on right box
-        L, can_move = find_boxes_not_in_line(g.step(npt, '>'), move, g)
-    elif cc == '][':
-        # recurse on both left/right box
-        L1, can_move_left = find_boxes_not_in_line(g.step(npt, '<'), move, g)
-        L2, can_move_right = find_boxes_not_in_line(g.step(npt, '>'), move, g)
-        L = L1 + L2
-        can_move = can_move_left and can_move_right
-    else:
-        assert 0, cc
+    if c == '.':
+        return [], True
+    if c == '#':
+        return [], False
+    if c == 'O':
+        L, can_move = find_boxes(npt, move, g)
+        return [npt] + L, can_move
 
-    boxes.extend(L)
+    # double width boxes, different stuff depending on move direction...
+    if move in 'v^':
+        if c == '[':
+            npt2 = g.step(npt, '>')
+        elif c == ']':
+            npt2 = g.step(npt, '<')
+        L1, can_move1 = find_boxes(npt, move, g)
+        L2, can_move2 = find_boxes(npt2, move, g)
+        return [npt if c == '[' else npt2] + L1 + L2, can_move1 and can_move2
 
-    return boxes, can_move
+    # <> skip over second half of box
+    npt2 = g.step(npt, move)
+    L, can_move = find_boxes(g.step(npt, move), move, g)
+    return [npt if c == '[' else npt2] + L, can_move
+
+    assert 0, c
 
 def move_boxes(boxes, move, g):
-    if not boxes:
-        return
-
     c = g.getc(boxes[0])
 
     # clear existing locations
@@ -94,7 +62,7 @@ def move_boxes(boxes, move, g):
         if c == '[':
             g.setc((npt[0]+1, npt[1]), ']')
 
-def part1(g, moves):
+def part(g, moves):
     g = g.copy()
 
     # find start point and clear the @
@@ -114,17 +82,21 @@ def part1(g, moves):
             g.print()
             g.setc(pt, '.')
 
-        boxes, hole = find_boxes_in_line(pt, move, g)
-        if hole:
-            move_boxes(boxes, move, g)
+        boxes, can_move = find_boxes(pt, move, g)
+        if can_move:
+            if boxes:
+                move_boxes(boxes, move, g)
             pt = g.step(pt, move)
 
     if DEBUG:
+        print()
         g.setc(pt, move)
         g.print()
 
-    print(sum(_[1] * 100 + _[0] for _ in g if g.getc(_) == 'O'))
+    return sum(_[1] * 100 + _[0] for _ in g if g.getc(_) in 'O[')
 
+def part1(g, moves):
+    print(part(g, moves))
 
 def part2(g, moves):
     # expand to double-width
@@ -135,55 +107,7 @@ def part2(g, moves):
         ng.setc((pt[0]*2, pt[1]), nc[0])
         ng.setc((pt[0]*2+1, pt[1]), nc[1])
 
-    g = ng
-
-    # find start point and clear the @
-    for pt in g:
-        if g.getc(pt) == '@':
-            break
-    g.setc(pt, '.')
-
-    if DEBUG:
-        g.print()
-
-    for move in moves:
-        if DEBUG > 1:
-            print()
-            print(pt, move)
-            g.setc(pt, move)
-            g.print()
-            g.setc(pt, '.')
-
-        if move in '<>':
-            boxes, hole = find_boxes_in_line(pt, move, g)
-            if hole:
-                move_boxes(boxes, move, g)
-                pt = g.step(pt, move)
-        else:
-            npt = g.step(pt, move)
-            c = g.getc(npt)
-            if c == '.':
-                pt = npt
-            elif c == '#':
-                # can't move
-                pass
-            elif c in '[]':
-                spt = npt
-                if c == ']':
-                    spt = (npt[0]-1, npt[1])
-
-                boxes, can_move = find_boxes_not_in_line(spt, move, g)
-                if can_move:
-                    move_boxes(boxes, move, g)
-                    pt = npt
-            else:
-                assert 0, c
-
-    if DEBUG:
-        g.setc(pt, move)
-        g.print()
-
-    print(sum(_[1] * 100 + _[0] for _ in g if g.getc(_) == '['))
+    print(part(ng, moves))
 
 def main():
     data = parse_input()
