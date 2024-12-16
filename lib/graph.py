@@ -95,6 +95,8 @@ class BucketHeap:
 def bfs(frontier, neighbors, end=None):
     # neighbors is a function that takes a vertex and yields neighboring
     # vertices...
+    #
+    # if you need the path, collect {npt: pt} in neighbors function...
     found = []
 
     if not isinstance(frontier, (list, set)):
