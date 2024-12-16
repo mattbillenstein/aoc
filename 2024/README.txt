@@ -13,7 +13,7 @@
 13: Search/optimization problem in 2 variables - Z3 solver for large part2
 14: Robots moving across 2d grid with given velocity, model their movement, and part 2, find an xmas tree in the grid
 15: Grid box pushing problem - part 2 double-width with 2-wide boxes
-16:
+16: Grid shortest path with turns as part of cost, dijkstra
 17:
 18:
 19:
