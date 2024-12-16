@@ -1,14 +1,10 @@
 #!/usr/bin/env pypy3
 
-import itertools
-import math
 import sys
-import time
-from collections import defaultdict
 from pprint import pprint
 
-from grid import Grid, manhattan_distance
-from graph import bfs, dfs, dijkstra
+from grid import Grid
+from graph import dijkstra
 
 DEBUG = sys.argv.count('-v')
 
@@ -57,43 +53,6 @@ def trace(grid, pt, dir, vertices, visited):
 
     assert 0
 
-def dfs(start, end, graph, grid, maxdist=0):
-    best = [None, maxdist or sys.maxsize]
-    visited = set()
-    ts = time.time()
-    grid = grid.copy()
-
-    def _dfs(pos, dist):
-        nonlocal ts
-        if time.time() - ts > 10.0:
-            ts = time.time()
-            g = grid.copy()
-            for pt, dir in visited:
-                g.setc(pt, dir)
-            g.print()
-            print(pos, dist)
-
-        if dist > best[1]:
-            return
-
-        visited.add(pos)
-
-        if pos[0] == end and dist < best[1]:
-            best[0] = list(visited)
-            best[1] = dist
-            print('BEST', best)
-        else:
-            for v, d in graph[pos]:
-                if v not in visited:
-                    _dfs(v, dist + d)
-
-        visited.remove(pos)
-
-    _dfs(start, 0)
-
-    return best
-
-
 def part1(g):
     g = g.copy()
     if DEBUG:
@@ -103,7 +62,6 @@ def part1(g):
     dirs = {'<': '>', '>': '<', '^': 'v', 'v': '^'}
 
     # find start / end and clear
-    graph = defaultdict(list)
     for pt in g:
         c = g.getc(pt)
         if c == 'S':
