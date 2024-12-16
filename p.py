@@ -15,7 +15,7 @@ def debug(*args):
 
 def parse_input():
     lines = [_.strip('\r\n') for _ in sys.stdin]
-    return lines
+    return (lines,)
 
 def part1(data):
     for line in data:
