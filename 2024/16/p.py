@@ -95,11 +95,14 @@ def dfs(start, end, graph, grid, maxdist=0):
 
 
 def part1(g):
-    print('>>>>>>>>>>>>>>>>>>>>>')
-    g.print()
+    g = g.copy()
+    if DEBUG:
+        g.print()
 
+    # directions and their opposite direction
     dirs = {'<': '>', '>': '<', '^': 'v', 'v': '^'}
 
+    # find start / end and clear
     graph = defaultdict(list)
     for pt in g:
         c = g.getc(pt)
@@ -110,33 +113,7 @@ def part1(g):
             end = pt
             g.setc(pt, '.')
 
-    # first bfs to get an upper bound on cost so we can better bound dfs
-    visited = {}
-    def neighbors(pt):
-        for npt in g.neighbors4(pt):
-            if g.getc(npt) == '.' and npt not in visited:
-                visited[npt] = pt
-                yield npt
- 
-    bfs(start, neighbors, end)
-
-    path = []
-    pt = end
-    while pt != start:
-        path.append(pt)
-        pt = visited[pt]
-    path.append(start)
-    path.reverse()
-
-#    for pt in path:
-#        g.setc(pt, 'o')
-#    g.print()
-
-    maxdist = len(path)
-    for i in range(1, len(path)-2):
-        if path[i-1][0] != path[i+1][0] and path[i-1][1] != path[i+1][1]:
-            maxdist += 1000
-
+    # compress the grid into a graph, find vertices where we can turn first
     vertices = {start: [], end: []}
     for pt in g:
         if g.getc(pt) != '.':
@@ -145,61 +122,60 @@ def part1(g):
         if N > 2:
             vertices[pt] = []
 
-    graph = defaultdict(list)
+    graph = {}
 
+    # From each vertex, trace in each direction to the next vertex
     for pt, L in vertices.items():
+        if pt == end:
+            # don't trace from end, we only go to it
+            continue
         for dir in dirs:
             npt = g.step(pt, dir)
             if g.getc(npt) == '.':
                 x = trace(g, npt, dir, vertices, [pt])
-                if x:
+                if x and x[0] != start:  # start is not an end
                     npt, ndir, dist, path = x
-                    graph[(pt, dir)].append(((npt, ndir), dist))
 
-                    # add just turns at npt cost 1000
-                    ndir_opp = dirs[ndir]
-                    # add cost for turns omitting a 180 and the same dir...
-                    for odir in dirs:
-                        if odir != ndir_opp and odir != ndir and g.getc(g.step(npt, odir)) == '.':
-                            rec = ((npt, odir), 1000)
-                            if rec not in graph[(npt, ndir)]:
-                                graph[(npt, ndir)].append(((npt, odir), 1000))
+                    if npt == end:
+                        # add end node to graph ending with this direction
+                        graph[(npt, ndir)] = []
 
-    if not graph[(start, '>')]:
-        for dir in dirs:
-            if dir != '>':
-                graph[(start, '>')].append(((start, dir), 1000))
+                    # add src -> dst vertex mapping if the end direction is
+                    # valid or we hit end
+                    if g.getc(g.step(npt, ndir)) == '.' or npt == end:
+                        graph.setdefault((pt, dir), []).append(((npt, ndir), dist))
 
-    pprint(graph)
-    print()
+                    # if we're not at an end, add nodes ending at this vertex
+                    # with a valid turn, dist+1000
+                    if npt != end:
+                        ndir_opp = dirs[ndir]
+                        for turn_dir in dirs:
+                            if turn_dir in (ndir, ndir_opp) or g.getc(g.step(npt, turn_dir)) != '.':
+                                continue
+                            graph.setdefault((pt, dir), []).append(((npt, turn_dir), dist+1000))
 
-    print(maxdist)
-    best = dfs((start, '>'), end, graph, g, 30000)
-    print(best)
+    # add nodes from the start if our starting direction isn't available...
+    if (start, '>') not in graph:
+        for dir in '^v':
+            if (start, dir) in graph:
+                graph.setdefault((start, '>'), []).extend([(pt, dist+1000) for pt, dist in graph[(start, dir)]])
 
-    duh
-    '''
-        if c == '.':
-            # if I'm on a tile facing any direction, store neightbors and their
-            # cost to the direction they are...
-            for current_dir in dirs:
-                opp_dir = dirs[current_dir]
-                for new_dir in dirs:
-                    if new_dir == opp_dir:  # don't allow 180 turn
-                        continue
-                    npt = g.step(pt, new_dir)
-                    c = g.getc(npt)
-                    if c == '.':
-                        graph[(pt, current_dir)].append( ((npt, new_dir), 1 if current_dir == new_dir else 1001) )
-                graph[(pt, current_dir)].sort(key=lambda x: x[1])
-    '''
+    # some turns added above go into dead-ends, remove them, but keep nodes to
+    # end
+    for k, L in graph.items():
+        # dead ends
+#        for x in L:
+#            if x[0] not in graph:
+#                print('missing', k, x[0], L)
 
-    if DEBUG:
-        for pt, dir in best.path:
-            g.setc(pt, dir)
-        g.print()
-        
-    print(best)
+        L[:] = [_ for _ in L if _[0] in graph or _[0][0] == end]
+
+    # Ok, actual dijkstra
+    dist, prev = dijkstra(graph, (start, '>'))
+
+    # min distance to end point, we can end up there from different directions
+    # with different costs
+    print(min(v for k, v in dist.items() if k[0] == end))
 
 def part2(data):
     pass

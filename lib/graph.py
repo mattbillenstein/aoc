@@ -241,11 +241,9 @@ def dijkstra(graph, start, end=None):
     dist = {}
     prev = {}
     for v in graph:
-        dist[v] = sys.maxsize
+        dist[v] = d = 0 if v == start else sys.maxsize
         prev[v] = None
-        pq.add_task(v)
-
-    dist[start] = 0
+        pq.add_task(v, d)
 
     while pq:
         u = pq.pop_task()
