@@ -89,28 +89,29 @@ def part1(g):
             continue
         for dir in dirs:
             npt = g.step(pt, dir)
-            if g.getc(npt) == '.':
-                x = trace(g, npt, dir, vertices, [pt])
-                if x and x[0] != start:  # start is not an end
-                    npt, ndir, dist, path = x
+            if g.getc(npt) != '.':
+                continue
+            x = trace(g, npt, dir, vertices, [pt])
+            if x and x[0] != start:  # start is not an end
+                npt, ndir, dist, path = x
 
-                    if npt == end:
-                        # add end node to graph ending with this direction
-                        graph[(npt, ndir)] = []
+                if npt == end:
+                    # add end node to graph ending with this direction
+                    graph[(npt, ndir)] = []
 
-                    # add src -> dst vertex mapping if the end direction is
-                    # valid or we hit end
-                    if g.getc(g.step(npt, ndir)) == '.' or npt == end:
-                        graph.setdefault((pt, dir), []).append(((npt, ndir), dist))
+                # add src -> dst vertex mapping if the end direction is
+                # valid or we hit end
+                if g.getc(g.step(npt, ndir)) == '.' or npt == end:
+                    graph.setdefault((pt, dir), []).append(((npt, ndir), dist))
 
-                    # if we're not at an end, add nodes ending at this vertex
-                    # with a valid turn, dist+1000
-                    if npt != end:
-                        ndir_opp = dirs[ndir]
-                        for turn_dir in dirs:
-                            if turn_dir in (ndir, ndir_opp) or g.getc(g.step(npt, turn_dir)) != '.':
-                                continue
-                            graph.setdefault((pt, dir), []).append(((npt, turn_dir), dist+1000))
+                # if we're not at an end, add nodes ending at this vertex
+                # with a valid turn, dist+1000
+                if npt != end:
+                    ndir_opp = dirs[ndir]
+                    for turn_dir in dirs:
+                        if turn_dir in (ndir, ndir_opp) or g.getc(g.step(npt, turn_dir)) != '.':
+                            continue
+                        graph.setdefault((pt, dir), []).append(((npt, turn_dir), dist+1000))
 
     # add nodes from the start if our starting direction isn't available...
     if (start, '>') not in graph:
