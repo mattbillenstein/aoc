@@ -18,7 +18,7 @@ def parse_input():
             regs[reg] = int(val)
         elif line.startswith('Program'):
             prog = line.split()[1].split(',')
-            prog = [int(_) for _ in prog]
+            prog = tuple(int(_) for _ in prog)
     return (prog, regs)
 
 def run(prog, regs):
@@ -66,7 +66,6 @@ def run(prog, regs):
     return ','.join(str(_) for _ in output)
 
 def part1(prog, regs):
-    prog = tuple(prog)
     regs = dict(regs)
     out = run(prog, regs)
     print(out)
@@ -113,16 +112,14 @@ def part2(prog, regs):
         x = out[-1]
 
         for i in range(8):
-            val = (v << 3) | i
-
-            A = val & 0b111
-            C = val >> (A ^ 5) & 0b111
-            newx = C ^ 5 ^ 6 ^ A
-
+            A = (v << 3) | i
+            B = A & 0b111
+            C = A >> (B ^ 5) & 0b111
+            newx = C ^ 5 ^ 6 ^ B
             if newx == x:
-                find(val, out[:-1])
+                find(A, out[:-1])
 
-    find(0, tuple(prog))
+    find(0, prog)
 
     value = min(matches)
 
