@@ -14,7 +14,7 @@
 14: Robots moving across 2d grid with given velocity, model their movement, and part 2, find an xmas tree in the grid
 15: Grid box pushing problem - part 2 double-width with 2-wide boxes
 16: Grid shortest path with turns as part of cost - part 2, all min paths, modified dijkstra, dfs
-17:
+17: Simple 3-bit computer and reverse-engineering a program to figure out the correct input value
 18:
 19:
 20:
