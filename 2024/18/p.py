@@ -45,7 +45,23 @@ def part(points):
 
     if '1' in sys.argv:
         if DEBUG:
+            path = [end]
+            pt = end
+            while pt != start:
+                pt = prev[pt]
+                path.append(pt)
+
+            for pt in path:
+                g.setc(pt, 'O')
+
             g.print()
+            if DEBUG > 1:
+                g.draw(20)
+                time.sleep(3)
+
+            for pt in path:
+                g.setc(pt, '.')
+
         print(x[0][1])
 
     if not '2' in sys.argv:
@@ -58,15 +74,15 @@ def part(points):
         g.setc(pt, '#')
         if not bfs(start, neighbors, set([end])):
             if DEBUG:
-                g.print()
-            print('%d,%d' % pt)
-            if DEBUG > 1:
                 for pt in prev:
                     g.setc(pt, 'O')
-                g.draw()
+                g.print()
+                if DEBUG > 1:
+                    g.draw()
+            print('%d,%d' % pt)
             break
 
-        if DEBUG > 1:
+        if DEBUG:
             path = [end]
             pt = end
             while pt != start:
@@ -76,7 +92,8 @@ def part(points):
             for pt in path:
                 g.setc(pt, 'O')
 
-            g.draw()
+            if DEBUG > 1:
+                g.draw()
 
             prev.clear()
             for pt in path:
