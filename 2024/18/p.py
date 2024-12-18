@@ -1,6 +1,7 @@
 #!/usr/bin/env pypy3
 
 import sys
+import time
 
 from grid import Grid
 from graph import bfs
@@ -28,9 +29,16 @@ def part(points):
     for pt in points[:steps]:
         g.setc(pt, '#')
 
+    if DEBUG > 1:
+        g.draw(20)
+        time.sleep(3)
+
+    prev = {}
     def neighbors(pt):
         for npt in g.neighbors4(pt):
             if g.getc(npt) == '.':
+                if npt not in prev:
+                    prev[npt] = pt
                 yield npt
 
     x = bfs(start, neighbors, set([end]))
@@ -44,12 +52,38 @@ def part(points):
         return
 
     for pt in points[steps:]:
+        if DEBUG > 1:
+            time.sleep(0.01)
+
         g.setc(pt, '#')
         if not bfs(start, neighbors, set([end])):
             if DEBUG:
                 g.print()
             print('%d,%d' % pt)
+            if DEBUG > 1:
+                for pt in prev:
+                    g.setc(pt, 'O')
+                g.draw()
             break
+
+        if DEBUG > 1:
+            path = [end]
+            pt = end
+            while pt != start:
+                pt = prev[pt]
+                path.append(pt)
+
+            for pt in path:
+                g.setc(pt, 'O')
+
+            g.draw()
+
+            prev.clear()
+            for pt in path:
+                g.setc(pt, '.')
+
+    if DEBUG > 1:
+        time.sleep(10)
 
 def main():
     data = parse_input()
