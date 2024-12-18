@@ -1,26 +1,17 @@
 #!/usr/bin/env pypy3
 
-import itertools
-import math
 import sys
-import time
-from collections import defaultdict
-from pprint import pprint
 
 from grid import Grid
 from graph import bfs
 
 DEBUG = sys.argv.count('-v')
 
-def debug(*args):
-    if DEBUG:
-        print(*args)
-
 def parse_input():
     lines = [_.strip('\r\n') for _ in sys.stdin]
-    bytes = [_.split(',') for _ in lines]
-    bytes = [(int(_[0]), int(_[1])) for _ in bytes]
-    return (bytes,)
+    points = [_.split(',') for _ in lines]
+    points = [(int(_[0]), int(_[1])) for _ in points]
+    return (points,)
 
 def part(points):
     size = (7, 7)
@@ -34,8 +25,8 @@ def part(points):
 
     g = Grid(['.' * size[0] for _ in range(size[1])], {'.': 0, '#': 1, 'O': 2})
 
-    for i in range(steps):
-        g.setc(points[i], '#')
+    for pt in points[:steps]:
+        g.setc(pt, '#')
 
     def neighbors(pt):
         for npt in g.neighbors4(pt):
@@ -52,7 +43,7 @@ def part(points):
     if not '2' in sys.argv:
         return
 
-    for pt in points[1024:]:
+    for pt in points[steps:]:
         g.setc(pt, '#')
         if not bfs(start, neighbors, set([end])):
             if DEBUG:
