@@ -32,7 +32,14 @@ res = urllib.request.urlopen(req)
 assert res.status == 200, res.status
 data = json.loads(res.read().decode(res.headers.get_content_charset('utf-8')))
 
-for id, d in data['members'].items():
+
+for id, d in sorted(data['members'].items(), key=lambda x: x[1]['local_score'], reverse=True):
+    print(f"{d['name']:20s} stars:{d['stars']:2d} score:{d['local_score']:d}")
+
+print()
+
+for id, d in sorted(data['members'].items(), key=lambda x: x[1]['local_score'], reverse=True):
+    print()
     print(f"{d['name']:20s} stars:{d['stars']:2d} score:{d['local_score']:d}")
     x = d['completion_day_level']
     for day in range(1, 26):
