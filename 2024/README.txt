@@ -16,7 +16,7 @@
 16: Grid shortest path with turns as part of cost - part 2, all min paths, modified dijkstra, dfs
 17: Simple 3-bit computer and reverse-engineering a program to figure out the correct input value
 18: BFS in grid with blockages dropping in
-19:
+19: Finding towel designs from list of patterns - recurse and memoize
 20:
 21:
 22:
