@@ -1,7 +1,6 @@
 #!/usr/bin/env pypy3
 
 import sys
-from collections import defaultdict
 
 from grid import Grid, manhattan_distance
 
@@ -55,16 +54,13 @@ def part(g):
 
     # for each point on path in front of us, if it's manhattan-distance is
     # <= cheat steps away, count it...
-    cheats = defaultdict(int)
-    tot = 0
+    cheats = {_: 0 for _ in dists}
     for i, pt in enumerate(path[:-1]):
         for npt in path[i+min(dists):]:
             md = manhattan_distance(pt, npt)
             for cheat in dists:
                 if md <= cheat:
-                    idx = idxs[npt]
-                    new_len = len(path) - (idx - i) + md
-                    saved = len(path) - new_len
+                    saved = idxs[npt] - i - md
                     if saved >= save:
                         cheats[cheat] += 1
 
