@@ -22,13 +22,13 @@ def part(g):
             g.setc(pt, '.')
 
     # trace the path with no skips
-    path = set([start])
+    path = [start]
     pt = start
     while pt != end:
         for npt in g.neighbors4(pt):
             if g.getc(npt) == '.' and npt not in path:
                 pt = npt
-                path.add(npt)
+                path.append(npt)
                 break
 
     path = tuple(path)
@@ -58,11 +58,10 @@ def part(g):
     for i, pt in enumerate(path[:-1]):
         for npt in path[i+min(dists):]:
             md = manhattan_distance(pt, npt)
+            saved = idxs[npt] - i - md
             for cheat in dists:
-                if md <= cheat:
-                    saved = idxs[npt] - i - md
-                    if saved >= save:
-                        cheats[cheat] += 1
+                if md <= cheat and saved >= save:
+                    cheats[cheat] += 1
 
     for k in sorted(cheats):
         print(cheats[k])
