@@ -17,7 +17,7 @@
 17: Simple 3-bit computer and reverse-engineering a program to figure out the correct input value
 18: BFS in grid with blockages dropping in
 19: Finding towel designs from list of patterns - recurse and memoize
-20:
+20: Finding shortcuts passing through walls N steps in a non-branching grid
 21:
 22:
 23:
