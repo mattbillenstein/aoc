@@ -59,7 +59,7 @@ def part(g):
         cheats = defaultdict(int)
         tot = 0
         for i, pt in enumerate(path[:-1]):
-            for npt in path[i+2:]:
+            for npt in path[i+cheat:]:
                 md = manhattan_distance(pt, npt)
                 if md <= cheat:
                     idx = idxs[npt]
