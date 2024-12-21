@@ -20,12 +20,6 @@ def parse_input():
     lines = [_.strip('\r\n') for _ in sys.stdin]
     return (lines,)
 
-def canon(s):
-    x = s.split('A')
-    x = [''.join(sorted(list(_))) for _ in x]
-    x = 'A'.join(x)
-    return x
-
 def find_paths(ckey, nkey, g):
     def find(path):
         pt, dir = path[-1]
@@ -72,41 +66,40 @@ def part1(codes):
                 for path in find_paths(c1, c2, g):
                     paths[(c1, c2)].append(path)
 
-    check = [
-        '<vA<AA>>^AvAA<^A>A<v<A>>^AvA^A<vA>^A<v<A>^A>AAvA^A<v<A>A>^AAAvA<^A>A',
-        'v<<A>>^A<A>AvA<^AA>A<vAAA>^A',
-        '<A^A>^^AvvvA',
-        '029A',
-    ]
+    maxlevel = 3
 
-    def generate(code):
+    def generate(code, pos='A', level=1):
         # generate all new codes from given code using paths
-        s = 'A' + code
+        s = pos + code
         L = []
         for i in range(len(s)-1):
             k, nk = s[i], s[i+1]
             L.append(paths[(k, nk)])
 
         for tup in itertools.product(*L):
-            yield 'A'.join(tup) + 'A'
-
+            s = 'A'.join(tup) + 'A'
+            if len(s) <= best[level]:
+                best[level] = len(s)
+                if level < maxlevel:
+                    for x in generate(s, level=level+1):
+                        yield x
+                else:
+                    yield s
+                        
     tot = 0
     for code in codes:
-        best = ''
-        for s1 in generate(code):
-            for s2 in generate(s1):
-                for s3 in generate(s2):
-                    if not best or len(s3) < len(best):
-                        best = s3
-                        print()
-                        print(code)
-                        print(s1)
-                        print(s2)
-                        print(s3)
+        best = defaultdict(lambda: 10000000000000)
+        sbest = ''
+        for s in generate(code):
+            if not sbest or len(s) < len(sbest):
+                sbest = s
+                print()
+                print(code)
+                print(s)
 
         num = int(''.join(_ for _ in code if _ != 'A'))
-        print(code, best, len(best), num)
-        num *= len(best)
+        print(code, sbest, len(sbest), num)
+        num *= len(sbest)
         tot += num
 
     print(tot)
