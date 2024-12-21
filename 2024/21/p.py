@@ -50,6 +50,8 @@ def find_paths(ckey, nkey, g):
     return paths
 
 def part1(codes):
+    sys.setrecursionlimit(10000)
+
     dg = Grid(['#^A', '<v>'])
     ng = Grid(['789', '456', '123', '#0A'])
 
@@ -68,43 +70,40 @@ def part1(codes):
 
     maxlevel = 3
 
-    def generate(code, pos='A', level=1):
-        # generate all new codes from given code using paths
-        s = pos + code
-        L = []
-        for i in range(len(s)-1):
-            k, nk = s[i], s[i+1]
-            L.append(paths[(k, nk)])
+    def generate(code, ncode='', pos='A', level=1):
+#        print('gen', repr(code), repr(ncode), pos, level)
+        if not code:
+            if level < maxlevel:
+                for y in generate(ncode, level=level+1):
+                    yield y
+            else:
+                yield ncode
+        else:
+            for path in paths[(pos, code[0])]:
+                for x in generate(code[1:], ncode + path + 'A', pos=code[0], level=level):
+                    yield x
 
-        for tup in itertools.product(*L):
-            s = 'A'.join(tup) + 'A'
-            if len(s) <= best[level]:
-                best[level] = len(s)
-                if level < maxlevel:
-                    for x in generate(s, level=level+1):
-                        yield x
-                else:
-                    yield s
-                        
     tot = 0
     for code in codes:
-        best = defaultdict(lambda: 10000000000000)
-        sbest = ''
-        for s in generate(code):
-            if not sbest or len(s) < len(sbest):
-                sbest = s
-                print()
-                print(code)
-                print(s)
+        s = ''
+        last = 'A'
+        for c in code:
+            best = ''
+            for x in generate(c, pos=last):
+                if not best or len(x) < len(best):
+                    best = x
+            last = c
+            print(c, best)
+            s += best
 
+        print(s)
         num = int(''.join(_ for _ in code if _ != 'A'))
-        print(code, sbest, len(sbest), num)
-        num *= len(sbest)
+        print(code, s, len(s), num)
+        num *= len(s)
         tot += num
 
     print(tot)
 
-            
 def part2(data):
     pass
 
