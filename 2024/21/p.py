@@ -77,8 +77,112 @@ def part1(codes):
                 for s in generate(code[0], code[1:], ncode + path):
                     yield s
 
-    def generate_list(pos, code, ncode=''):
-        return list(generate(pos, code, ncode=''))
+    def split(code):
+        # split a code on 'A' and return list of parts
+        return [_ + 'A' for _ in code.split('A')[:-1]]
+
+    @lru_cache(maxsize=None)
+    def next_code(code):
+        if 'A' in code[:-1]:
+            s = ''
+            for p in split(code):
+                s += next_code(p)
+            return s
+
+        # take a code and generate its next two codes returning the next code
+        # based on the shortest next next code...
+        best = sys.maxsize
+        for s1 in generate('A', code):
+            for s2 in generate('A', s1):
+                for s3 in generate('A', s2):
+                    if len(s3) < best:
+                        best = len(s3)
+                        s = s1
+        return s
+
+    tot = 0
+    for code in codes:
+        ocode = code
+
+        # compute numpad code
+        ncode = next_code(code)
+
+        print(code, ncode, len(ncode))
+
+        if 0:
+            if code == '029A':
+                assert ncode == '<A^A>^^AvvvA', ncode
+
+            code = ncode
+            ncode = next_code(code)
+            print(code, ncode, len(ncode))
+            if code == '029A':
+                assert ncode == 'v<<A>>^A<A>AvA<^AA>A<vAAA>^A', ncode
+
+            code = ncode
+            ncode = next_code(code)
+            print(code, ncode, len(ncode))
+            d = {
+                '029A': '<vA<AA>>^AvAA<^A>A<v<A>>^AvA^A<vA>^A<v<A>^A>AAvA^A<v<A>A>^AAAvA<^A>A',
+                '980A': '<v<A>>^AAAvA^A<vA<AA>>^AvAA<^A>A<v<A>A>^AAAvA<^A>A<vA>^A<A>A',
+                '179A': '<v<A>>^A<vA<A>>^AAvAA<^A>A<v<A>>^AAvA^A<vA>^AA<A>A<v<A>A>^AAAvA<^A>A',
+                '456A': '<v<A>>^AA<vA<A>>^AAvAA<^A>A<vA>^A<A>A<vA>^A<A>A<v<A>A>^AAvA<^A>A',
+                '379A': '<v<A>>^AvA^A<vA<AA>>^AAvA<^A>AAvA^A<vA>^AA<A>A<v<A>A>^AAAvA<^A>A',
+            }
+
+            code = ocode
+            n = len(ncode)
+
+            if code in d:
+                print(code)
+                print(ncode, n)
+                print(d[code], len(d[code]))
+
+                # diff doesn't matter here if same length...
+                #assert ncode == d[ocode]
+                assert len(d[code]) == n
+
+            print()
+
+            continue
+
+        if DEBUG:
+            for i in range(2):
+                ncode = next_code(ncode)
+
+            n = len(ncode)
+            num = int(''.join(_ for _ in code if _ != 'A'))
+            print(code, ncode, n, num)
+        else:
+            pass
+#           n = compute_length(ncode, 2)
+            duh
+
+        num *= n
+        tot += num
+
+    print(tot)
+    return
+    duh
+    pprint(cache)
+
+    for code in cache.values():
+        val = get_next_code(code)
+
+        print(code)
+        parts = split(code)
+        print(parts)
+        val2 = ''
+        for p in parts:
+            s = get_next_code(p)
+            print('  ', p, s)
+            val2 += s
+
+        print(code, val)
+        print(code, val2)
+        print()
+
+    return
 
     def find_shortest(code):
         best = sys.maxsize
