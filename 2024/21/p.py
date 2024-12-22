@@ -52,7 +52,7 @@ def make_paths(cpt, npt, g):
 
     return [paths[0]]
 
-def part1(codes):
+def part(codes):
     # use small grids to generate paths
     dg = Grid(['#^A', '<v>'])
     ng = Grid(['789', '456', '123', '#0A'])
@@ -119,7 +119,7 @@ def part1(codes):
         else:
             return len(code)
 
-    tot = 0
+    tot1 = tot2 = 0
     for code in codes:
         num = int(code.lstrip('A0').rstrip('A'))
 
@@ -132,25 +132,25 @@ def part1(codes):
             for i in range(2):
                 ncode = next_code(ncode)
 
-            n = len(ncode)
-            print(code, ncode, n, num)
+            n1 = len(ncode)
+            n2 = 0
+            print(code, ncode, n1, num)
         else:
-            n = compute_length(ncode, 25)  # fixme, 25
+            n1 = compute_length(ncode, 2)
+            n2 = compute_length(ncode, 25)
             # print(code, n, num)
 
-        tot += num * n
+        tot1 += num * n1
+        tot2 += num * n2
 
-    print(tot)
-
-def part2(data):
-    pass
+    if '1' in sys.argv:
+        print(tot1)
+    if '2' in sys.argv:
+        print(tot2)
 
 def main():
     data = parse_input()
-    if '1' in sys.argv:
-        part1(*data)
-    if '2' in sys.argv:
-        part2(*data)
+    part(*data)
 
 if __name__ == '__main__':
     main()
