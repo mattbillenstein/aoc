@@ -46,10 +46,11 @@ def part(codes):
                         paths[(c1, c2)] = make_paths(pt1, pt2, g)
 
     @lru_cache(maxsize=None)
-    def countem(code, times, prev='A'):
+    def countem(code, times):
         if times == 0:
             return len(code)
 
+        prev = 'A'
         tot = 0
         for c in code:
             mn = sys.maxsize
