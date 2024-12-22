@@ -107,6 +107,19 @@ def part1(codes):
                         s = s1
         return s
 
+    for k, L in paths.items():
+        if len(L) > 1:
+            mn = min(len(next_code(next_code(_))) for _ in L)
+            print(k, L)
+            for x in list(L):
+                nc = next_code(next_code(x))
+                if len(nc) != mn:
+                    L.remove(x)
+                print('  ', x, nc, len(nc))
+
+    pprint(dict(paths))
+    #return
+
     @lru_cache(maxsize=None)
     def compute_length(code, times):
         print(code, times)
@@ -121,7 +134,7 @@ def part1(codes):
 
     tot = 0
     for code in codes:
-        num = int(''.join(_ for _ in code if _ != 'A'))
+        num = int(code.lstrip('A0').rstrip('A'))
 
         # compute numpad code
         ncode = next_code(code)
@@ -143,6 +156,7 @@ def part1(codes):
     print(tot)
 
     # 277554934879758 too high times=25
+    # 175396398527088 too low times=25
     # 110880490505014 too low times=24
 
 def part2(data):
