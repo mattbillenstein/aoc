@@ -50,9 +50,12 @@ def find_paths(ckey, nkey, g):
     return paths
 
 def part1(codes):
+    # use small grids to generate paths
     dg = Grid(['#^A', '<v>'])
     ng = Grid(['789', '456', '123', '#0A'])
 
+    # for each pair of points on each grid, generate a set of shortest paths we
+    # can take between them...
     paths = defaultdict(set)
     for g in (dg, ng):
         for pt1 in g:
@@ -69,7 +72,7 @@ def part1(codes):
     #pprint(dict(paths))
 
     def generate(pos, code, ncode=''):
-        #print('gen', repr(code), repr(ncode), pos, level)
+        # from starting position and code, generate possible next codes
         if not code:
             yield ncode
         else:
@@ -83,14 +86,18 @@ def part1(codes):
 
     @lru_cache(maxsize=None)
     def next_code(code):
+        # given a code, generate the next code that will result in the shortest
+        # descendant codes...
+
+        # if we can split the code, do so and recurse
         if 'A' in code[:-1]:
             s = ''
             for p in split(code):
                 s += next_code(p)
             return s
 
-        # take a code and generate its next two codes returning the next code
-        # based on the shortest next next code...
+        # brute force find shortest code by inspecting several levels of
+        # descendant codes...
         best = sys.maxsize
         for s1 in generate('A', code):
             for s2 in generate('A', s1):
@@ -100,176 +107,43 @@ def part1(codes):
                         s = s1
         return s
 
+    @lru_cache(maxsize=None)
+    def compute_length(code, times):
+        print(code, times)
+        if 'A' in code[:-1]:
+            return sum(compute_length(_, times) for _ in split(code))
+
+        if times:
+            return sum(compute_length(_, times-1) for _ in split(next_code(code)))
+            #return compute_length(next_code(code), times-1)
+        else:
+            return len(code)
+
     tot = 0
     for code in codes:
-        ocode = code
+        num = int(''.join(_ for _ in code if _ != 'A'))
 
         # compute numpad code
         ncode = next_code(code)
 
-        print(code, ncode, len(ncode))
-
-        if 0:
-            if code == '029A':
-                assert ncode == '<A^A>^^AvvvA', ncode
-
-            code = ncode
-            ncode = next_code(code)
-            print(code, ncode, len(ncode))
-            if code == '029A':
-                assert ncode == 'v<<A>>^A<A>AvA<^AA>A<vAAA>^A', ncode
-
-            code = ncode
-            ncode = next_code(code)
-            print(code, ncode, len(ncode))
-            d = {
-                '029A': '<vA<AA>>^AvAA<^A>A<v<A>>^AvA^A<vA>^A<v<A>^A>AAvA^A<v<A>A>^AAAvA<^A>A',
-                '980A': '<v<A>>^AAAvA^A<vA<AA>>^AvAA<^A>A<v<A>A>^AAAvA<^A>A<vA>^A<A>A',
-                '179A': '<v<A>>^A<vA<A>>^AAvAA<^A>A<v<A>>^AAvA^A<vA>^AA<A>A<v<A>A>^AAAvA<^A>A',
-                '456A': '<v<A>>^AA<vA<A>>^AAvAA<^A>A<vA>^A<A>A<vA>^A<A>A<v<A>A>^AAvA<^A>A',
-                '379A': '<v<A>>^AvA^A<vA<AA>>^AAvA<^A>AAvA^A<vA>^AA<A>A<v<A>A>^AAAvA<^A>A',
-            }
-
-            code = ocode
-            n = len(ncode)
-
-            if code in d:
-                print(code)
-                print(ncode, n)
-                print(d[code], len(d[code]))
-
-                # diff doesn't matter here if same length...
-                #assert ncode == d[ocode]
-                assert len(d[code]) == n
-
-            print()
-
-            continue
-
         if DEBUG:
+            print(code, ncode, len(ncode))
+
             for i in range(2):
                 ncode = next_code(ncode)
 
             n = len(ncode)
-            num = int(''.join(_ for _ in code if _ != 'A'))
             print(code, ncode, n, num)
         else:
-            pass
-#           n = compute_length(ncode, 2)
-            duh
+            n = compute_length(ncode, 25)
+            print(code, n, num)
 
-        num *= n
-        tot += num
+        tot += num * n
 
     print(tot)
-    return
-    duh
-    pprint(cache)
 
-    for code in cache.values():
-        val = get_next_code(code)
-
-        print(code)
-        parts = split(code)
-        print(parts)
-        val2 = ''
-        for p in parts:
-            s = get_next_code(p)
-            print('  ', p, s)
-            val2 += s
-
-        print(code, val)
-        print(code, val2)
-        print()
-
-    return
-
-    def find_shortest(code):
-        best = sys.maxsize
-        L = []
-        for s in generate('A', code):
-            if len(s) <= best:
-                best = len(s)
-                yield s
-
-    def take_shortest(codes):
-        best = ''
-        for code in codes:
-            for nc in find_shortest(code):
-                if not best or len(nc) < len(best):
-                    best = code
-        return best
-
-    def find_shortest_length(code, times=1):
-        if times > 1:
-            tot = 0
-            parts = [_ + 'A' for _ in code.split('A')]
-            for p in parts:
-                nc = take_shortest(find_shortest(p))
-                print(' '*times, 'fsl p', p, nc, times)
-                tot += find_shortest_length(nc, times-1)
-        else:
-            nc = take_shortest(find_shortest(code))
-            print(' '*times, 'fsl code', code, nc, len(nc), times)
-            tot = len(nc)
-        print('fsl end', code, times, tot)
-        print()
-        return tot
-
-    # for each code, take the shortest on the npad
-    tot = 0
-    for code in codes:
-        # take npad code
-        if 1:
-            ncode = take_shortest(find_shortest(code))
-            print(code, ncode, len(ncode))
-            if code == '029A':
-                assert ncode == '<A^A>^^AvvvA', ncode
-
-            code = ncode
-            ncode = take_shortest(find_shortest(code))
-            print(code, ncode, len(ncode))
-            if code == '029A':
-                assert ncode == 'v<<A>>^A<A>AvA<^AA>A<vAAA>^A', ncode
-
-            code = ncode
-            ncode = take_shortest(find_shortest(code))
-            print(code, ncode, len(ncode))
-            if code == '029A':
-                assert ncode == '<vA<AA>>^AvAA<^A>A<v<A>>^AvA^A<vA>^A<v<A>^A>AAvA^A<v<A>A>^AAAvA<^A>A', ncode
-            print()
-
-            continue
-
-        # find npad codes, take one that generates shortest dpad code
-        best = take_shortest(find_shortest(code))
-        print('best npad:', best)
-
-        n = find_shortest_length(best, times=2)
-
-        print(best, len(best), n)
-
-        duh
-
-        if code == '029A':
-            assert n == 68, (code, dcode, n)
-        elif code == '980A':
-            assert n == 60, (code, dcode, n)
-        elif code == '179A':
-            assert n == 68, (code, dcode, n)
-        elif code == '456A':
-            assert n == 64, (code, dcode, n)
-        elif code == '379A':
-            assert n == 64, (code, dcode, n)
-
-
-        num = int(''.join(_ for _ in code if _ != 'A'))
-        print('final', code, dcode, n, num)
-        num *= n
-        tot += num
-
-
-    print(tot)
+    # 277554934879758 too high times=25
+    # 110880490505014 too low times=24
 
 def part2(data):
     pass
