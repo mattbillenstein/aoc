@@ -20,43 +20,46 @@ def parse_input():
     lines = [_.strip('\r\n') for _ in sys.stdin]
     return (lines,)
 
-def find_paths(ckey, nkey, g):
-    def find(path):
-        pt, dir = path[-1]
-        if g.getc(pt) == nkey:
-            yield ''.join([_[1] for _ in path[1:]])
+def make_paths(cpt, npt, g):
+    # only take L paths if they don't pass through the # in the grid
+    if cpt == npt:
+        return ['A']
 
-        visited = [_[0] for _ in path]
-        for ndir in '<>v^':
-            npt = g.step(pt, ndir)
-            if npt and npt not in visited and g.getc(npt) != '#':
-                for x in find(path + ((npt, ndir),)):
-                    yield x
+    # this was trial/error from other ppl in the solutions thread - how can
+    # this be derived?
+    move_priority = '<^v>'
 
-    for spt in g:
-        if g.getc(spt) == ckey:
-            break
+    dx = npt[0] - cpt[0]
+    dy = npt[1] - cpt[1]
+    cx = '>' if dx > 0 else '<'
+    cy = 'v' if dy > 0 else '^'
+    dx = abs(dx)
+    dy = abs(dy)
 
     paths = []
-    for path in find(((spt, None),)):
-        paths.append(path)
+    for path in set([cx * dx + cy * dy, cy * dy + cx * dx]):
+        valid = True
+        pt = cpt
+        for dir in path:
+            pt = g.step(pt, dir)
+            if g.getc(pt) == '#':
+                valid = False
+                break
+        if valid:
+            paths.append(path + 'A')
 
-    # filter down to all min paths of same length - I don't think there can be
-    # a case where a longer path is desired?
-    if paths:
-        mn = min(len(_) for _ in paths)
-        paths = [_ for _ in paths if len(_) == mn]
+    paths.sort(key=lambda x: [move_priority.index(_) for _ in x[:-1]])
 
-    return paths
+    return [paths[0]]
 
 def part1(codes):
     # use small grids to generate paths
     dg = Grid(['#^A', '<v>'])
     ng = Grid(['789', '456', '123', '#0A'])
 
-    # for each pair of points on each grid, generate a set of shortest paths we
-    # can take between them...
-    paths = defaultdict(set)
+    # for each pair of points on each grid, generate the shortest path we can
+    # take between them...
+    paths = {}
     for g in (dg, ng):
         for pt1 in g:
             c1 = g.getc(pt1)
@@ -66,10 +69,7 @@ def part1(codes):
                 c2 = g.getc(pt2)
                 if c2 == '#':
                     continue
-                for path in find_paths(c1, c2, g):
-                    paths[(c1, c2)].add(path + 'A')
-
-    #pprint(dict(paths))
+                paths[(c1, c2)] = make_paths(pt1, pt2, g)
 
     def generate(pos, code, ncode=''):
         # from starting position and code, generate possible next codes
@@ -83,6 +83,9 @@ def part1(codes):
     def split(code):
         # split a code on 'A' and return list of parts
         return [_ + 'A' for _ in code.split('A')[:-1]]
+
+    #pprint(dict(paths))
+    #return
 
     @lru_cache(maxsize=None)
     def next_code(code):
@@ -101,34 +104,18 @@ def part1(codes):
         best = sys.maxsize
         for s1 in generate('A', code):
             for s2 in generate('A', s1):
-                for s3 in generate('A', s2):
-                    if len(s3) < best:
-                        best = len(s3)
-                        s = s1
+                if len(s2) < best:
+                    best = len(s2)
+                    s = s1
         return s
-
-    for k, L in paths.items():
-        if len(L) > 1:
-            mn = min(len(next_code(next_code(_))) for _ in L)
-            #print(k, L)
-            for x in list(L):
-                nc = next_code(next_code(x))
-                if len(nc) != mn:
-                    L.remove(x)
-                #print('  ', x, nc, len(nc))
-
-    #pprint(dict(paths))
-    #return
 
     @lru_cache(maxsize=None)
     def compute_length(code, times):
-        #print(code, times)
         if 'A' in code[:-1]:
             return sum(compute_length(_, times) for _ in split(code))
 
         if times:
             return sum(compute_length(_, times-1) for _ in split(next_code(code)))
-            #return compute_length(next_code(code), times-1)
         else:
             return len(code)
 
@@ -148,16 +135,12 @@ def part1(codes):
             n = len(ncode)
             print(code, ncode, n, num)
         else:
-            n = compute_length(ncode, 2)  # fixme, 25
-           # print(code, n, num)
+            n = compute_length(ncode, 25)  # fixme, 25
+            # print(code, n, num)
 
         tot += num * n
 
     print(tot)
-
-    # 277554934879758 too high times=25
-    # 175396398527088 too low times=25
-    # 110880490505014 too low times=24
 
 def part2(data):
     pass
