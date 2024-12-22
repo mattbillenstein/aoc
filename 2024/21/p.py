@@ -16,10 +16,6 @@ def make_paths(cpt, npt, g):
     if cpt == npt:
         return ['A']
 
-    # this was trial/error from other ppl in the solutions thread - how can
-    # this be derived?
-    move_priority = '<^v>'
-
     dx = npt[0] - cpt[0]
     dy = npt[1] - cpt[1]
     cx = '>' if dx > 0 else '<'
@@ -39,9 +35,7 @@ def make_paths(cpt, npt, g):
         if valid:
             paths.append(path + 'A')
 
-    paths.sort(key=lambda x: [move_priority.index(_) for _ in x[:-1]])
-
-    return [paths[0]]
+    return paths
 
 def part(codes):
     # use small grids to generate paths
@@ -62,76 +56,28 @@ def part(codes):
                     continue
                 paths[(c1, c2)] = make_paths(pt1, pt2, g)
 
-    if DEBUG > 1:
-        for k, v in sorted(paths.items()):
-            print(k, v)
-        return
-
-    def generate(pos, code, ncode=''):
-        # from starting position and code, generate possible next codes
-        if not code:
-            yield ncode
-        else:
-            for path in paths[(pos, code[0])]:
-                for s in generate(code[0], code[1:], ncode + path):
-                    yield s
-
-    def split(code):
-        # split a code on 'A' and return list of parts
-        return [_ + 'A' for _ in code.split('A')[:-1]]
-
     @lru_cache(maxsize=None)
-    def next_code(code):
-        # given a code, generate the next code that will result in the shortest
-        # descendant codes...
-
-        # if we can split the code, do so and recurse
-        if 'A' in code[:-1]:
-            s = ''
-            for p in split(code):
-                s += next_code(p)
-            return s
-
-        # brute force find shortest code by inspecting several levels of
-        # descendant codes...
-        best = sys.maxsize
-        for s1 in generate('A', code):
-            if len(s1) < best:
-                best = len(s1)
-                s = s1
-        return s
-
-    @lru_cache(maxsize=None)
-    def compute_length(code, times):
-        if 'A' in code[:-1]:
-            return sum(compute_length(_, times) for _ in split(code))
-
-        if times:
-            return sum(compute_length(_, times-1) for _ in split(next_code(code)))
-        else:
+    def countem(code, times, prev='A'):
+        if times == 0:
             return len(code)
+
+        tot = 0
+        for c in code:
+            mn = sys.maxsize
+            for path in paths[(prev, c)]:
+                x = countem(path, times-1)
+                if x < mn:
+                    mn = x
+            tot += mn
+            prev = c
+
+        return tot
 
     tot1 = tot2 = 0
     for code in codes:
         num = int(code.lstrip('A0').rstrip('A'))
-
-        # compute numpad code
-        ncode = next_code(code)
-
-        if DEBUG:
-            print(code, ncode, len(ncode))
-            for i in range(2):
-                ncode = next_code(ncode)
-                print(code, ncode, len(ncode))
-            print()
-
-            n1 = len(ncode)
-            n2 = 0
-        else:
-            n1 = compute_length(ncode, 2)
-            n2 = compute_length(ncode, 25)
-            # print(code, n, num)
-
+        n1 = countem(code, 3)
+        n2 = countem(code, 26)
         tot1 += num * n1
         tot2 += num * n2
 

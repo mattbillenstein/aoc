@@ -254,6 +254,14 @@ class Grid:
                 if v:
                     yield (x, y), v
 
+    def iterc(self):
+        for pt in self:
+            yield pt, self.getc(pt)
+
+    def iteri(self):
+        for pt in self:
+            yield pt, self.get(pt)
+
     # transformations
     def flip_x(self):
         self.g.reverse()
