@@ -110,19 +110,19 @@ def part1(codes):
     for k, L in paths.items():
         if len(L) > 1:
             mn = min(len(next_code(next_code(_))) for _ in L)
-            print(k, L)
+            #print(k, L)
             for x in list(L):
                 nc = next_code(next_code(x))
                 if len(nc) != mn:
                     L.remove(x)
-                print('  ', x, nc, len(nc))
+                #print('  ', x, nc, len(nc))
 
-    pprint(dict(paths))
+    #pprint(dict(paths))
     #return
 
     @lru_cache(maxsize=None)
     def compute_length(code, times):
-        print(code, times)
+        #print(code, times)
         if 'A' in code[:-1]:
             return sum(compute_length(_, times) for _ in split(code))
 
@@ -148,8 +148,8 @@ def part1(codes):
             n = len(ncode)
             print(code, ncode, n, num)
         else:
-            n = compute_length(ncode, 25)
-            print(code, n, num)
+            n = compute_length(ncode, 2)  # fixme, 25
+           # print(code, n, num)
 
         tot += num * n
 
