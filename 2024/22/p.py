@@ -22,7 +22,7 @@ def part1(data):
 def part2(data):
     possibles = defaultdict(dict)
     for seller, num in enumerate(data):
-        L = []
+        p = 0
         price = num % 10
         for i in range(2000):
             num = ((num * 64) ^ num) % 16777216
@@ -30,14 +30,14 @@ def part2(data):
             num = ((num * 2048) ^ num) % 16777216
             newprice = num % 10
 
-            L.append(newprice - price)
+            delta = newprice - price
             price = newprice
 
+            # pack the delta prices into a 32-bit int, 1-byte per
+            p = ((p << 8) | (delta + 100)) & 0xffffffff
             if i >= 3:
-                p = tuple(L)
                 if seller not in possibles[p]:
                     possibles[p][seller] = price
-                L = L[1:]
 
     mx = 0
     mp = None
