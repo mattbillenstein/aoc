@@ -148,7 +148,11 @@ class Grid:
 
         return ng
 
-    def print(self):
+    def print(self, gohome=0.0):
+        if gohome > 0.0:
+            print('\033[H')
+            time.sleep(gohome)
+
         for y in self.ys:
             s = ''
             for x in self.xs:

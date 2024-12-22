@@ -74,11 +74,11 @@ def part(g, moves):
 
     for move in moves:
         if DEBUG > 1:
+            g.setc(pt, move)
+            g.print(0.005)
+            g.setc(pt, '.')
             print()
             print(pt, move)
-            g.setc(pt, move)
-            g.print()
-            g.setc(pt, '.')
 
         boxes, can_move = find_boxes(pt, move, g)
         if can_move:
