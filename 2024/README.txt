@@ -18,7 +18,7 @@
 18: BFS in grid with blockages dropping in
 19: Finding towel designs from list of patterns - recurse and memoize
 20: Finding shortcuts passing through walls N steps in a non-branching grid
-21:
+21: Hard problem! Recursive robot num/d-pad pressing
 22: Finding optimal window of numbers in many sequences of data
 23:
 24:

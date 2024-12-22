@@ -1,20 +1,11 @@
 #!/usr/bin/env pypy3
 
-import itertools
-import math
 import sys
-import time
-from collections import defaultdict
 from functools import lru_cache
-from pprint import pprint
 
 from grid import Grid
 
 DEBUG = sys.argv.count('-v')
-
-def debug(*args):
-    if DEBUG:
-        print(*args)
 
 def parse_input():
     lines = [_.strip('\r\n') for _ in sys.stdin]
@@ -71,6 +62,11 @@ def part(codes):
                     continue
                 paths[(c1, c2)] = make_paths(pt1, pt2, g)
 
+    if DEBUG > 1:
+        for k, v in sorted(paths.items()):
+            print(k, v)
+        return
+
     def generate(pos, code, ncode=''):
         # from starting position and code, generate possible next codes
         if not code:
@@ -83,9 +79,6 @@ def part(codes):
     def split(code):
         # split a code on 'A' and return list of parts
         return [_ + 'A' for _ in code.split('A')[:-1]]
-
-    #pprint(dict(paths))
-    #return
 
     @lru_cache(maxsize=None)
     def next_code(code):
@@ -103,10 +96,9 @@ def part(codes):
         # descendant codes...
         best = sys.maxsize
         for s1 in generate('A', code):
-            for s2 in generate('A', s1):
-                if len(s2) < best:
-                    best = len(s2)
-                    s = s1
+            if len(s1) < best:
+                best = len(s1)
+                s = s1
         return s
 
     @lru_cache(maxsize=None)
@@ -128,13 +120,13 @@ def part(codes):
 
         if DEBUG:
             print(code, ncode, len(ncode))
-
             for i in range(2):
                 ncode = next_code(ncode)
+                print(code, ncode, len(ncode))
+            print()
 
             n1 = len(ncode)
             n2 = 0
-            print(code, ncode, n1, num)
         else:
             n1 = compute_length(ncode, 2)
             n2 = compute_length(ncode, 25)
