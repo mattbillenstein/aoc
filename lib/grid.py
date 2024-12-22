@@ -233,6 +233,12 @@ class Grid:
             return npt
         return None
 
+    def stepc(self, pt, dir):
+        npt = self.step(pt, dir)
+        if not npt:
+            return None, None
+        return npt, self.getc(npt)
+
     # dict/set ish methods
     def __iter__(self):
         for y in self.ys:
@@ -437,6 +443,10 @@ class SparseGrid(Grid):
 
     def step(self, pt, dir):
         return step(pt, dir)
+
+    def stepc(self, pt, dir):
+        npt = self.step(pt, dir)
+        return npt, self.getc(npt)
 
     # dict/set ish methods
 # this was just iterating over the set points - I think iterating over the

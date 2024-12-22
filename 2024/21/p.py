@@ -22,8 +22,8 @@ def make_paths(cpt, npt, g):
     for path in list(paths):
         pt = cpt
         for dir in path:
-            pt = g.step(pt, dir)
-            if g.getc(pt) == '#':
+            pt, c = g.stepc(pt, dir)
+            if c == '#':
                 paths.remove(path)
                 break
 
