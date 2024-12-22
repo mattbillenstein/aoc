@@ -21,7 +21,7 @@ def part1(data):
 
 def part2(data):
     possibles = defaultdict(dict)
-    for num in data:
+    for seller, num in enumerate(data):
         L = []
         price = num % 10
         for i in range(2000):
@@ -35,8 +35,8 @@ def part2(data):
 
             if i >= 3:
                 p = tuple(L)
-                if i not in possibles[p]:
-                    possibles[p][i] = price
+                if seller not in possibles[p]:
+                    possibles[p][seller] = price
                 L = L[1:]
 
     mx = 0
