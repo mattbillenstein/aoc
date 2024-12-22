@@ -5,8 +5,6 @@ from functools import lru_cache
 
 from grid import Grid
 
-DEBUG = sys.argv.count('-v')
-
 def parse_input():
     lines = [_.strip('\r\n') for _ in sys.stdin]
     return (lines,)
@@ -33,12 +31,12 @@ def make_paths(cpt, npt, g):
 
 def part(codes):
     # use small grids to generate paths
-    dg = Grid(['#^A', '<v>'])
     ng = Grid(['789', '456', '123', '#0A'])
+    dg = Grid(['#^A', '<v>'])
 
     # generate paths between points on each grid
     paths = {}
-    for g in (dg, ng):
+    for g in (ng, dg):
         for pt1, c1 in g.iterc():
             if c1 != '#':
                 for pt2, c2 in g.iterc():
@@ -53,12 +51,7 @@ def part(codes):
         prev = 'A'
         tot = 0
         for c in code:
-            mn = sys.maxsize
-            for path in paths[(prev, c)]:
-                x = countem(path, times-1)
-                if x < mn:
-                    mn = x
-            tot += mn
+            tot += min(countem(_, times-1) for _ in paths[(prev, c)])
             prev = c
 
         return tot
@@ -66,10 +59,9 @@ def part(codes):
     tot1 = tot2 = 0
     for code in codes:
         num = int(code.lstrip('A0').rstrip('A'))
-        n1 = countem(code, 3)
-        n2 = countem(code, 26)
-        tot1 += num * n1
-        tot2 += num * n2
+        tot1 += num * countem(code, 3)
+        if '2' in sys.argv:
+            tot2 += num * countem(code, 26)
 
     if '1' in sys.argv:
         print(tot1)
