@@ -50,12 +50,10 @@ def find_paths(ckey, nkey, g):
     return paths
 
 def part1(codes):
-    sys.setrecursionlimit(10000)
-
     dg = Grid(['#^A', '<v>'])
     ng = Grid(['789', '456', '123', '#0A'])
 
-    paths = defaultdict(list)
+    paths = defaultdict(set)
     for g in (dg, ng):
         for pt1 in g:
             c1 = g.getc(pt1)
@@ -66,41 +64,106 @@ def part1(codes):
                 if c2 == '#':
                     continue
                 for path in find_paths(c1, c2, g):
-                    paths[(c1, c2)].append(path)
+                    paths[(c1, c2)].add(path + 'A')
 
-    maxlevel = 3
+    #pprint(dict(paths))
 
-    def generate(code, ncode='', pos='A', level=1):
-#        print('gen', repr(code), repr(ncode), pos, level)
+    def generate(pos, code, ncode=''):
+        #print('gen', repr(code), repr(ncode), pos, level)
         if not code:
-            if level < maxlevel:
-                for y in generate(ncode, level=level+1):
-                    yield y
-            else:
-                yield ncode
+            yield ncode
         else:
             for path in paths[(pos, code[0])]:
-                for x in generate(code[1:], ncode + path + 'A', pos=code[0], level=level):
-                    yield x
+                for s in generate(code[0], code[1:], ncode + path):
+                    yield s
 
+    def generate_list(pos, code, ncode=''):
+        return list(generate(pos, code, ncode=''))
+
+    def find_shortest(code):
+        best = sys.maxsize
+        L = []
+        for s in generate('A', code):
+            if len(s) <= best:
+                best = len(s)
+                yield s
+
+    def take_shortest(codes):
+        best = ''
+        for code in codes:
+            for nc in find_shortest(code):
+                if not best or len(nc) < len(best):
+                    best = code
+        return best
+
+    def find_shortest_length(code, times=1):
+        if times > 1:
+            tot = 0
+            parts = [_ + 'A' for _ in code.split('A')]
+            for p in parts:
+                nc = take_shortest(find_shortest(p))
+                print(' '*times, 'fsl p', p, nc, times)
+                tot += find_shortest_length(nc, times-1)
+        else:
+            nc = take_shortest(find_shortest(code))
+            print(' '*times, 'fsl code', code, nc, len(nc), times)
+            tot = len(nc)
+        print('fsl end', code, times, tot)
+        print()
+        return tot
+
+    # for each code, take the shortest on the npad
     tot = 0
     for code in codes:
-        s = ''
-        last = 'A'
-        for c in code:
-            best = ''
-            for x in generate(c, pos=last):
-                if not best or len(x) < len(best):
-                    best = x
-            last = c
-            print(c, best)
-            s += best
+        # take npad code
+        if 1:
+            ncode = take_shortest(find_shortest(code))
+            print(code, ncode, len(ncode))
+            if code == '029A':
+                assert ncode == '<A^A>^^AvvvA', ncode
 
-        print(s)
+            code = ncode
+            ncode = take_shortest(find_shortest(code))
+            print(code, ncode, len(ncode))
+            if code == '029A':
+                assert ncode == 'v<<A>>^A<A>AvA<^AA>A<vAAA>^A', ncode
+
+            code = ncode
+            ncode = take_shortest(find_shortest(code))
+            print(code, ncode, len(ncode))
+            if code == '029A':
+                assert ncode == '<vA<AA>>^AvAA<^A>A<v<A>>^AvA^A<vA>^A<v<A>^A>AAvA^A<v<A>A>^AAAvA<^A>A', ncode
+            print()
+
+            continue
+
+        # find npad codes, take one that generates shortest dpad code
+        best = take_shortest(find_shortest(code))
+        print('best npad:', best)
+
+        n = find_shortest_length(best, times=2)
+
+        print(best, len(best), n)
+
+        duh
+
+        if code == '029A':
+            assert n == 68, (code, dcode, n)
+        elif code == '980A':
+            assert n == 60, (code, dcode, n)
+        elif code == '179A':
+            assert n == 68, (code, dcode, n)
+        elif code == '456A':
+            assert n == 64, (code, dcode, n)
+        elif code == '379A':
+            assert n == 64, (code, dcode, n)
+
+
         num = int(''.join(_ for _ in code if _ != 'A'))
-        print(code, s, len(s), num)
-        num *= len(s)
+        print('final', code, dcode, n, num)
+        num *= n
         tot += num
+
 
     print(tot)
 
