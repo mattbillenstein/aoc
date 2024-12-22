@@ -20,12 +20,9 @@ def part1(data):
     print(tot)
 
 def part2(data):
-    start = time.time()
-    possibles = []
+    possibles = defaultdict(dict)
     for num in data:
         L = []
-        poss = {}
-        possibles.append(poss)
         price = num % 10
         for i in range(2000):
             num = ((num * 64) ^ num) % 16777216
@@ -35,28 +32,22 @@ def part2(data):
 
             L.append(newprice - price)
             price = newprice
+
             if i >= 3:
                 p = tuple(L)
-                if p not in poss:
-                    poss[p] = price
-                L[:] = L[1:]
+                if i not in possibles[p]:
+                    possibles[p][i] = price
+                L = L[1:]
 
-    #print(time.time() - start)
-    s = set()
-    for poss in possibles:
-        s.update(poss)
-
-    #print(time.time() - start)
     mx = 0
     mp = None
-    for p in s:
-        x = sum(_.get(p, 0) for _ in possibles)
+    for p, d in possibles.items():
+        x = sum(d.values())
         if x > mx:
             mx = x
             mp = p
 
-    #print(time.time() - start)
-    print(mx) #, mp)
+    print(mx)
 
 
 def main():
