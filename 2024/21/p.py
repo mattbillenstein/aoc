@@ -16,45 +16,34 @@ def make_paths(cpt, npt, g):
     if cpt == npt:
         return ['A']
 
-    dx = npt[0] - cpt[0]
-    dy = npt[1] - cpt[1]
-    cx = '>' if dx > 0 else '<'
-    cy = 'v' if dy > 0 else '^'
-    dx = abs(dx)
-    dy = abs(dy)
+    nx, ny = (abs(npt[0] - cpt[0]), abs(npt[1] - cpt[1]))
+    cx = '>' if npt[0] > cpt[0] else '<'
+    cy = 'v' if npt[1] > cpt[1] else '^'
 
-    paths = []
-    for path in set([cx * dx + cy * dy, cy * dy + cx * dx]):
-        valid = True
+    paths = set([cx * nx + cy * ny, cy * ny + cx * nx])
+    for path in list(paths):
         pt = cpt
         for dir in path:
             pt = g.step(pt, dir)
             if g.getc(pt) == '#':
-                valid = False
+                paths.remove(path)
                 break
-        if valid:
-            paths.append(path + 'A')
 
-    return paths
+    return [_ + 'A' for _ in paths]
 
 def part(codes):
     # use small grids to generate paths
     dg = Grid(['#^A', '<v>'])
     ng = Grid(['789', '456', '123', '#0A'])
 
-    # for each pair of points on each grid, generate the shortest path we can
-    # take between them...
+    # generate paths between points on each grid
     paths = {}
     for g in (dg, ng):
-        for pt1 in g:
-            c1 = g.getc(pt1)
-            if c1 == '#':
-                continue
-            for pt2 in g:
-                c2 = g.getc(pt2)
-                if c2 == '#':
-                    continue
-                paths[(c1, c2)] = make_paths(pt1, pt2, g)
+        for pt1, c1 in g.iterc():
+            if c1 != '#':
+                for pt2, c2 in g.iterc():
+                    if c2 != '#':
+                        paths[(c1, c2)] = make_paths(pt1, pt2, g)
 
     @lru_cache(maxsize=None)
     def countem(code, times, prev='A'):
