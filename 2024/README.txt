@@ -20,6 +20,6 @@
 20: Finding shortcuts passing through walls N steps in a non-branching grid
 21: Hard problem! Recursive robot num/d-pad pressing
 22: Finding optimal window of numbers in many sequences of data
-23:
+23: Set operations on a network specified as 2-tuple connected nodes
 24:
 25:
