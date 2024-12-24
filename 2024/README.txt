@@ -21,5 +21,5 @@
 21: Hard problem! Recursive robot num/d-pad pressing
 22: Finding optimal window of numbers in many sequences of data
 23: Set operations on a network specified as 2-tuple connected nodes
-24:
+24: AND/OR/XOR circuit propagation and in part 2 fixing full adder implementation
 25:
