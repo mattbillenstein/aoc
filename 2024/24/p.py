@@ -1,8 +1,11 @@
 #!/usr/bin/env pypy3
 
 import sys
+from collections import namedtuple
 
 DEBUG = sys.argv.count('-v')
+
+Gate = namedtuple('Gate', ['type', 'a', 'b', 'q'])
 
 def parse_input():
     lines = [_.strip('\r\n') for _ in sys.stdin]
@@ -13,10 +16,10 @@ def parse_input():
             inp, val = line.replace(':', '').split()
             inputs[inp] = int(val)
         elif '->' in line:
-            w1, gate, w2, _, out = line.split()
+            w1, type, w2, _, out = line.split()
             if w1[0] == 'y' and w2[0] == 'x':
                 w1, w2 = w2, w1
-            gates[out] = (gate, w1, w2)
+            gates[out] = Gate(type, a=w1, b=w2, q=out)
     
     return (inputs, gates)
 
@@ -28,16 +31,15 @@ def part1(inputs, gates):
 
     # while there are any unknowns, propagate ins to outs
     while any(_ is None for _ in wires.values()):
-        for out, tup in gates.items():
-            type, in1, in2 = tup
-            if wires[out] is None:
-                if wires[in1] is not None and wires[in2] is not None:
-                    if type == 'AND':
-                        wires[out] = (wires[in1] & wires[in2]) & 1
-                    elif type == 'OR':
-                        wires[out] = (wires[in1] | wires[in2]) & 1
-                    elif type == 'XOR':
-                        wires[out] = (wires[in1] ^ wires[in2]) & 1
+        for g in gates.values():
+            if wires[g.q] is None:
+                if wires[g.a] is not None and wires[g.b] is not None:
+                    if g.type == 'AND':
+                        wires[g.q] = (wires[g.a] & wires[g.b]) & 1
+                    elif g.type == 'OR':
+                        wires[g.q] = (wires[g.a] | wires[g.b]) & 1
+                    elif g.type == 'XOR':
+                        wires[g.q] = (wires[g.a] ^ wires[g.b]) & 1
 
     # compute output value, shift each bit into an int...
     x = 0
@@ -60,25 +62,26 @@ def part2(inputs, gates):
 
     bad = []
 
-    zs = sorted([_ for _ in gates if _[0] == 'z'])
+    zs = sorted([_.q for _ in gates.values() if _.q[0] == 'z'])
     Z0, ZN = zs[0], zs[-1]
 
+    z0 = gates[Z0]
+    zn = gates[ZN]
+
     # Special case, Z0 = X0 XOR Y0
-    type, in1, in2 = gates[Z0]
-    if type != 'XOR':
+    if z0.type != 'XOR':
         bad.append((Z0, f'{Z0} not XOR'))
     else:
-        assert in1 == Z0.replace('z', 'x'), in1
-        assert in2 == Z0.replace('z', 'y'), in2
+        assert z0.a == Z0.replace('z', 'x'), in1
+        assert z0.b == Z0.replace('z', 'y'), in2
 
     # Special case, ZN is just carry-out N-1
-    type, in1, in2 = gates[ZN]
-    if type != 'OR':
+    if zn.type != 'OR':
         bad.append((ZN, f'{ZN} not OR'))
     else:
         # just check they're and
-        assert gates[in1][0] == 'AND'
-        assert gates[in2][0] == 'AND'
+        assert gates[zn.a].type == 'AND'
+        assert gates[zn.b].type == 'AND'
 
     # otherwise, check each Zi
     for i in range(1, len(zs)-1):
@@ -88,44 +91,48 @@ def part2(inputs, gates):
         z = f'z{i:02d}'
 
         # check output direct
-        type, in1, in2 = gates[z]
-        if type != 'XOR':
+        zi = gates[z]
+        if zi.type != 'XOR':
             bad.append((z, f'{z} not XOR {type}'))
             continue
 
-        # inputs otherwise
-        g1 = gates[in1]
-        g2 = gates[in2]
+        # Grab Zi inputs
+        g1 = gates[zi.a]
+        g2 = gates[zi.b]
 
-        # make g1 Zi if it's Ci or g2 is Zi - either could be wrong...
-        if g1[0] == 'OR' or g2[0] == 'XOR':
-            in1, in2 = in2, in1
+        # Swap gates making g1 Zi and g2 Ci - either could actually be wrong
+        # which is why this check is written this way...
+        if g1.type == 'OR' or g2.type == 'XOR':
             g1, g2 = g2, g1
 
-        if g1[0] != 'XOR':
-            bad.append((in1, f'{z} in1 not XOR'))
+        # Zi = Xi XOR Yi
+        if g1.type != 'XOR':
+            bad.append((g1.q, f'{z} in1 not XOR'))
         else:
-            if g1[1] != x:
-                bad.append((g1[1], f'{z} in1 XOR in1 not {x}'))
-            if g1[2] != y:
-                bad.append((g1[2], f'{z} in2 XOR in2 not {y}'))
+            # Xi
+            if g1.a != x:
+                bad.append((g1.q, f'{z} in1 XOR in1 not {x}'))
+            # Yi
+            if g1.b != y:
+                bad.append((g1.q, f'{z} in2 XOR in2 not {y}'))
 
-        # check Ci
-        if g2[0] == 'AND' and i == 1:
-            # c0 is just X AND Y
+        # Ci = (Xi AND Yi) OR ((Xi XOR Yi) AND Ci-1)
+        if g2.type == 'AND' and i == 1:
+            # C0 is just X AND Y - no carry-in
             pass
-        elif g2[0] != 'OR':
-            bad.append((in2, f'{c} not OR'))
+        elif g2.type != 'OR':
+            # Ci = _ OR _
+            bad.append((g2.q, f'{c} not OR'))
         else:
-            in1p = gates[in2][1]
-            g1p = gates[in1p]
-            if g1p[0] != 'AND':
-                bad.append((in1p, f'{c} in1 not AND {g1p[0]}'))
+            # Just checking both ANDs here, seems to be enough without checking
+            # inputs as well...
+            g2a = gates[g2.a]
+            if g2a.type != 'AND':
+                bad.append((g2.a, f'{c} in1 not AND {g2a.type}'))
 
-            in2p = gates[in2][2]
-            g2p = gates[in2p]
-            if g2p[0] != 'AND':
-                bad.append((in2p, f'{c} in2 not AND {g2p[0]}'))
+            g2b = gates[g2.b]
+            if g2b.type != 'AND':
+                bad.append((g2.b, f'{c} in2 not AND {g2b.type}'))
 
     if DEBUG:
         for item in bad:
