@@ -17,3 +17,9 @@ ln -s ../../../aoc-input/$YEAR/$DAY/input.txt .
 if [ ! -e p.py ]; then
   cp ../../p.py .
 fi
+
+pushd ../../../aoc-input
+git add $YEAR/$DAY
+git commit -am "$YEAR Day $DAY"
+git pushme
+popd
