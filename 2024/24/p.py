@@ -162,23 +162,17 @@ def part2(inputs, gates):
         print(f"{x} + {y} = {z}")
 
     for tup in permutations(bad):
-        swaps = []
-        for i in range(0, len(tup), 2):
-            swaps.append((tup[i], tup[i+1]))
+        swaps = list(zip(tup[::2], tup[1::2]))
 
         gs = dict(gates)
         for a, b in swaps:
-            ga = gs[a]
-            gb = gs[b]
-
-            gs[a] = gb._replace(q=a)
-            gs[b] = ga._replace(q=b)
+            gs[a], gs[b] = gs[b]._replace(q=a), gs[a]._replace(q=b)
 
         zz = solve(inputs, gs)
 
         if zz == z:
             if DEBUG:
-                print("Swaps = ", swaps)
+                print("Swaps =", swaps)
             break
 
     assert zz == z
