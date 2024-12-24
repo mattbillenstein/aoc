@@ -112,7 +112,7 @@ def part2(inputs, gates):
 
         # check Ci
         if g2[0] == 'AND' and i == 1:
-            # c1 is just X AND Y
+            # c0 is just X AND Y
             pass
         elif g2[0] != 'OR':
             bad.append((in2, f'{c} not OR'))
