@@ -2,6 +2,7 @@
 
 import sys
 from collections import namedtuple
+from itertools import permutations
 
 DEBUG = sys.argv.count('-v')
 
@@ -23,7 +24,7 @@ def parse_input():
     
     return (inputs, gates)
 
-def part1(inputs, gates):
+def solve(inputs, gates):
     # collect all wires and assign known value
     wires = {_: None for _ in gates}
     for inp, v in inputs.items():
@@ -49,7 +50,10 @@ def part1(inputs, gates):
             break
         x |= (wires[name] << i)
         
-    print(x)
+    return x
+
+def part1(inputs, gates):
+    print(solve(inputs, gates))
 
 def part2(inputs, gates):
     # Circuit just implements a full adder:
@@ -93,7 +97,7 @@ def part2(inputs, gates):
         # check output direct
         zi = gates[z]
         if zi.type != 'XOR':
-            bad.append((z, f'{z} not XOR {type}'))
+            bad.append((z, f'{z} not XOR {zi.type}'))
             continue
 
         # Grab Zi inputs
@@ -139,8 +143,46 @@ def part2(inputs, gates):
             print(item)
         print(len(bad))
 
-    b = sorted(set(_[0] for _ in bad))
-    print(','.join(b))
+    bad = [_[0] for _ in bad]
+    print(','.join(sorted(bad)))
+
+    # for fun, try all swaps until our input solves
+    x = y = 0
+    for n, v in inputs.items():
+        if v:
+            i = int(n[1:])
+            if n[0] == 'x':
+                x |= v << i
+            else:
+                y |= v << i
+
+    z = x + y
+
+    if DEBUG:
+        print(f"{x} + {y} = {z}")
+
+    for tup in permutations(bad):
+        swaps = []
+        for i in range(0, len(tup), 2):
+            swaps.append((tup[i], tup[i+1]))
+
+        gs = dict(gates)
+        for a, b in swaps:
+            ga = gs[a]
+            gb = gs[b]
+
+            gs[a] = gb._replace(q=a)
+            gs[b] = ga._replace(q=b)
+
+        zz = solve(inputs, gs)
+
+        if zz == z:
+            if DEBUG:
+                print("Swaps = ", swaps)
+            break
+
+    assert zz == z
+
 
 def main():
     data = parse_input()
