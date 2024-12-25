@@ -2,7 +2,6 @@
 
 import sys
 from collections import namedtuple
-from itertools import permutations
 
 DEBUG = sys.argv.count('-v')
 
@@ -31,7 +30,12 @@ def solve(inputs, gates):
         wires[inp] = v
 
     # while there are any unknowns, propagate ins to outs
+    i = 0
     while any(_ is None for _ in wires.values()):
+        i += 1
+        if i > 100:
+            return None
+
         for g in gates.values():
             if wires[g.q] is None:
                 if wires[g.a] is not None and wires[g.b] is not None:
@@ -146,7 +150,13 @@ def part2(inputs, gates):
     bad = [_[0] for _ in bad]
     print(','.join(sorted(bad)))
 
-    # for fun, try all swaps until our input solves
+    # Verify - I had code here to sweep different swaps, but since we find bad
+    # signals in ascending Zi order, we already effectively have them - this is
+    # not a generic solution of course.
+    #
+    # Also, when sweeping, the inputs X and Y are not good enough to find the
+    # one unique solution - would need to sweep some other input values as
+    # well...
     x = y = 0
     for n, v in inputs.items():
         if v:
@@ -158,25 +168,13 @@ def part2(inputs, gates):
 
     z = x + y
 
-    if DEBUG:
-        print(f"{x} + {y} = {z}")
+    swaps = zip(bad[::2], bad[1::2])
+    gs = dict(gates)
+    for a, b in swaps:
+        gs[a], gs[b] = gs[b]._replace(q=a), gs[a]._replace(q=b)
 
-    for tup in permutations(bad):
-        swaps = list(zip(tup[::2], tup[1::2]))
-
-        gs = dict(gates)
-        for a, b in swaps:
-            gs[a], gs[b] = gs[b]._replace(q=a), gs[a]._replace(q=b)
-
-        zz = solve(inputs, gs)
-
-        if zz == z:
-            if DEBUG:
-                print("Swaps =", swaps)
-            break
-
+    zz = solve(inputs, gs)
     assert zz == z
-
 
 def main():
     data = parse_input()
