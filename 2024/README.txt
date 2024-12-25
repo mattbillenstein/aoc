@@ -22,4 +22,4 @@
 22: Finding optimal window of numbers in many sequences of data
 23: Graph specified as bi-directional 2 connected nodes, compute 3-cliques, then max k-cliques 
 24: AND/OR/XOR circuit propagation and in part 2 fixing full adder implementation
-25:
+25: Key/lock fititng puzzle where key cuts are specfied like grids.
