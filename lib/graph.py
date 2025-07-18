@@ -11,6 +11,9 @@
 # dijkstra
 # astar?
 
+# Good guide over these algorithms
+# https://www.redblobgames.com/pathfinding/a-star/introduction.html
+
 import itertools
 import sys
 import time
