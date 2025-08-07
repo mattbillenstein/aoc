@@ -35,7 +35,7 @@ def replacements(repls, molecule):
 
             idx += 1
 
-    return s
+    return list(s)
 
 def part1(repls, molecule):
     s = replacements(repls, molecule)
@@ -64,8 +64,12 @@ class State:
 
     def next(self):
         # next states
-        # greedy, take just a couple of the shortest substitutions...
-        ms = sorted(replacements(self.repls, self.molecule), key=lambda x: (len(x), x), reverse=True)
+        ms = replacements(self.repls, self.molecule)
+
+        # sorting longest here seems to make quite a difference - perhaps
+        # pruning earlier?
+        ms.sort(key=lambda x: (len(x), x), reverse=True)
+
         for m in ms:
             yield self.__class__(m, self.steps + 1, self.repls)
 
@@ -79,9 +83,6 @@ def part2(repls, molecule):
     # can just be computed as a reduction, but a greedy dfs works as well...
 
     rrepls = [(b, a) for a, b in repls]
-
-    # greedy, take longest substitutions first
-    rrepls.sort(key=lambda x: (len(x[0]), x[0]), reverse=True)
 
     state = State(molecule, 0, rrepls)
     best = dfs(state)
