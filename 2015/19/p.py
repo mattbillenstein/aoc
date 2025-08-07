@@ -65,9 +65,8 @@ class State:
     def next(self):
         # next states
         # greedy, take just a couple of the shortest substitutions...
-        ms = list(replacements(self.repls, self.molecule))
-        ms.sort(key=lambda x: (len(x), x))
-        for m in ms[:2]:
+        ms = sorted(replacements(self.repls, self.molecule), key=lambda x: (len(x), x), reverse=True)
+        for m in ms:
             yield self.__class__(m, self.steps + 1, self.repls)
 
     def __repr__(self):
