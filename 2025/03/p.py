@@ -1,12 +1,6 @@
 #!/usr/bin/env pypy3
 
-import itertools
-import math
 import sys
-import time
-from collections import defaultdict
-from functools import lru_cache
-from pprint import pprint
 
 DEBUG = sys.argv.count('-v')
 
@@ -19,30 +13,39 @@ def parse_input():
     return (lines,)
 
 def part1(data):
+    # Find biggest digit except last, then biggest digit after that digit...
     L = []
     for bank in data:
-        v = 0
-        for i in range(len(bank)):
-            for j in range(i+1, len(bank)):
-                if j > i:
-                    x = int(bank[i] + bank[j])
-                    if x > v:
-                        v = x
-        L.append(v)
+        a = max(bank[:-1])
+        idx = bank.find(a)
+        b = max(bank[idx+1:])
+        s = a + b
+
+        debug(bank, s)
+        L.append(int(s))
+
     print(sum(L))
 
 def part2(data):
+    # take the max digit in the part of the bank after our last batt turned on
+    # and the number of batts we need to make 12 digits...
     L = []
     for bank in data:
+        # Negate the index here so we take the first max digit L to R order for
+        # equal digits
+        chars = [(c, -i) for i, c in enumerate(bank)]
+
         s = ''
-        rest = bank
-        for i in range(11, 0, -1):
-            digit = max(rest[:-i])
-            s += digit
-            idx = rest[:-i].find(digit)
-            rest = rest[idx+1:]
-        s += max(rest)
+        i, j = 0, len(chars) - 11
+        for _ in range(12):
+            c, idx = max(chars[i:j])
+            s += c
+            i = -idx + 1  # undo negation
+            j += 1
+
+        debug(bank, s)
         L.append(int(s))
+
     print(sum(L))
 
 def main():
