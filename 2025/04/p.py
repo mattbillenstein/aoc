@@ -12,7 +12,8 @@ def remove(g):
     L = []
     for pt in g:
         if g.getc(pt) == '@':
-            if sum(1 if g.getc(_) == '@' else 0 for _ in g.neighbors8(pt)) < 4:
+            neighbors = [g.getc(_) for _ in g.neighbors8(pt)]
+            if neighbors.count('@') < 4:
                 L.append(pt)
     
     for pt in L:
