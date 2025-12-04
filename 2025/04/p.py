@@ -11,12 +11,9 @@ def parse_input():
 def remove(g):
     L = []
     for pt in g:
-        if g.getc(pt) != '@':
-            continue
-
-        x = sum(1 if g.getc(_) == '@' else 0 for _ in g.neighbors8(pt))
-        if x < 4:
-            L.append(pt)
+        if g.getc(pt) == '@':
+            if sum(1 if g.getc(_) == '@' else 0 for _ in g.neighbors8(pt)) < 4:
+                L.append(pt)
     
     for pt in L:
         g.setc(pt, '.')
@@ -24,25 +21,20 @@ def remove(g):
     return len(L)
 
 def part1(g):
-    g = g.copy()
     print(remove(g))
 
 def part2(g):
-    g = g.copy()
     tot = 0
-    while 1:
-        x = remove(g)
-        if not x:
-            break
+    while x := remove(g):
         tot += x
     print(tot)
 
 def main():
     g = parse_input()
     if '1' in sys.argv:
-        part1(g)
+        part1(g.copy())
     if '2' in sys.argv:
-        part2(g)
+        part2(g.copy())
 
 if __name__ == '__main__':
     main()
