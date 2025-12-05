@@ -26,33 +26,25 @@ def part1(fresh, ingredients):
     print(tot)
 
 def part2(fresh, _):
-    # unique and sort
-    fresh = sorted(set(fresh))
+    # sort, take a copy
+    fresh = sorted(fresh)
 
-    found = True
-    while found:
-        found = False
-        for i in range(len(fresh)):
-            for j in range(len(fresh)):
-                if i == j:
-                    continue
-
-                a1, a2 = fresh[i]
-                b1, b2 = fresh[j]
-
-                # a and b overlap, merge onto a and remove b
-                if b1 <= a1 <= b2 or b1 <= a2 <= b2 or a1 <= b1 <= a2 or a1 <= b2 <= a2:
-                    fresh[i] = (min(a1, b1), max(a2, b2))
-                    fresh.pop(j)
-                    found = True
-                    break
-
-            if found:
-                break
+    # iterate the sorted list merging any following overlapping range onto the
+    # i-th one and marking the j-th removed
+    for i in range(len(fresh)):
+        if not fresh[i]:
+            continue
+        a1, a2 = fresh[i]
+        for j in range(i + 1, len(fresh)):
+            b1, b2 = fresh[j]
+            if b1 <= a1 <= b2 or b1 <= a2 <= b2 or a1 <= b1 <= a2 or a1 <= b2 <= a2:
+                fresh[i] = (a1, a2) = (min(a1, b1), max(a2, b2))
+                fresh[j] = None
 
     tot = 0
-    for a, b in fresh:
-        tot += b - a + 1
+    for tup in fresh:
+        if tup:
+            tot += tup[1] - tup[0] + 1
     print(tot)
 
 def main():
