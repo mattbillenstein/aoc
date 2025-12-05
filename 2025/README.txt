@@ -2,3 +2,4 @@
 02: Finding numbers completely made of repeating substrings of digits
 03: Find maximum number created by selecting from a string of numbers in order
 04: Simple iterative grid update/count problem
+05: Merge overlapping ranges and count
