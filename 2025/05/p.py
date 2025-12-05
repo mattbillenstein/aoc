@@ -1,18 +1,6 @@
 #!/usr/bin/env pypy3
 
-import itertools
-import math
 import sys
-import time
-from collections import defaultdict
-from functools import lru_cache
-from pprint import pprint
-
-DEBUG = sys.argv.count('-v')
-
-def debug(*args):
-    if DEBUG:
-        print(*args)
 
 def parse_input():
     lines = [_.strip('\r\n') for _ in sys.stdin]
@@ -45,15 +33,12 @@ def part2(fresh, _):
     while found:
         found = False
         for i in range(len(fresh)):
-            a = fresh[i]
             for j in range(len(fresh)):
                 if i == j:
                     continue
 
-                b = fresh[j]
-
-                a1, a2 = a
-                b1, b2 = b
+                a1, a2 = fresh[i]
+                b1, b2 = fresh[j]
 
                 # a and b overlap, merge onto a and remove b
                 if b1 <= a1 <= b2 or b1 <= a2 <= b2 or a1 <= b1 <= a2 or a1 <= b2 <= a2:
