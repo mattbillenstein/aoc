@@ -2,6 +2,8 @@
 
 import sys
 
+from algo import merge_ranges
+
 def parse_input():
     lines = [_.strip('\r\n') for _ in sys.stdin]
 
@@ -47,12 +49,17 @@ def part2(fresh, _):
             tot += tup[1] - tup[0] + 1
     print(tot)
 
+def part2a(fresh, _):
+    print(sum(b - a + 1 for a, b in merge_ranges(fresh)) )
+
 def main():
     data = parse_input()
     if '1' in sys.argv:
         part1(*data)
     if '2' in sys.argv:
         part2(*data)
+    if '2a' in sys.argv:
+        part2a(*data)
 
 if __name__ == '__main__':
     main()

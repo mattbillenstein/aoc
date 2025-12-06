@@ -149,3 +149,21 @@ def cramers_rule_3(A, B):
     z = Dz / D
 
     return (x, y, z)
+
+def merge_ranges(ranges):
+    # merge a list of 2-tuples representing ranges
+    ranges = sorted(ranges)
+    last = None
+    a1, a2 = ranges[0]
+    assert a1 <= a2
+    for b1, b2 in ranges[1:]:
+        assert b1 <= b2
+        if b1 <= a1 <= b2 or b1 <= a2 <= b2 or a1 <= b1 <= a2 or a1 <= b2 <= a2:
+            a1, a2 = min(a1, b1), max(a2, b2)
+        else:
+            last = (a1, a2)
+            yield last
+            a1, a2 = b1, b2
+
+    if (a1, a2) != last:
+        yield (a1, a2)
