@@ -3,3 +3,4 @@
 03: Find maximum number created by selecting from a string of numbers in order
 04: Simple iterative grid update/count problem
 05: Merge overlapping ranges and count
+06: Parsing numbers in columns of text, simple math
