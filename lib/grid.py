@@ -89,6 +89,8 @@ def step(pt, dir):
 
 class Grid:
     def __init__(self, items, chars={'.': 0, '#': 1}, gfx=None):
+        if isinstance(chars, str):
+            chars = {_: ord(_) for _ in chars}
         self.chars = chars
         self.values = {v: k for k, v in chars.items()}
         self.gfx = gfx
