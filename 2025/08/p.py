@@ -63,10 +63,9 @@ def part(boxes):
                 return
 
         # part 2, every box in a single circuit, take product of X of b1, b2
-        if len(circuits) == len(boxes):
-            if len(set(circuits.values())) == 1:
-                print(b1[0] * b2[0])
-                return
+        if len(circuits) == len(boxes) and len(set(circuits.values())) == 1:
+            print(b1[0] * b2[0])
+            return
 
 def main():
     data = parse_input()
