@@ -11,6 +11,9 @@ def parse_input():
 def normalize(a, b):
     return (min(a[0], b[0]), min(a[1], b[1])), (max(a[0], b[0]), max(a[1], b[1]))
 
+def contains(box, pt):
+    return box[0][0] < pt[0] < box[1][0] and box[0][1] < pt[1] < box[1][1]
+
 def part1(tiles):
     maxarea = 0
     for a, b in itertools.combinations(tiles, 2):
@@ -20,12 +23,10 @@ def part1(tiles):
             maxarea = area
     print(maxarea)
 
-def contains(box, pt):
-    return box[0][0] < pt[0] < box[1][0] and box[0][1] < pt[1] < box[1][1]
-
 def part2(tiles):
     maxarea = 0
 
+    # collect all points on any edge
     edge = set()
     last = tiles[-1]
     for t in tiles:
@@ -39,6 +40,8 @@ def part2(tiles):
         a, b = normalize(a, b)
         area = (b[0] - a[0] + 1) * (b[1] - a[1] + 1)
         box = [a, b]
+        # in order of speed, check area, then corners inside the box, then any
+        # edge point inside the box
         if area > maxarea and not any(contains(box, _) for _ in tiles) and not any(contains(box, _) for _ in edge):
             maxarea = area
 
