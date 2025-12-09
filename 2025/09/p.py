@@ -9,32 +9,44 @@ def parse_input():
     return (tiles,)
 
 def normalize(a, b):
+    # normalize box/line so coords are sorted
     return (min(a[0], b[0]), min(a[1], b[1])), (max(a[0], b[0]), max(a[1], b[1]))
 
 def contains(box, pt):
+    # box contains point (point is not on boundary)
     return box[0][0] < pt[0] < box[1][0] and box[0][1] < pt[1] < box[1][1]
 
 def overlaps(box, line):
-    # either end in box, or line span box horizontally, or line span box vertically
+    # line overlaps box interior - either end in box, or line spans box
+    # horizontally / vertically
+    #
+    # subtle detail, the spanning case the end can be on the boundary as long
+    # as points on the line are in the interior...
     return contains(box, line[0]) or contains(box, line[1]) \
         or (line[0][1] == line[1][1] and line[0][0] <= box[0][0] <= box[1][0] <= line[1][0] and box[0][1] < line[0][1] < box[1][1]) \
         or (line[0][0] == line[1][0] and line[0][1] <= box[0][1] <= box[1][1] <= line[1][1] and box[0][0] < line[0][0] < box[1][0])
 
 def test():
-    # contains
+    # contains end
     assert overlaps([(0, 0), (10, 10)], [(1, 1), (20, 1)])
     assert overlaps([(0, 0), (10, 10)], [(1, 1), (1, 20)])
 
-    # spans - ends can lie on boundary
+    # spans
     assert overlaps([(0, 0), (10, 10)], [(-1, 1), (20, 1)])
     assert overlaps([(0, 0), (10, 10)], [(1, -1), (1, 20)])
+    # spans, ends can lie on boundary
     assert overlaps([(0, 0), (10, 10)], [(0, 1), (20, 1)])
     assert overlaps([(0, 0), (10, 10)], [(1, 0), (1, 20)])
 
+    # Clearly not overlapping cases
     assert not overlaps([(0, 0), (10, 10)], [(11, 20), (20, 20)])
     assert not overlaps([(0, 0), (10, 10)], [(20, 11), (20, 20)])
     assert not overlaps([(0, 0), (10, 10)], [(-1, 20), (20, 20)])
     assert not overlaps([(0, 0), (10, 10)], [(20, -1), (20, 20)])
+
+    # line on boundary
+    assert not overlaps([(0, 0), (10, 10)], [(-1, 10), (20, 10)])
+    assert not overlaps([(0, 0), (10, 10)], [(10, -1), (10, 20)])
 
 def part1(tiles):
     maxarea = 0
