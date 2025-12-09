@@ -14,6 +14,28 @@ def normalize(a, b):
 def contains(box, pt):
     return box[0][0] < pt[0] < box[1][0] and box[0][1] < pt[1] < box[1][1]
 
+def overlaps(box, line):
+    # either end in box, or line span box horizontally, or line span box vertically
+    return contains(box, line[0]) or contains(box, line[1]) \
+        or (line[0][1] == line[1][1] and line[0][0] <= box[0][0] <= box[1][0] <= line[1][0] and box[0][1] < line[0][1] < box[1][1]) \
+        or (line[0][0] == line[1][0] and line[0][1] <= box[0][1] <= box[1][1] <= line[1][1] and box[0][0] < line[0][0] < box[1][0])
+
+def test():
+    # contains
+    assert overlaps([(0, 0), (10, 10)], [(1, 1), (20, 1)])
+    assert overlaps([(0, 0), (10, 10)], [(1, 1), (1, 20)])
+
+    # spans - ends can lie on boundary
+    assert overlaps([(0, 0), (10, 10)], [(-1, 1), (20, 1)])
+    assert overlaps([(0, 0), (10, 10)], [(1, -1), (1, 20)])
+    assert overlaps([(0, 0), (10, 10)], [(0, 1), (20, 1)])
+    assert overlaps([(0, 0), (10, 10)], [(1, 0), (1, 20)])
+
+    assert not overlaps([(0, 0), (10, 10)], [(11, 20), (20, 20)])
+    assert not overlaps([(0, 0), (10, 10)], [(20, 11), (20, 20)])
+    assert not overlaps([(0, 0), (10, 10)], [(-1, 20), (20, 20)])
+    assert not overlaps([(0, 0), (10, 10)], [(20, -1), (20, 20)])
+
 def part1(tiles):
     maxarea = 0
     for a, b in itertools.combinations(tiles, 2):
@@ -24,31 +46,27 @@ def part1(tiles):
     print(maxarea)
 
 def part2(tiles):
-    maxarea = 0
-
-    # collect all points on any edge
-    edge = set()
+    # collect all the edges
+    edges = []
     last = tiles[-1]
     for t in tiles:
         a, b = normalize(last, t)
-        for x in range(a[0], b[0] + 1):
-            for y in range(a[1], b[1] + 1):
-                edge.add((x, y))
+        edges.append([a, b])
         last = t
 
+    maxarea = 0
     for a, b in itertools.combinations(tiles, 2):
-        a, b = normalize(a, b)
+        a, b = box = normalize(a, b)
         area = (b[0] - a[0] + 1) * (b[1] - a[1] + 1)
-        box = [a, b]
-        # in order of speed, check area, then corners inside the box, then any
-        # edge point inside the box
-        if area > maxarea and not any(contains(box, _) for _ in tiles) and not any(contains(box, _) for _ in edge):
+        # faster area test first, then check edge overlaps
+        if area > maxarea and not any(overlaps(box, _) for _ in edges):
             maxarea = area
-
     print(maxarea)
 
 def main():
     data = parse_input()
+    if 'test' in sys.argv:
+        test()
     if '1' in sys.argv:
         part1(*data)
     if '2' in sys.argv:
