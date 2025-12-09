@@ -38,7 +38,8 @@ def part2(tiles):
     for a, b in itertools.combinations(tiles, 2):
         a, b = normalize(a, b)
         area = (b[0] - a[0] + 1) * (b[1] - a[1] + 1)
-        if area > maxarea and not any(contains([a, b], _) for _ in edge):
+        box = [a, b]
+        if area > maxarea and not any(contains(box, _) for _ in tiles) and not any(contains(box, _) for _ in edge):
             maxarea = area
 
     print(maxarea)
