@@ -7,8 +7,7 @@ def parse_input():
     lines = [_.strip('\r\n') for _ in sys.stdin]
     machines = []
     for line in lines:
-        for c in '[](){}':
-            line = line.replace(c, '')
+        line = line.translate({ord(_): None for _ in '[](){}'})
 
         lights, *buttons, joltages = line.split()
 
