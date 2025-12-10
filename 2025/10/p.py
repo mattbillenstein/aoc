@@ -2,6 +2,7 @@
 
 import itertools
 import math
+import random
 import sys
 import time
 from collections import defaultdict
@@ -104,12 +105,83 @@ def solve_joltages(idx, joltages, buttons, pressed, best):
 
 def part2(machines):
     tot = 0
+
     for m in machines:
-        best = [1_000_000]
-        solve_joltages(0, m['joltages'], m['buttons'], (), best)
-        presses = best[0]
-        print(m, presses)
-        tot += presses
+        best = 1_000_000
+        buttons = m['buttons']
+        joltages = m['joltages']
+        N = len(joltages)
+        buttons_by_idx = {i: [_ for _ in buttons if _ & (1 << i)] for i in range(N)}
+
+        # 20:
+        #   20878
+        #   20855
+        #   20860
+        #
+        # 100:
+        #   20796
+        #
+        # 1000:
+        #   20772
+
+        J = [0] * N
+        presses = {b: 0 for b in buttons}
+
+        runs = defaultdict(int)
+        for _ in range(5000):
+            if _ == 100 and len(runs) == 1:
+                break
+
+            b = random.choice(buttons)
+            if presses[b] >= 2:
+                p = presses[b] // 2
+                presses[b] -= p
+                for j in range(N):
+                    if b & (1 << j):
+                        J[j] -= p
+
+            while J != joltages:
+                #print(joltages, J, presses, sum(presses.values()))
+                for i in range(N):
+                    if J[i] < joltages[i]:
+                        # press
+                        b = random.choice(buttons_by_idx[i])
+                        presses[b] += 1
+                        for j in range(N):
+                            if b & (1 << j):
+                                J[j] += 1
+                    elif J[i] > joltages[i]:
+                        # unpress
+                        b = random.choice(buttons_by_idx[i])
+                        if presses[b] >= 1:
+                            presses[b] -= 1
+                            for j in range(N):
+                                if b & (1 << j):
+                                    J[j] -= 1
+
+            p = sum(presses.values())
+            runs[p] += 1
+
+        best = min(runs)
+
+        if 0:
+            # sweep each button 10% around the number of total presses
+            delta = best // 5
+            print(joltages, J, presses, sum(presses.values()))
+
+            its = []
+            for b, n in presses.items():
+                its.append(it(b, max(0, n-delta), n+delta))
+
+            for tup in itertools.product(*its):
+                J = compute_joltage(tup, N)
+                p = sum(_[1] for _ in tup)
+                if J == joltages and p < best:
+                    print(J, joltages, best, p)
+
+        print(buttons, joltages, best, runs)
+        tot += best
+
     print(tot)
 
 def main():
