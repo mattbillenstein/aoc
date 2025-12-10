@@ -58,11 +58,59 @@ def part1(machines):
                 break
         assert found > -1
         tot += found
-
     print(tot)
 
-def part2(data):
-    pass
+def it(x, i, j):
+    for k in range(i, j+1):
+        yield (x, k)
+
+def compute_joltage(presses, N):
+    J = [0] * N
+    for b, p in presses:
+        for i in range(N):
+            if b & (1 << i):
+                J[i] += p
+    return J
+
+def solve_joltages(idx, joltages, buttons, pressed, best):
+    print(idx, joltages, buttons, pressed, best)
+
+    joltage = joltages[idx]
+    N = len(joltages)
+    ranges = {_: joltage for _ in buttons if _ & (1 << idx)}
+    other_buttons = [_ for  _ in buttons if _ not in ranges]
+
+    last = None
+    if len(ranges) > 1:
+        last, _ = ranges.popitem()
+
+    its = [it(b, 0, j) for b, j in ranges.items()]
+    for tup in itertools.product(*its):
+        if last:
+            tup = tup + ((last, joltage - sum(_[1] for _ in tup)),)
+        next_pressed = pressed + tup
+        J = compute_joltage(next_pressed, N)
+        if any(x > y for x, y in zip(J, joltages)):
+            continue
+
+        if J == joltages:
+            tot = sum(_[1] for _ in next_pressed)
+            if tot < best[0]:
+                print('BEST', next_pressed, J, joltages)
+                best[0] = tot
+
+        elif J[idx] == joltages[idx]:
+            solve_joltages(idx+1, joltages, other_buttons, next_pressed, best)
+
+def part2(machines):
+    tot = 0
+    for m in machines:
+        best = [1_000_000]
+        solve_joltages(0, m['joltages'], m['buttons'], (), best)
+        presses = best[0]
+        print(m, presses)
+        tot += presses
+    print(tot)
 
 def main():
     data = parse_input()
