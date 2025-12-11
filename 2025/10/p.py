@@ -1,5 +1,10 @@
 #!/usr/bin/env pypy3
 
+# To do this witout z3, take a look at:
+#
+# https://www.baeldung.com/cs/simplex-algorithm-linear-programming
+# https://en.wikipedia.org/wiki/Gaussian_elimination
+
 import itertools
 import sys
 
