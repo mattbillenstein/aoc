@@ -1,12 +1,6 @@
 #!/usr/bin/env pypy3
 
-import itertools
-import math
 import sys
-import time
-from collections import defaultdict
-from functools import lru_cache
-from pprint import pprint
 
 DEBUG = sys.argv.count('-v')
 
