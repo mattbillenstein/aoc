@@ -27,7 +27,7 @@ measure:
 	touch .venv-python3/installed
 
 .nim:
-	if [ "$$(uname)" == "Darwin" ]; then brew install nim && mkdir .nim; else wget https://nim-lang.org/download/nim-2.2.0-linux_x64.tar.xz && tar Jxf nim-*.tar.xz && mv nim-2.2.0 .nim && rm nim-*.tar.xz; fi
+	if [ "$$(uname)" == "Darwin" ]; then brew install nim && mkdir .nim; else wget https://nim-lang.org/download/nim-2.2.6-linux_x64.tar.xz && tar Jxf nim-*.tar.xz && mv nim-2.2.6 .nim && rm nim-*.tar.xz; fi
 
 ../aoc-input:
 	git clone git@github.com:mattbillenstein/aoc-input.git ../aoc-input
