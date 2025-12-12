@@ -60,18 +60,25 @@ def part1(tiles):
 def part2(tiles):
     # collect all the edges
     edges = []
+    v_edges = []
     last = tiles[-1]
     for t in tiles:
         a, b = normalize(last, t)
         edges.append([a, b])
+        if a[0] == b[0]:
+            v_edges.append([a, b])
         last = t
 
     maxarea = 0
     for a, b in itertools.combinations(tiles, 2):
         a, b = box = normalize(a, b)
         area = (b[0] - a[0] + 1) * (b[1] - a[1] + 1)
-        # faster area test first, then check edge overlaps
-        if area > maxarea and not any(overlaps(box, _) for _ in edges):
+        x, y = a[0] + 1, a[1] + 1
+        # faster area test first, then check edge overlaps, then cast ray and
+        # count parity wrt being inside the larger region...
+        if area > maxarea \
+           and not any(overlaps(box, _) for _ in edges) \
+           and sum(1 if e[0][0] < x and e[0][1] <= y <= e[1][1] else 0 for e in v_edges) % 2 == 1:
             maxarea = area
     print(maxarea)
 
