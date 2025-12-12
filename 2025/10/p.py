@@ -62,6 +62,10 @@ def part1(machines):
 def part2(machines):
     # Linear algebra, fixme, write some code that can solve systems of
     # equations like this...
+    #
+    # Really clever recursive type solution to study:
+    #  https://www.reddit.com/r/adventofcode/comments/1pk87hl/2025_day_10_part_2_bifurcate_your_way_to_victory/
+
     from z3 import Optimize, Int, Sum, sat
 
     tot = 0
