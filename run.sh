@@ -9,12 +9,12 @@ START=$(date +'%s')
 cd $1 > /dev/null
 
 EXE="$AOCPY ./p.py"
-if [ -e p.rs ] && [ "$(which rustc)" != "" ]; then
-  rustc -O p.rs
-  EXE="./p"
-elif [ -e p.nim ] && [ "$(which nim)" != "" ]; then
+if [ -e p.nim ] && [ "$(which nim)" != "" ]; then
   nim compile -d:release -o:p.exe p.nim 2> /dev/null
   EXE="./p.exe"
+elif [ -e p.rs ] && [ "$(which rustc)" != "" ]; then
+  rustc -O p.rs
+  EXE="./p"
 fi
 
 if [[ "$AOCPY ./p.py" =~ .*pypy3\ ./p\.py$ ]] || grep -q pypy3 ./p.py; then
