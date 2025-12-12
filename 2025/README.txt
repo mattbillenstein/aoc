@@ -9,3 +9,4 @@
 09: Find max area box inside irregular rectilinear shape given corners on the perimeter
 10: ILP / Linear Algebra optimization - solved using Z3, study gaussian elimination, simplex algorithm, etc
 11: Simple graph / path counting recursive problem with @lru_cache
+12: Joke bin packing problem, just do simple math on areas required

@@ -1,0 +1,1 @@
+../../../aoc-input/2025/12/input.txt
