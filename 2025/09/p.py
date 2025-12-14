@@ -78,7 +78,7 @@ def part2(tiles):
         # count parity wrt being inside the larger region...
         if area > maxarea \
            and not any(overlaps(box, _) for _ in edges) \
-           and sum(1 if e[0][0] < x and e[0][1] <= y <= e[1][1] else 0 for e in v_edges) % 2 == 1:
+           and sum(1 if e[0][0] < x and e[0][1] < y <= e[1][1] else 0 for e in v_edges) % 2 == 1:
             maxarea = area
     print(maxarea)
 
