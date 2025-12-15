@@ -70,6 +70,7 @@ def part2(tiles):
         last = t
 
     maxarea = 0
+    maxbox = None
     for a, b in itertools.combinations(tiles, 2):
         a, b = box = normalize(a, b)
         area = (b[0] - a[0] + 1) * (b[1] - a[1] + 1)
@@ -80,7 +81,34 @@ def part2(tiles):
            and not any(overlaps(box, _) for _ in edges) \
            and sum(1 if e[0][0] < x and e[0][1] < y <= e[1][1] else 0 for e in v_edges) % 2 == 1:
             maxarea = area
+            maxbox = box
+
+    #vis(tiles, maxbox)
     print(maxarea)
+
+def vis(tiles, box=None):
+    from grid import SparseGrid
+
+    g = SparseGrid([])
+
+    last = tiles[-1]
+    for t in tiles:
+        a, b = normalize(last, t)
+        for x in range(a[0] // 50, b[0] // 50 + 1):
+            for y in range(a[1] // 50, b[1] // 50 + 1):
+                g.setc((x, y), '#')
+
+        last = t
+
+    if box:
+        a, b = box
+        for x in range(a[0] // 50, b[0] // 50 + 1):
+            for y in range(a[1] // 50, b[1] // 50 + 1):
+                g.setc((x, y), '#')
+
+    g.draw()
+    import time
+    time.sleep(10)
 
 def main():
     data = parse_input()
@@ -90,6 +118,8 @@ def main():
         part1(*data)
     if '2' in sys.argv:
         part2(*data)
+    if 'vis' in sys.argv:
+        vis(*data)
 
 if __name__ == '__main__':
     main()
