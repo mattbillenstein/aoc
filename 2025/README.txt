@@ -11,6 +11,7 @@
 11: Simple graph / path counting recursive problem with @lru_cache
 12: Joke bin packing problem, just do simple math on areas required
 
+From: https://adventofstats.com/
 Day     Part 1      Part 1 Rank     Part 2      Part 2 Rank
 1       00:05:28    1265-1275       00:26:00    2075-2085
 2       00:12:53    2375-2385       00:23:29    2165-2175
