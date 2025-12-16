@@ -7,6 +7,7 @@
 
 import itertools
 import sys
+from functools import lru_cache
 
 def parse_input():
     lines = [_.strip('\r\n') for _ in sys.stdin]
@@ -59,12 +60,9 @@ def part1(machines):
 
     print(tot)
 
-def part2(machines):
+def part2a(machines):
     # Linear algebra, fixme, write some code that can solve systems of
     # equations like this...
-    #
-    # Really clever recursive type solution to study:
-    #  https://www.reddit.com/r/adventofcode/comments/1pk87hl/2025_day_10_part_2_bifurcate_your_way_to_victory/
 
     from z3 import Optimize, Int, Sum, sat
 
@@ -96,12 +94,44 @@ def part2(machines):
 
     print(tot)
 
+@lru_cache(maxsize=None)
+def solve_recursive(joltages, buttons):
+    # Really clever recursive type solution to study:
+    #  https://www.reddit.com/r/adventofcode/comments/1pk87hl/2025_day_10_part_2_bifurcate_your_way_to_victory/
+    #
+    # Find all single presses that make all joltages even, then divide all
+    # joltages by 2 and recurse...
+
+    if sum(joltages) == 0: return 0
+
+    best = 2**64
+    for p in range(0, len(buttons)+1):
+        for pressed in itertools.combinations(buttons, p):
+            L = list(joltages)
+            for button in pressed:
+                for idx in button:
+                    L[idx] -= 1
+
+            if all(_ >= 0 and _ % 2 == 0 for _ in L):
+                x = p + 2 * solve_recursive(tuple(_ // 2 for _ in L), buttons)
+                if x < best:
+                    best = x
+    return best
+
+def part2(machines):
+    tot = 0
+    for m in machines:
+        tot += solve_recursive(tuple(m['joltages']), tuple(m['buttons']))
+    print(tot)
+
 def main():
     data = parse_input()
     if '1' in sys.argv:
         part1(*data)
     if '2' in sys.argv:
         part2(*data)
+    if '2a' in sys.argv:
+        part2a(*data)
 
 if __name__ == '__main__':
     main()
