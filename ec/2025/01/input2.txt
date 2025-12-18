@@ -1,0 +1,3 @@
+Thalisis,Ryssquin,Iskararis,Pylartal,Ignmirix,Jaror,Anorix,Urithirin,Kalix,Orahnylor,Ulkvash,Urakimar,Nylvynar,Kronynn,Xilhal,Brynkryth,Lazgoril,Dordaros,Thazlon,Braenylor
+
+L13,R5,L8,R5,L11,R8,L6,R8,L15,R7,L5,R6,L5,R18,L5,R7,L5,R8,L5,R17,L19,R18,L8,R18,L14,R15,L13,R11,L17
