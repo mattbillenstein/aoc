@@ -1,12 +1,6 @@
 #!/usr/bin/env pypy3
 
-import itertools
-import math
 import sys
-import time
-from collections import defaultdict
-from functools import lru_cache
-from pprint import pprint
 
 DEBUG = sys.argv.count('-v')
 
@@ -33,7 +27,7 @@ def part2(names, instructions):
     i = 0
     for n in instructions:
         j = (i+n) % len(names)
-        #print(i, n, names[i], names[j])
+        debug(i, n, names[i], names[j])
         i = j
     print(names[i])
 
