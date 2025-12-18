@@ -124,6 +124,9 @@ def part2(machines):
         tot += solve_recursive(tuple(m['joltages']), tuple(m['buttons']))
     print(tot)
 
+# Also, a writeup on writing a solver:
+# https://www.reddit.com/r/adventofcode/comments/1pp98cr/2025_day_10_part_2_solution_without_using_a_3rd/
+
 def main():
     data = parse_input()
     if '1' in sys.argv:
