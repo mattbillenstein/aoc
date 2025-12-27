@@ -50,9 +50,42 @@ proc parse_input(): seq[Machine] =
     result.add(m)
 
 proc part1(machines: seq[Machine]) =
-  echo machines[0].buttons
-  for x in combinations(machines[0].buttons, 2):
-    echo x
+  var tot = 0
+
+  for m in machines:
+
+    var lights: int = 0
+    for i, v in m.lights:
+      if v != 0:
+        lights = lights or (1 shl i)
+
+    var buttons: seq[int] = @[]
+    for button in m.buttons:
+      var b = 0
+      for idx in button:
+        b = b or (1 shl idx)
+      buttons.add(b)
+
+    if DEBUG > 0:
+      echo m
+      echo &"{lights} {buttons}"
+
+    var found = -1
+    for p in 1..100:
+      for pressed in product(buttons, p):
+        var L = 0
+        for b in pressed:
+          L = L xor b
+        if L == lights:
+          found = p
+          break
+      if found > -1:
+        break
+
+    assert found > -1
+    tot += found
+
+  echo tot
 
 proc part2(prog: seq[Machine]) =
   echo "p2"
@@ -64,8 +97,6 @@ proc main() =
       DEBUG += 1
 
   let machines = parse_input()
-
-  echo "main ", machines
 
   if "1" in args:
     part1(machines)
