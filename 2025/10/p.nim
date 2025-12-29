@@ -1,7 +1,11 @@
+import hashes
+import math
 import os
 import std/re
+import std/sequtils
 import std/strformat
 import std/strutils
+import std/sugar
 import std/tables
 
 import itertools
@@ -53,7 +57,6 @@ proc part1(machines: seq[Machine]) =
   var tot = 0
 
   for m in machines:
-
     var lights: int = 0
     for i, v in m.lights:
       if v != 0:
@@ -87,8 +90,43 @@ proc part1(machines: seq[Machine]) =
 
   echo tot
 
-proc part2(prog: seq[Machine]) =
-  echo "p2"
+proc solve_recursive(joltages: seq[int], buttons: seq[seq[int]], cache: var Table[Hash, int]): int =
+  if all(joltages, x => x == 0):
+    return 0
+
+  var h = foldl(joltages, a !& b, 0)
+  if h in cache:
+    return cache[h]
+
+  var best = 2^32
+
+  # 0 presses, not valid arg for combinations...
+  if all(joltages, x => x >= 0 and x mod 2 == 0):
+    let x = 0 + 2 * solve_recursive(joltages.map(x => x div 2), buttons, cache)
+    if x < best:
+      best = x
+
+  for p in 1 .. len(buttons):
+    for pressed in combinations(buttons, p):
+      var L = joltages
+      for button in pressed:
+        for idx in button:
+          L[idx] -= 1
+
+      if all(L, x => x >= 0 and x mod 2 == 0):
+        let x = p + 2 * solve_recursive(L.map(x => x div 2), buttons, cache)
+        if x < best:
+          best = x
+
+  cache[h] = best
+  return best
+
+proc part2(machines: seq[Machine]) =
+  var tot = 0
+  for m in machines:
+    var cache: Table[int, int] = initTable[int, int]()
+    tot += solve_recursive(m.joltages, m.buttons, cache)
+  echo tot
 
 proc main() =
   let args = commandLineParams()
