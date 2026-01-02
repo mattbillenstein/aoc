@@ -34,10 +34,14 @@ def part1(boxes, bins):
     # Rather cute, don't need to do any packing at all; just compute the area
     # needed and compare to the area available.
     #
+    # This has a binomial sort of distribution - there are boxes that only need
+    # 65-75% of available area consumed, and everything else is impossible.
+    #
     # Intuitively, with such large areas and so many boxes, you'd think you
-    # could almost fill the entire bin full except for this piece with a hole
-    # in it except near the edge; so, it's not completely surprising this works
-    # I guess.
+    # could almost fill the entire bin except perhaps near the edges - there
+    # are some perfect tilings with one of each shape, so an actual approach
+    # might be to compute those first (taking several hours) and then use those
+    # perfect packings to tile the larger shape.
 
     box_areas = {}
     for i, b in enumerate(boxes):
@@ -45,17 +49,13 @@ def part1(boxes, bins):
 
     debug(box_areas)
 
-    # hole in this one that can't be reached...
-    box_areas[1] += 1
-
     tot = 0
     for size, counts in bins:
         area = size[0] * size[1]
         needed = sum(box_areas[i] * c for i, c in enumerate(counts))
+        debug(f"{needed / area:.3f}", size, counts, area, needed)
         if needed < area:
             tot += 1
-        else:
-            debug(size, counts, area, needed)
 
     print(tot)
 
